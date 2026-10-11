@@ -1,0 +1,5 @@
+# Large market data: regenerate with `python3 data/fetch_data.py all`
+data/**/*.csv
+data/**/*.tmp
+!data/**/*_funding*.csv
+__pycache__/

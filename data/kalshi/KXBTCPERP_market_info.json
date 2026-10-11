@@ -1,0 +1,56 @@
+{
+  "market": {
+    "ask": "8.3645",
+    "asset_class": "Crypto",
+    "bid": "8.3637",
+    "contract_size": "0.000100",
+    "exchange_index": 0,
+    "fractional_trading_enabled": false,
+    "leverage_estimate": 6.3858,
+    "leverage_estimates": {
+      "1000": 6.3805,
+      "10000": 6.3752,
+      "100000": 6.3489,
+      "1000000": 6.2205
+    },
+    "liquidation_mark_price": {
+      "price": "8.3630",
+      "ts_ms": 1791760370558
+    },
+    "long_leverage_estimates": {
+      "1000": 6.8413,
+      "10000": 6.8352,
+      "100000": 6.8049,
+      "1000000": 6.6577
+    },
+    "market_id": "87c59f79-328c-4a2c-9471-3cc84a8f78e2",
+    "market_version": 1,
+    "open_interest": "1804212.00",
+    "open_interest_notional_value_dollars": "15089527.062000",
+    "price": "8.3635",
+    "reference_price": {
+      "price": "8.3615",
+      "ts_ms": 1791760370000
+    },
+    "schedule": null,
+    "settlement_mark_price": {
+      "price": "8.3635",
+      "ts_ms": 1791760370595
+    },
+    "short_leverage_estimates": {
+      "1000": 6.3805,
+      "10000": 6.3752,
+      "100000": 6.3489,
+      "1000000": 6.2205
+    },
+    "status": "active",
+    "tick_size": "0.0001",
+    "ticker": "KXBTCPERP",
+    "title": "0.0001 BTC",
+    "underlying_multiplier": "1.000000",
+    "volume": "4928322787.00",
+    "volume_24h": "13416554.00",
+    "volume_24h_notional_value_dollars": "111716167.832400",
+    "volume_notional_value_dollars": "35452034331.036500"
+  }
+}
