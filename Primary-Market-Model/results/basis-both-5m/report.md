@@ -1,0 +1,111 @@
+# Historical BTC basis backtest
+
+**Total PnL: +79.716026 USDC equivalent**, consisting of
++78.794200 basis-price PnL and +0.921826 funding cash flows.
+
+![Mark-to-market PnL](/Users/allen/src/BTC-Perps/Primary-Market-Model/results/basis-both-5m/pnl.png)
+
+| Metric | Result |
+|---|---:|
+| UTC data start | 2026-06-03T00:00:00Z |
+| UTC data end | 2026-09-30T23:54:00Z |
+| Quantity per leg | 0.01 BTC |
+| Maximum holding period | 5 minutes |
+| Average measured holding period | 1.999 minutes |
+| Longest measured trade | 5 minutes |
+| Trading/carry costs | 0 bps |
+| Funding events crossed | 37 |
+| Trades | 1558 |
+| Win rate | 87.87% |
+| Mean trade PnL | +0.682458 bps |
+| Maximum observed minute mark-to-market drawdown | 0.695100 USDC equivalent |
+| Matched minute observations | 172,060 |
+| Missing matched minutes inside covered span | 735 |
+| Entry checks skipped for missing features | 159 |
+| Exits delayed until next matched minute open | 0 |
+| Final pairs closed early at data end | 0 |
+| Unmeasurable missing-deadline trades excluded | 0 |
+
+The measured trades crossed 37 hourly funding events; actual cash flows are included.
+
+| Direction | Trades | Basis-price PnL | Funding PnL | Total PnL |
+|---|---:|---:|---:|---:|
+| Buy basis | 30 | +9.096700 | +0.000000 | +9.096700 |
+| Sell basis | 1528 | +69.697500 | +0.921826 | +70.619326 |
+
+## Rule tested
+
+Check each available minute open, with
+`basis = 10,000 * (perp / spot - 1)`:
+
+- Buy basis: **long perp / short spot** when basis is below **-5 bps**.
+- Sell basis: **short perp / long spot** when basis is above **+5 bps**.
+
+Each entry also requires positive theo edge above 0 bps
+for that direction. The theo forecasts an exit basis of **-5 bps for longs / +5 bps for shorts** within
+5 minutes. The past 60 completed candle closes proxy
+the premium TWAP; only funding already recorded at entry supplies the prior rate.
+The supplied smoothing formula forecasts funding payments inside that window.
+
+Close at the first available minute with positive total PnL (including funding)
+when profit exits are enabled, as in this run,
+when long basis reaches -5 bps or higher or
+short basis reaches +5 bps or lower,
+or at the 5-minute deadline.
+Never close and reopen in the same minute. Hold one equal-BTC pair at a time.
+No future prices select an entry. A final open pair is closed at data end.
+
+If no matched price exists at the exact deadline, the trade is unmeasurable and
+excluded from both PnL and the equity curve. The exclusion count below makes
+this conditional sample visible; an actual position would still need a fill.
+
+
+| Exit reason | Trades |
+|---|---:|
+| PROFIT | 1369 |
+| TIMEOUT | 189 |
+
+The funding forecast is `F_next = 0.75 * (TWAP_basis / 24) + 0.25 * F_previous`.
+Its exit target is an assumption, not a guarantee that the basis converges.
+
+## Realized accounting
+
+`price_PnL = direction * q * [(perp_exit - perp_entry) - (spot_exit - spot_entry)]`
+
+`funding_PnL = -direction * q * sum(recorded_mark * recorded_rate)`
+
+Direction is +1 for buy basis and -1 for sell basis. Funding payments in
+`(entry, exit]` count. Net PnL is their sum. Unlike the scenario calculator's
+fixed spot forecast, realized PnL uses both markets' changing prices.
+
+Trade bps divide each trade's net PnL by its entry spot notional. Their mean is
+not an account return. No account capital, leverage return, CAGR, or compounding
+is assumed. The price-only line uses the same positions with funding excluded.
+
+## Data and practical limits
+
+Prices: Coinbase `BTC-USD` spot and `BTC-PERP-INTX` perp minute candles. Funding:
+the retained `BTC-PERP-INTX_funding_1h.csv`, with actual rates and funding marks.
+Forecasts use the supplied formula; realized PnL uses recorded payments, not
+those forecasts. Funding timestamps are assumed to be publication/settlement
+times with no publication delay. Signal computation and execution latency are zero.
+
+The funding premium proxy uses trade candle closes and BTC-USD, **not** Coinbase's
+official per-second mark/index premium series. USD and USDC are assumed at parity.
+Minute opens are idealized executable prices for both legs, not verified
+simultaneous bids/asks. No maker queue, partial fills, fees, slippage, borrow
+availability, financing, currency hedge, or liquidation is simulated. Missing
+prices are not forward-filled; incomplete signal windows skip entries. Funding
+must be complete hourly history. Drawdown is observed only at matched minute
+opens. This is a historical zero-cost signal test, not locked arbitrage or proof
+of achievable market-making profits.
+
+## Audit files
+
+- [Trade ledger](trades.csv)
+- [Minute mark-to-market equity](equity.csv)
+- [Machine-readable summary](summary.json)
+- [Vector chart](pnl.svg)
+
+Sources: [Coinbase candle API](https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/public/get-public-product-candles)
+and [original INTX rules](https://www.coinbase.com/international-exchange/legal/trading-rules).

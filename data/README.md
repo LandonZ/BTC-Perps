@@ -1,64 +1,76 @@
-# Data
+# Data for the current BTC basis theo
 
-All market data for the BTC perp basis / market-making project. Everything comes from free, public, no-auth endpoints.
+The active model is `Primary-Market-Model/model/theo-model.cpp`, run through
+`Primary-Market-Model/build/theo-pricer`. It uses supplied scenario inputs and
+**does not load historical CSVs or train a regression**. The new C++ backtester
+uses the relevant historical files listed below. Trading and carrying
+costs default to zero; the supplied hourly funding formula remains included.
+
+## Relevant Coinbase data
+
+- `coinbase/BTC-USD_spot_1m.csv`: historical spot minute OHLCV, restored for the backtest.
+- `coinbase/BTC-PERP-INTX_1m.csv`: historical perp minute OHLCV, restored for the backtest.
+- `coinbase/BTC-PERP-INTX_funding_1h.csv`: retained historical hourly funding and marks.
+
+Minute price columns are `ts,open,high,low,close,volume`; timestamps are candle
+start times. Completed closes become known one minute later. Spot USD and perp
+USDC prices are assumed at parity. The backtester joins exact timestamps and
+does not interpolate missing prices.
+
+`coinbase/BTC-PERP-INTX_funding_1h.csv` contains historical Coinbase International
+BTC perp funding and mark prices. It can provide a historical previous-funding
+input for a matching timestamp; the pricer does not read it automatically.
+
+Columns:
+
+- `ts`: Unix timestamp in seconds.
+- `funding_time`: UTC funding timestamp.
+- `funding_rate`: fractional hourly rate; multiply by 10,000 for the CLI's bps.
+- `mark_price`: funding mark price per BTC.
+
+For example, `0.000005` is **0.05 bps**, not 5 bps. Historical realized funding
+must not be used as information known before its publication.
+
+The historical funding file alone cannot reconstruct the one-hour premium TWAP.
+The model needs separately supplied prices, TWAP basis, previous funding,
+holding period, time to next funding, and assumed exit basis. The current
+scenario calculator uses the hourly formula supplied for this project; this
+file is historical reference data, not confirmation of the current venue rules.
+
+## Legacy files retained under the preservation instruction
+
+These files existed in the last commit and are not inputs to the current theo:
+
+| File | Purpose |
+|---|---|
+| `binance/BTCUSDT_perp_funding.csv` | Earlier Binance research |
+| `kalshi/KXBTCPERP_funding.csv` | Earlier Kalshi research |
+| `kalshi/KXBTCPERP_market_info.json` | Earlier Kalshi contract snapshot |
+| `fetch_data.py` | Original multi-venue data collector |
+
+They remain at their original paths because committed files must be preserved.
+The original collector can recreate unrelated datasets. No historical data is
+needed for the scenario pricer; the backtester needs the three Coinbase files.
+
+## Cleanup
+
+The Coinbase minute candles previously removed during scenario-only cleanup
+were reacquired for the requested historical backtest. They are now relevant
+inputs to the latest five-minute two-sided basis strategy. No committed dataset was removed.
+
+Run the model from the repository root:
 
 ```bash
-python3 data/fetch_data.py all                       # Kalshi + Coinbase + Binance, 2026-06-03 -> now
-python3 data/fetch_data.py kalshi --trades-start 2026-09-01   # more tick history (~55k trades/day)
-python3 data/fetch_data.py binance --start 2025-01-01          # longer primary-market history
-python3 data/fetch_data.py record --seconds 86400 --interval 1 # live Kalshi L2 book recorder
+make -C Primary-Market-Model theo
 ```
 
-The script uses only the Python stdlib. Every CSV has a header row, and its first column is `ts` in **unix seconds, UTC**, so the C++ code can read it with a plain `getline` + split. For candles, `ts` is the **start** of the minute on Coinbase/Binance and the **end** of the minute on Kalshi.
+Run the backtest with `make -C Primary-Market-Model backtest`. Its PnL report
+and chart are under `Primary-Market-Model/results/basis-both-5m/`.
 
-**Re-run `kalshi` at least weekly.** Kalshi keeps only about 7–10 days of the per-second premium index. Each run merges new points into the existing file, so the history keeps growing only if someone keeps pulling it.
+Regenerate minute prices with:
 
-## Kalshi — `KXBTCPERP` (target market) — `kalshi/`
+```bash
+python3 Primary-Market-Model/tools/download_basis_data.py --start 2026-06-03 --end 2026-10-01
+```
 
-Base URL `https://external-api.kalshi.com/trade-api/v2/margin` ([docs](https://docs.kalshi.com/margin)). The contract is **0.0001 BTC**, so a price of `8.3633` means $83,633/BTC. Tick size is 0.0001 (≈ 0.12 bps). The market launched on 2026-06-03.
-
-| file | rows | what |
-|---|---|---|
-| `KXBTCPERP_funding.csv` | 3/day since launch | `funding_rate` (fraction per 8h) and `mark_price` at each funding time. Funding times are 04:00, 12:00 and 20:00 UTC |
-| `KXBTCPERP_candles_1m.csv` | 1/min since launch | **bid and ask OHLC**, trade OHLC + mean, volume (contracts and USD), open interest, `mid_close_usd_per_btc` |
-| `KXBTCPERP_premium_index_1s.csv` | 1/sec, rolling | Per-second premium index: (impact-price book − underlying index) / index. This is the basis signal |
-| `trades/KXBTCPERP_trades_YYYY-MM-DD.csv` | every print | `price`, `count` (contracts), `taker_side` (`bid` = buyer aggressed), `trade_id` |
-| `live/KXBTCPERP_book_*.csv` | from `record` | 10-level book snapshots + live premium index and estimated funding |
-| `KXBTCPERP_market_info.json` | snapshot | contract specs, OI, 24h volume |
-
-Notes:
-- **Funding rule (checked against our data):** funding ≈ the time-weighted average of the premium index over the 8h window, and **it is set to 0 when |TWAP| < 1 bp**. 203 of the first 391 periods paid 0. The smallest nonzero |rate| is exactly 1.0 bp, and only 2 periods have been negative. This is not the Binance-style formula with the −5 bp x-intercept; see Binance below.
-- In candles, empty fields and `0.0000` bids mean that side of the book was empty. This happens mostly in the first hours after launch. There are a few 2h gaps (exchange maintenance).
-- Kalshi does not serve historical order-book depth. Only `record` captures depth, going forward.
-
-## Coinbase — `coinbase/`
-
-| file | source | notes |
-|---|---|---|
-| `BTC-USD_spot_1m.csv` | Advanced Trade public candles | **BTC spot reference**, OHLCV in USD |
-| `BTC-PERP-INTX_1m.csv` | Advanced Trade `BTC-PERP-INTX` | Coinbase International perp (USDC) |
-| `BTC-PERP-INTX_funding_1h.csv` | `api.international.coinbase.com/.../BTC-PERP/funding` | **Hourly** funding + mark price |
-| `BIP-20DEC30-CDE_us_perp_1m.csv` | Advanced Trade `BIP-20DEC30-CDE` | Coinbase Derivatives US "perp-style" future, 0.01 BTC, hourly funding. Public API has candles only |
-
-⚠️ **Coinbase International BTC-PERP has been `PAUSED` since 2026-10-01 09:00 UTC.** Its data stops there, so the INTX files cover 2026-06-03 → 2026-10-01. For a live Coinbase perp use BIP, or use Binance.
-
-## Binance — `binance/` (deepest primary-market history)
-
-Source: bulk archive at [data.binance.vision](https://data.binance.vision). The `fapi`/`api` REST endpoints are geo-blocked in the US, but the archive is not. Use `--start` to go back years.
-
-| file | notes |
-|---|---|
-| `BTCUSDT_spot_klines_1m.csv` | spot |
-| `BTCUSDT_perp_klines_1m.csv` | USDT-M perpetual |
-| `BTCUSDT_perp_premium_index_1m.csv` | premium index OHLC per minute (the basis Binance funding is computed from) |
-| `BTCUSDT_perp_mark_price_1m.csv` | mark price |
-| `BTCUSDT_perp_funding.csv` | realized funding every 8h. Monthly archives only, so the current month appears after it ends |
-
-Kline columns: `ts, open, high, low, close, volume, quote_volume, num_trades, taker_buy_base_volume, taker_buy_quote_volume`. For premium-index files, the OHLC values are premium fractions, not prices.
-
-Binance funding is `F = P + clamp(0.01% − P, −0.05%, +0.05%)`, where P is the 8h average premium index. F = 0 at **P = −5 bp**. That is the −5 bp x-intercept in the pitch, so this formula comes from Binance, not Kalshi.
-
-## Computing the basis
-
-- **Kalshi:** use `premium_index_1s` directly (recent days only), or `mid_close_usd_per_btc / spot_close − 1` from the Kalshi candles joined to `coinbase/BTC-USD_spot_1m.csv`. Shift Kalshi `ts` by −60 to align bars by start time.
-- **Binance:** `perp_klines.close / spot_klines.close − 1`, or use `perp_premium_index_1m` directly.
+See `Primary-Market-Model/README.md` for formulas, inputs, and assumptions.
