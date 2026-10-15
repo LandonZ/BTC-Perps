@@ -267,6 +267,70 @@ def coinbase_candles(product, start, end, name):
               ["ts", "open", "high", "low", "close", "volume"], sorted(rows.values()))
 
 
+CB_EXCHANGE = "https://api.exchange.coinbase.com/products"
+
+
+def _cb_trade_before(product, trade_id):
+    """The newest trade with id <= trade_id (Exchange `after` pages to older ids)."""
+    d = http_get(f"{CB_EXCHANGE}/{product}/trades", {"after": trade_id + 1, "limit": 1})
+    return d[0] if d else None
+
+
+def _cb_last_id_before(product, t, newest_id):
+    """Binary search trade ids for the last trade strictly before unix time t."""
+    lo, hi = max(1, newest_id - 50_000_000), newest_id
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        x = _cb_trade_before(product, mid)
+        if x and iso_to_ts(x["time"]) < t:
+            lo = mid
+        else:
+            hi = mid - 1
+        time.sleep(0.11)
+    return lo
+
+
+def coinbase_spot_ticks(product, start, end):
+    """Every spot trade, rolled up to 1-second OHLCV candles (raw ticks are
+    ~500k/day). One file per day so a crash only loses a day; for the maker
+    simulation, which needs spot finer than the 1m candles."""
+    log(f"[coinbase] 1s candles from tick trades {product} {start.date()} -> {end.date()}")
+    out_dir = os.path.join(DATA_DIR, "coinbase", "trades")
+    newest = http_get(f"{CB_EXCHANGE}/{product}/trades", {"limit": 1})[0]["trade_id"]
+    day = start.replace(hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.now(timezone.utc).date()
+    while day < end:
+        path = os.path.join(out_dir, f"{product}_spot_1s_{day.date()}.csv")
+        if os.path.exists(path) and day.date() < today:
+            log(f"  skip {day.date()} (already downloaded)")
+            day += timedelta(days=1)
+            continue
+        day_start, day_end = day.timestamp(), min(day + timedelta(days=1), end).timestamp()
+        cursor = _cb_last_id_before(product, day_end, newest) + 1
+        trades = []
+        while True:
+            page = http_get(f"{CB_EXCHANGE}/{product}/trades", {"after": cursor, "limit": 1000})
+            if not page:
+                break
+            older = [(x["trade_id"], iso_to_ts(x["time"]), float(x["price"]), float(x["size"])) for x in page]
+            trades += [x for x in older if x[1] >= day_start]
+            if older[-1][1] < day_start:
+                break
+            cursor = min(x[0] for x in older)
+            time.sleep(0.11)  # public limit is 10 req/s
+        candles = {}
+        for _, ts, price, size in sorted(trades):
+            sec = int(ts)
+            c = candles.get(sec)
+            if c is None:
+                candles[sec] = [sec, price, price, price, price, size]
+            else:
+                c[2], c[3], c[4], c[5] = max(c[2], price), min(c[3], price), price, c[5] + size
+        write_csv(path, ["ts", "open", "high", "low", "close", "volume"],
+                  [[c[0], c[1], c[2], c[3], c[4], f"{c[5]:.8f}"] for c in sorted(candles.values())])
+        day += timedelta(days=1)
+
+
 def coinbase_intx_funding(start):
     log("[coinbase] INTX BTC-PERP hourly funding")
     rows, offset = [], 0
@@ -357,11 +421,11 @@ def binance(start, end):
 def main():
     now = datetime.now(timezone.utc)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("source", choices=["all", "kalshi", "coinbase", "binance", "record"])
+    ap.add_argument("source", choices=["all", "kalshi", "coinbase", "coinbase-ticks", "binance", "record"])
     ap.add_argument("--start", default=KALSHI_LAUNCH, help="YYYY-MM-DD (default: Kalshi BTC perp launch)")
     ap.add_argument("--end", default=None, help="YYYY-MM-DD exclusive (default: now)")
     ap.add_argument("--trades-start", default=None,
-                    help="first day of Kalshi tick trades (default: 7 days ago; tick data is large)")
+                    help="first day of Kalshi / Coinbase tick trades (default: 7 days ago; tick data is large)")
     ap.add_argument("--seconds", type=int, default=3600, help="record: how long to run")
     ap.add_argument("--interval", type=float, default=1.0, help="record: seconds between snapshots")
     a = ap.parse_args()
@@ -384,6 +448,9 @@ def main():
         coinbase_candles("BIP-20DEC30-CDE", start, end, "BIP-20DEC30-CDE_us_perp")
         coinbase_candles("BTC-PERP-INTX", start, min(end, parse_day("2026-10-02")), "BTC-PERP-INTX")
         coinbase_intx_funding(start)
+        coinbase_spot_ticks("BTC-USD", max(trades_start, start), end)
+    if a.source == "coinbase-ticks":
+        coinbase_spot_ticks("BTC-USD", max(trades_start, start), end)
     if a.source in ("all", "binance"):
         binance(start, end)
 

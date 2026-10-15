@@ -158,29 +158,26 @@ Result run_threshold_basis(const Dataset& data,const Settings& settings) {
         if (position) {
             auto& tr = *position;
             const Time deadline = tr.entry+settings.holding_minutes*60LL;
-            if (t > deadline) {
-                // The exact deadline quote is absent. Do not claim a fill beyond the user's cap.
-                // Omit this unmeasurable trade from PnL and expose the exclusion count.
-                ++result.excluded_missing_deadline;
+            // If the deadline quote is absent, close at the first quote observed after it.
+            // Dropping the trade instead would select the sample on future data availability.
+            const bool late = t > deadline;
+            result.delayed_exits += late;
+            const double price = tr.direction*settings.quantity_btc*((p.perp_open-tr.entry_perp)-(p.spot_open-tr.entry_spot));
+            const bool profit = settings.exit_on_profit && price+tr.funding_pnl > 1e-10;
+            const bool converged = tr.direction > 0 ? basis >= -settings.discount_threshold_bps-1e-10 :
+                                                     basis <= settings.discount_threshold_bps+1e-10;
+            if (profit || converged || t >= deadline || t == last) {
+                tr.exit = t; tr.exit_spot = p.spot_open; tr.exit_perp = p.perp_open;
+                tr.exit_basis_bps = basis; tr.price_pnl = price; tr.net_pnl = price+tr.funding_pnl;
+                tr.net_bps = tr.net_pnl/(settings.quantity_btc*tr.entry_spot)*theo::bps;
+                tr.forced_end = !profit && !converged && t < deadline;
+                tr.exit_reason = late ? "LATE_TIMEOUT" : profit ? "PROFIT" : converged ? "CONVERGED" : t == deadline ? "TIMEOUT" : "DATA_END";
+                result.price_pnl += tr.price_pnl; result.funding_pnl += tr.funding_pnl;
+                result.mean_trade_bps += tr.net_bps; result.wins += tr.net_pnl > 0;
+                result.long_trades += tr.direction > 0;
+                result.short_trades += tr.direction < 0;
+                result.trades.push_back(tr);
                 position.reset(); closed_this_minute = true;
-            } else {
-                const double price = tr.direction*settings.quantity_btc*((p.perp_open-tr.entry_perp)-(p.spot_open-tr.entry_spot));
-                const bool profit = settings.exit_on_profit && price+tr.funding_pnl > 1e-10;
-                const bool converged = tr.direction > 0 ? basis >= -settings.discount_threshold_bps-1e-10 :
-                                                         basis <= settings.discount_threshold_bps+1e-10;
-                if (profit || converged || t == deadline || t == last) {
-                    tr.exit = t; tr.exit_spot = p.spot_open; tr.exit_perp = p.perp_open;
-                    tr.exit_basis_bps = basis; tr.price_pnl = price; tr.net_pnl = price+tr.funding_pnl;
-                    tr.net_bps = tr.net_pnl/(settings.quantity_btc*tr.entry_spot)*theo::bps;
-                    tr.forced_end = !profit && !converged && t < deadline;
-                    tr.exit_reason = profit ? "PROFIT" : converged ? "CONVERGED" : t == deadline ? "TIMEOUT" : "DATA_END";
-                    result.price_pnl += tr.price_pnl; result.funding_pnl += tr.funding_pnl;
-                    result.mean_trade_bps += tr.net_bps; result.wins += tr.net_pnl > 0;
-                    result.long_trades += tr.direction > 0;
-                    result.short_trades += tr.direction < 0;
-                    result.trades.push_back(tr);
-                    position.reset(); closed_this_minute = true;
-                }
             }
         }
         // Entry checks are every observed minute. Never close and reopen in the same minute.
@@ -212,12 +209,11 @@ Result run_threshold_basis(const Dataset& data,const Settings& settings) {
             position = tr;
         }
     }
-    require(!position,"Final position must close or be marked unmeasurable");
+    require(!position,"Final position must close");
     result.net_pnl = result.price_pnl+result.funding_pnl;
     if (!result.trades.empty()) result.mean_trade_bps /= result.trades.size();
 
-    // Reconstruct equity solely for measurable trades. An excluded missing-deadline
-    // pair must not leave hypothetical floating PnL in the published curve.
+    // Reconstruct equity from the closed trades.
     std::vector<double> funding_prefix(1,0);
     for (const auto& f : data.funding) funding_prefix.push_back(funding_prefix.back()+f.mark*f.rate);
     std::size_t trade_index = 0,event_index = 0;
@@ -391,7 +387,6 @@ void write_results(const Dataset& data,const Settings& s,const Result& r,const s
             << "  \"skipped_feature_hours\": " << r.skipped_feature_hours << ",\n"
             << "  \"skipped_feature_checks\": " << r.skipped_feature_hours << ",\n"
             << "  \"delayed_exits\": " << r.delayed_exits << ",\n"
-            << "  \"excluded_missing_deadline\": " << r.excluded_missing_deadline << ",\n"
             << "  \"trades\": " << r.trades.size() << ",\n  \"long_trades\": " << r.long_trades << ",\n"
             << "  \"short_trades\": " << r.short_trades << ",\n  \"winning_trades\": " << r.wins << ",\n"
             << "  \"price_pnl\": " << r.price_pnl << ",\n  \"funding_pnl\": " << r.funding_pnl << ",\n"

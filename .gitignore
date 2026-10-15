@@ -3,3 +3,12 @@ data/**/*.csv
 data/**/*.tmp
 !data/**/*_funding*.csv
 __pycache__/
+
+# Regenerable backtest output: rerun the backtester / plot_backtest.py
+**/results/**/equity.csv
+**/results/**/trades.csv
+**/results/**/pnl.svg
+**/build/
+
+# Live paper-trading logs
+**/live/logs/

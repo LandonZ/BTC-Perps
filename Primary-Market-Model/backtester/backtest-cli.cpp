@@ -83,7 +83,7 @@ int main(int argc,char** argv) {
             << "Win rate: " << (run.trades.empty() ? 0 : 100.0*run.wins/run.trades.size()) << "%\n"
             << "Maximum mark-to-market drawdown: " << run.max_drawdown << '\n'
             << "Missing matched minutes: " << run.missing_minutes << "; skipped feature checks: " << run.skipped_feature_hours
-            << "; delayed exits: " << run.delayed_exits << "; missing-deadline trades excluded: " << run.excluded_missing_deadline << '\n'
+            << "; delayed exits: " << run.delayed_exits << '\n'
             << "Results: " << results << "/{summary.json,trades.csv,equity.csv}\n"
             << "Prices are idealized minute opens; TWAP uses trailing minute closes; USD/USDC assumed at parity.\n"
             << "The last open pair is liquidated at data end. This does not simulate resting-order fills or liquidations.\n";

@@ -1,37 +1,36 @@
 # Historical BTC basis backtest
 
-**Total PnL: +79.716026 USDC equivalent**, consisting of
-+78.794200 basis-price PnL and +0.921826 funding cash flows.
+**Total PnL: +52.116087 USDC equivalent**, consisting of
++51.184600 basis-price PnL and +0.931487 funding cash flows.
 
-![Mark-to-market PnL](/Users/allen/src/BTC-Perps/Primary-Market-Model/results/basis-both-5m/pnl.png)
+![Mark-to-market PnL](/Users/lucasbrown/Desktop/UT/Clubs/UCF/BTC-Perps/Primary-Market-Model/results/basis-both-5m/pnl.png)
 
 | Metric | Result |
 |---|---:|
-| UTC data start | 2026-06-03T00:00:00Z |
-| UTC data end | 2026-09-30T23:54:00Z |
+| UTC data start | 2026-06-03T00:50:00Z |
+| UTC data end | 2026-10-01T09:00:00Z |
 | Quantity per leg | 0.01 BTC |
 | Maximum holding period | 5 minutes |
-| Average measured holding period | 1.999 minutes |
-| Longest measured trade | 5 minutes |
+| Average measured holding period | 2.439 minutes |
+| Longest measured trade | 52 minutes |
 | Trading/carry costs | 0 bps |
-| Funding events crossed | 37 |
-| Trades | 1558 |
-| Win rate | 87.87% |
-| Mean trade PnL | +0.682458 bps |
-| Maximum observed minute mark-to-market drawdown | 0.695100 USDC equivalent |
-| Matched minute observations | 172,060 |
-| Missing matched minutes inside covered span | 735 |
-| Entry checks skipped for missing features | 159 |
-| Exits delayed until next matched minute open | 0 |
+| Funding events crossed | 35 |
+| Trades | 1052 |
+| Win rate | 86.98% |
+| Mean trade PnL | +0.663057 bps |
+| Maximum observed minute mark-to-market drawdown | 0.909727 USDC equivalent |
+| Matched minute observations | 148,446 |
+| Missing matched minutes inside covered span | 24,845 |
+| Entry checks skipped for missing features | 1250 |
+| Exits delayed until next matched minute open | 9 |
 | Final pairs closed early at data end | 0 |
-| Unmeasurable missing-deadline trades excluded | 0 |
 
-The measured trades crossed 37 hourly funding events; actual cash flows are included.
+The measured trades crossed 35 hourly funding events; actual cash flows are included.
 
 | Direction | Trades | Basis-price PnL | Funding PnL | Total PnL |
 |---|---:|---:|---:|---:|
-| Buy basis | 30 | +9.096700 | +0.000000 | +9.096700 |
-| Sell basis | 1528 | +69.697500 | +0.921826 | +70.619326 |
+| Buy basis | 23 | +5.300900 | +0.000000 | +5.300900 |
+| Sell basis | 1029 | +45.883700 | +0.931487 | +46.815187 |
 
 ## Rule tested
 
@@ -55,15 +54,16 @@ or at the 5-minute deadline.
 Never close and reopen in the same minute. Hold one equal-BTC pair at a time.
 No future prices select an entry. A final open pair is closed at data end.
 
-If no matched price exists at the exact deadline, the trade is unmeasurable and
-excluded from both PnL and the equity curve. The exclusion count below makes
-this conditional sample visible; an actual position would still need a fill.
+If no matched price exists at the exact deadline, the pair closes at the next
+observed minute open (LATE_TIMEOUT). Trades are never dropped based on whether
+later data exists, so the sample is not conditioned on future information.
 
 
 | Exit reason | Trades |
 |---|---:|
-| PROFIT | 1369 |
-| TIMEOUT | 189 |
+| LATE_TIMEOUT | 9 |
+| PROFIT | 910 |
+| TIMEOUT | 133 |
 
 The funding forecast is `F_next = 0.75 * (TWAP_basis / 24) + 0.25 * F_previous`.
 Its exit target is an assumption, not a guarantee that the basis converges.

@@ -146,8 +146,8 @@ and publication times, with no latency.
 Minute data checks profitability only at observed minute prices. It cannot
 verify the first profitable second, resting maker orders, queue position, or
 intra-minute drawdown. Missing prices are not interpolated. If a deadline quote
-is missing, the entire trade is excluded from PnL/equity and counted explicitly;
-the resulting sample is conditional on measurable trades. The final pair can
+is missing, the pair closes at the next observed minute open (`LATE_TIMEOUT`)
+and is counted as a delayed exit; trades are never dropped based on later data. The final pair can
 close early at the end of the dataset and is flagged.
 
 No borrow availability, partial fills, currency hedge, funding publication
