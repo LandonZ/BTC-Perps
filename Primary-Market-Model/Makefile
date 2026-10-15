@@ -5,6 +5,8 @@ HEADER = model/theo-model.h
 BACKTEST = backtester/basis-backtest.cpp
 BACKTEST_HEADER = backtester/basis-backtest.h
 BACKTEST_ARGS ?=
+BIP = model/bip-funding.cpp
+BIP_HEADER = model/bip-funding.h
 
 .PHONY: all test run theo backtest clean
 all: build/theo-pricer
@@ -21,15 +23,19 @@ build/theo-tests: $(MODEL) $(HEADER) tests/theo-tests.cpp | build
 build/funding-tests: $(MODEL) $(HEADER) tests/funding-tests.cpp | build
 	$(CXX) $(CXXFLAGS) $(MODEL) tests/funding-tests.cpp -o $@
 
+build/bip-funding-tests: $(BIP) $(BIP_HEADER) $(MODEL) $(HEADER) tests/bip-funding-tests.cpp | build
+	$(CXX) $(CXXFLAGS) $(BIP) $(MODEL) tests/bip-funding-tests.cpp -o $@
+
 build/basis-backtester: $(MODEL) $(HEADER) $(BACKTEST) $(BACKTEST_HEADER) backtester/backtest-cli.cpp | build
 	$(CXX) $(CXXFLAGS) $(MODEL) $(BACKTEST) backtester/backtest-cli.cpp -o $@
 
 build/backtest-tests: $(MODEL) $(HEADER) $(BACKTEST) $(BACKTEST_HEADER) tests/backtest-tests.cpp | build
 	$(CXX) $(CXXFLAGS) $(MODEL) $(BACKTEST) tests/backtest-tests.cpp -o $@
 
-test: build/theo-tests build/funding-tests build/backtest-tests
+test: build/theo-tests build/funding-tests build/bip-funding-tests build/backtest-tests
 	./build/theo-tests
 	./build/funding-tests
+	./build/bip-funding-tests
 	./build/backtest-tests
 
 backtest: build/basis-backtester
@@ -41,4 +47,4 @@ theo: build/theo-pricer
 run: theo
 
 clean:
-	rm -f build/theo-pricer build/theo-tests build/funding-tests build/basis-backtester build/backtest-tests
+	rm -f build/theo-pricer build/theo-tests build/funding-tests build/basis-backtester build/backtest-tests build/bip-funding-tests

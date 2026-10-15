@@ -108,6 +108,34 @@ scenario calculation, not evidence of an actual fill or future convergence.
 For a perp above spot, the scenario pricer defaults its target to +5 bps and
 selects the short-perp pair only when basis exceeds +5 bps with positive edge.
 
+## Coinbase US BIP funding (live venue)
+
+INTX BTC-PERP has been paused since 2026-10-01, so live/paper trading uses the
+Coinbase Derivatives nano BTC perp-style future `BIP-20DEC30-CDE` (0.01 BTC,
+$5 tick, hourly funding) hedged with `BTC-USD` spot. `model/bip-funding.{h,cpp}`
+implements Coinbase's published rule:
+
+```text
+futures mark = 3m VWAP | else 3m TWAP of mid | else spot mark + previous gap
+spot mark    = 3m VWAP | else 3m TWAP of mid | else futures mark + previous gap
+Premium      = mean over the hour's 20 samples of (futures mark - spot mark) / spot mark / 24
+Rate         = 0.75 * Premium + 0.25 * Previous rate     (no published cap)
+Long pays    = contracts * 0.01 * mark * Rate            (negative rate: long receives)
+```
+
+This is the same recurrence as `next_funding_bps` above. Only the mark inputs
+(3-minute VWAP samples instead of a median mark) and the per-contract payment
+differ. `FundingEstimator` builds the marks and projected rate from streamed
+trades and quotes for the paper trader. It publishes no rate for an hour with
+no futures data, and none for a partial first hour.
+
+Funding accrues hourly but is cash-settled at the midday and end-of-day margin
+runs. Coinbase's "examples" page shows 0.010% on $1,000 notional as $1.00; the
+correct product is $0.10. The funding-rate page's 0.1% -> $1.00 example is the
+one the tests use. Open questions: whether "spot" means Coinbase BTC-USD or the
+`index_price` in the product API, and where to get historical BIP funding
+(Coinbase says "available upon request").
+
 ## Historical accounting
 
 At each available minute open, the backtester evaluates the entry/exit rules.
