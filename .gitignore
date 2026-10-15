@@ -3,3 +3,7 @@ data/**/*.csv
 data/**/*.tmp
 !data/**/*_funding*.csv
 __pycache__/
+
+# Local builds and paper-trading output
+Primary-Market-Model/build/
+Primary-Market-Model/results/paper/
