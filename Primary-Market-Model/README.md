@@ -108,6 +108,92 @@ scenario calculation, not evidence of an actual fill or future convergence.
 For a perp above spot, the scenario pricer defaults its target to +5 bps and
 selects the short-perp pair only when basis exceeds +5 bps with positive edge.
 
+## Coinbase US BIP funding (live venue)
+
+INTX BTC-PERP has been paused since 2026-10-01, so live/paper trading uses the
+Coinbase Derivatives nano BTC perp-style future `BIP-20DEC30-CDE` (0.01 BTC,
+$5 tick, hourly funding) hedged with `BTC-USD` spot. `model/bip-funding.{h,cpp}`
+implements Coinbase's published rule:
+
+```text
+futures mark = 3m VWAP | else 3m TWAP of mid | else spot mark + previous gap
+spot mark    = 3m VWAP | else 3m TWAP of mid | else futures mark + previous gap
+Premium      = mean over the hour's 20 samples of (futures mark - spot mark) / spot mark / 24
+Rate         = 0.75 * Premium + 0.25 * Previous rate     (no published cap)
+Long pays    = contracts * 0.01 * mark * Rate            (negative rate: long receives)
+```
+
+This is the same recurrence as `next_funding_bps` above. Only the mark inputs
+(3-minute VWAP samples instead of a median mark) and the per-contract payment
+differ. `FundingEstimator` builds the marks and projected rate from streamed
+trades and quotes for the paper trader. It publishes no rate for an hour with
+no futures data, and none for a partial first hour.
+
+Funding accrues hourly but is cash-settled at the midday and end-of-day margin
+runs. Coinbase's "examples" page shows 0.010% on $1,000 notional as $1.00; the
+correct product is $0.10. The funding-rate page's 0.1% -> $1.00 example is the
+one the tests use. Open questions: whether "spot" means Coinbase BTC-USD or the
+`index_price` in the product API, and where to get historical BIP funding
+(Coinbase says "available upon request").
+
+## Live recording and paper trading (BIP vs BTC-USD)
+
+One C++ engine (`paper/paper-engine.{h,cpp}`) runs recorded ticks, Allen's minute
+candles, and a live stream, so the backtest and the paper trader use the same
+decision and fill code.
+
+1. Record (on a laptop; the cloud sandbox cannot reach Coinbase). Needs `pip install websockets`:
+
+   ```bash
+   python3 Primary-Market-Model/tools/record_coinbase.py              # Ctrl-C to stop
+   ```
+
+   This writes `data/live/YYYY-MM-DD/events.csv` (top-of-book changes `Q` and trades `T`
+   for both legs, from the public level2 and market_trades channels) and `funding.csv`
+   (a REST poll every 15 s of the BIP product: `funding_rate`, `funding_time`, `index_price`).
+   Compare the poll with `FundingEstimator` to settle the open questions above.
+
+2. Replay the recording, with one run per latency (best, middle and worst case):
+
+   ```bash
+   cd Primary-Market-Model && make build/paper-trader
+   ./build/paper-trader --events ../data/live/2026-10-15/events.csv --latency-ms 5,50,250 \
+       --perp-fee-usd 0.15 --spot-taker-bps 6       # placeholder fees: use our real tier
+   ```
+
+3. Paper trade live: `python3 tools/record_coinbase.py --stdout | ./build/paper-trader --live`.
+   Results are rewritten every minute and a status line is printed to stderr.
+
+4. Minute candles: `./build/paper-trader --candles` (same files as `basis-backtester`, bid = ask
+   = open, latency 0). Taker mode should come close to the zero-fee `basis-backtester` result,
+   and it lets fees be added. Funding here uses the BIP rule, not the recorded INTX rates.
+
+Modes:
+
+- `--mode taker` (default) is Allen's basis rule on **executable** prices. It sells the basis when
+  `perp_bid / spot_ask - 1 > center + threshold` and buys when `perp_ask / spot_bid - 1 < center - threshold`.
+  It exits on the first profit net of fees, convergence back to the band, or `--hold-minutes`.
+- `--mode maker` is the naive market maker. It quotes the perp at `spot_mid * (1 + center) * (1 -/+ threshold)`
+  on the $5 grid, with inventory skew and a `--max-inventory` cap, and never crosses the book.
+  It does not hedge yet; cop and lean comes after the Thursday meeting.
+- `--ema-halflife-min N` replaces the fixed `--center-bps` with a causal EMA of the mid basis.
+  INTX traded at a persistent premium, which a fixed 0 center ignores.
+
+Fill model:
+
+- An order decided at time t reaches the exchange at t + latency. A taker order fills at the
+  top of book in force at that moment. `signal_basis_bps` vs `entry_basis_bps` in `trades.csv`
+  is the latency slippage.
+- A maker quote (or its replacement or cancel) goes live after the latency. It fills only when a
+  perp trade prints **through** its price (`--fill-at-touch 1` also counts prints at the price),
+  for the full quote size. That is optimistic about queue position and size.
+- Time is our receive clock (`recv_ms`). Events sharing a timestamp are applied together before
+  deciding. `--from-ms/--to-ms` select train/test windows.
+- Fees default to zero and the CLI warns about it. Set them before reading anything into PnL.
+
+Outputs per latency go to `results/paper/latency-<N>ms/`: `trades.csv` (Allen's columns plus
+fees and signal basis), `fills.csv`, `equity.csv` and `summary.json`.
+
 ## Historical accounting
 
 At each available minute open, the backtester evaluates the entry/exit rules.
