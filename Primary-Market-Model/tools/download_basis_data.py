@@ -26,9 +26,8 @@ def fetch(product, name, start, end):
     if path.exists():
         with path.open(newline="") as file:
             for row in csv.DictReader(file):
-                ts = int(row["ts"])
-                if start <= ts < end:
-                    rows[ts] = [ts, row["open"], row["high"], row["low"], row["close"], row["volume"]]
+                ts = int(row["ts"])  # Keep rows outside this range: other runs may need them.
+                rows[ts] = [ts, row["open"], row["high"], row["low"], row["close"], row["volume"]]
     print(f"{product}: downloading historical minute candles", flush=True)
     # Legacy INTX truncates larger requests at 300 candles.
     for chunk, begin in enumerate(range(start, end, 300 * 60)):
@@ -68,13 +67,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--start", default="2026-06-03")
     parser.add_argument("--end", default="2026-10-01", help="exclusive; legacy INTX history ends at migration")
+    parser.add_argument("--perp", default="BTC-PERP-INTX",
+                        help="perp product, e.g. BIP-20DEC30-CDE for the Coinbase US nano BTC perp")
     args = parser.parse_args()
     start, end = timestamp(args.start), timestamp(args.end)
     if end <= start:
         parser.error("end must follow start")
     with ThreadPoolExecutor(max_workers=2) as pool:
         jobs = [pool.submit(fetch, product, name, start, end) for product, name in [
-            ("BTC-USD", "BTC-USD_spot_1m.csv"), ("BTC-PERP-INTX", "BTC-PERP-INTX_1m.csv")]]
+            ("BTC-USD", "BTC-USD_spot_1m.csv"), (args.perp, f"{args.perp}_1m.csv")]]
         for job in jobs:
             job.result()
 
