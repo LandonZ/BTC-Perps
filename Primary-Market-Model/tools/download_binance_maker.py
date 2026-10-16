@@ -7,6 +7,7 @@ Default spot reference is the most recent spot trade, explicitly a midpoint prox
 The older completed-minute-close reference remains available as a comparison.
 """
 import argparse
+import calendar
 import csv
 import hashlib
 import heapq
@@ -174,6 +175,25 @@ def prepare(paths, start, end, output):
     return counts
 
 
+def prepare_premium(month, output):
+    day = datetime.strptime(month, '%Y-%m').replace(tzinfo=timezone.utc)
+    start = int(day.timestamp()*1000)
+    archive, source = download(f'futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-{month}.zip',
+                               ROOT/'data/binance/maker'/month/'archives/premium')
+    observations = [(millis(row[6])+1,row[4]) for row in rows(archive)]
+    observations.sort()
+    expected = calendar.monthrange(day.year,day.month)[1]*1440
+    if len(observations) != expected or any(t != start+(i+1)*60000 for i,(t,_) in enumerate(observations)):
+        raise ValueError('Premium-index candles must have complete chronological minute coverage')
+    output.parent.mkdir(parents=True,exist_ok=True)
+    with output.open('w',newline='') as handle:
+        writer=csv.writer(handle);writer.writerow(COLUMNS)
+        writer.writerows(event(t,'P',price) for t,price in observations)
+    output.with_suffix('.manifest.json').write_text(json.dumps(dict(source=source,count=len(observations),
+        availability='Completed 1m premium index CLOSE at close_time+1ms; causal proxy for exchange 5s samples'),indent=2)+'\n')
+    print(f'Prepared premium events: {output} ({len(observations)} minutes)',flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--date', default='2023-07-20', help='UTC day; recent bookTicker archives may be unavailable')
@@ -181,7 +201,11 @@ def main():
     parser.add_argument('--hours', type=int, default=1)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--spot-reference', choices=['last-trade','minute-close'], default='last-trade')
+    parser.add_argument('--premium-month', help='Prepare only completed premium-index minutes for YYYY-MM')
     args = parser.parse_args()
+    if args.premium_month:
+        prepare_premium(args.premium_month,args.output or ROOT/'data/binance/maker'/args.premium_month/'premium-events.csv')
+        return
     if not 0 <= args.start_hour < 24 or not 1 <= args.hours <= 24-args.start_hour:
         parser.error('Window must fit within one UTC day')
     day = datetime.strptime(args.date, '%Y-%m-%d').replace(tzinfo=timezone.utc)

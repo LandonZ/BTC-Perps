@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BTC basis backtest</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f7f8fa,#111619);--surface:light-dark(#fff,#192125);--ink:light-dark(#18262d,#e8eeef);--muted:light-dark(#596b73,#a1b3ba);--grid:light-dark(#dfe6e9,#34434b);--line:light-dark(#08765f,#63d5b1);--other:light-dark(#6a7d95,#a3b1cb)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,sans-serif}main{max-width:1150px;margin:auto;padding:44px 28px}h1{font-size:28px;font-weight:600;margin:5px 0 10px}p{color:var(--muted);line-height:1.6;margin:8px 0}.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.stat{background:var(--surface);padding:18px;border-radius:10px}.stat span{display:block;color:var(--muted);font-size:13px}.stat strong{display:block;font-size:24px;font-weight:550;margin-top:7px;font-variant-numeric:tabular-nums}.plot{background:var(--surface);border-radius:12px;padding:22px 14px 8px}h2{font-size:17px;font-weight:550;margin:0 8px 12px}.legend{display:flex;gap:22px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:0 8px}.swatch{display:inline-block;width:22px;margin-right:6px;border-top:3px solid var(--line);vertical-align:middle}.swatch.realized{border-color:var(--other);border-top-style:dashed}svg{width:100%;height:380px;display:block;touch-action:pan-y}.readout{padding:8px;min-height:54px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.6}.readout strong{color:var(--ink);font-weight:500}.notes{margin-top:22px;font-size:13px}details{margin-top:16px;color:var(--muted);font-size:13px}summary{cursor:pointer}details p{max-width:100ch}a{color:inherit}@media(max-width:720px){main{padding:24px 14px}.stats{grid-template-columns:repeat(2,1fr)}.stat strong{font-size:21px}h1{font-size:24px}svg{height:320px}}
+</style>
+<main>
+  <div class="eyebrow">Binance · BTCUSDT · simulated trading</div>
+  <h1>Basis strategy: profit over time</h1>
+  <p id="period"></p>
+  <section class="stats" aria-label="Backtest results">
+    <div class="stat"><span>Total profit · USDT</span><strong id="net"></strong></div>
+    <div class="stat"><span>Realized profit · USDT</span><strong id="realized"></strong></div>
+    <div class="stat"><span>Open-position PnL · USDT</span><strong id="unrealized"></strong></div>
+    <div class="stat"><span>Maximum drawdown · USDT</span><strong id="drawdown"></strong></div>
+  </section>
+  <section class="plot">
+    <h2>Cumulative profit</h2>
+    <div class="legend"><span><i class="swatch"></i>Total PnL</span><span><i class="swatch realized"></i>Realized PnL</span></div>
+    <svg id="chart" role="img" aria-label="Cumulative total and realized profit over UTC time"></svg>
+    <div class="readout" id="readout" aria-live="polite"></div>
+  </section>
+  <p class="notes" id="activity"></p>
+  <details><summary>Strategy and assumptions</summary><p id="assumptions"></p><p id="strategy"></p><p>Multiple pairs can remain open. Spot prices use the latest trade as a midpoint proxy with an assumed spread. Queue priority, depth, impact, borrow costs, margin and liquidation are not modeled. The chart uses sampled minute observations; maximum drawdown is calculated from every replay event.</p></details>
+  <noscript><p>Enable JavaScript to view the embedded profit graph and results.</p></noscript>
+</main>
+<script id="results" type="application/json">__REPORT_DATA__</script>
+<script>
+(() => {
+ const {summary:s,points:p}=JSON.parse(document.getElementById('results').textContent);
+ const el=id=>document.getElementById(id),money=n=>new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2,signDisplay:'exceptZero'}).format(n);
+ const count=n=>new Intl.NumberFormat('en-US').format(n);
+ const day=t=>new Date(t).toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'});
+ const cycleFees=s.perp_maker_bps+s.perp_taker_bps+2*s.spot_taker_bps;
+ el('period').textContent=`${day(p[0][0])} – ${day(p.at(-1)[0])} · UTC · ${cycleFees} bps cycle fees`;
+ document.title=`BTC basis · ${day(p[0][0])} · ${money(s.net_pnl)} USDT`;
+ for(const [id,key] of [['net','net_pnl'],['realized','realized_pnl'],['unrealized','unrealized_pnl']])el(id).textContent=money(s[key]);
+ el('drawdown').textContent=count(Number(s.max_drawdown.toFixed(2)));
+ const rate=s.closed_pairs?100*s.winning_closed_pairs/s.closed_pairs:0;
+ el('activity').textContent=`${count(s.closed_pairs)} partial-fill pairs closed · ${rate.toFixed(1)}% win rate · Peak open exposure ${count(s.max_open_gross_perp_btc)} BTC per leg`;
+ el('assumptions').textContent=`Perp maker fee ${s.perp_maker_bps} bps · Perp taker fee ${s.perp_taker_bps} bps · Spot taker fee ${s.spot_taker_bps} bps · ${s.funding_cashflows?'Recorded funding cash flows':'Zero funding'} and zero latency · Assumed spot full spread ${2*s.proxy_spot_half_spread_bps} bps · Quote size ${s.order_btc} BTC · ${s.max_gross_perp_btc===0?'No position cap':`Position cap ${s.max_gross_perp_btc} BTC`}.`;
+ el('strategy').textContent=s.exit_on_equilibrium?'Convergence exits are enabled.':'Hold through convergence. In the final pre-funding minute, close only estimated payers outside the flat funding region. Signals use completed premium-index minute CLOSEs as a causal proxy. Held positions pay or receive recorded funding; funding cash is realized immediately.';
+ const svg=el('chart'),ns='http://www.w3.org/2000/svg';let scale,selected=p.length-1;
+ function element(tag,attributes,text){const node=document.createElementNS(ns,tag);for(const [key,value]of Object.entries(attributes))node.setAttribute(key,value);if(text!==undefined)node.textContent=text;svg.appendChild(node);return node;}
+ function read(index){selected=index;const row=p[index];el('readout').innerHTML=`<strong>${new Date(row[0]).toISOString().replace('T',' ').replace('.000Z',' UTC')}</strong> &nbsp; Total <strong>${money(row[1])} USDT</strong> &nbsp; Realized <strong>${money(row[2])} USDT</strong>`;}
+ function draw(){
+  svg.replaceChildren();const w=svg.clientWidth,h=svg.clientHeight,left=w<500?61:76,right=18,top=22,bottom=43;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);const width=w-left-right,height=h-top-bottom;
+  let low=0,high=0;for(const row of p){low=Math.min(low,row[1],row[2]);high=Math.max(high,row[1],row[2]);}const pad=Math.max((high-low)*.08,1);low-=pad;high+=pad;
+  const begin=p[0][0],end=Math.max(begin+1,p.at(-1)[0]);const x=t=>left+(t-begin)/(end-begin)*width,y=n=>top+(high-n)/(high-low)*height;scale={x,y,left,width,begin,end};
+  element('title',{},`Total profit ${money(s.net_pnl)} USDT, realized ${money(s.realized_pnl)} USDT`);
+  const style=getComputedStyle(document.documentElement),grid=style.getPropertyValue('--grid').trim(),muted=style.getPropertyValue('--muted').trim();
+  for(let i=0;i<=4;i++){const value=low+(high-low)*i/4,yy=y(value);element('line',{x1:left,y1:yy,x2:w-right,y2:yy,stroke:grid,'stroke-width':1});const label=Math.abs(value)>=1000?`${(value/1000).toFixed(1)}k`:value.toFixed(0);element('text',{x:left-10,y:yy+4,'text-anchor':'end',fill:muted,'font-size':12},label);}
+  element('text',{x:left,y:13,fill:muted,'font-size':12},'USDT');
+  const ticks=w<500?3:5;for(let i=0;i<ticks;i++){const t=begin+(end-begin)*i/(ticks-1);element('text',{x:x(t),y:h-15,'text-anchor':i===0?'start':i===ticks-1?'end':'middle',fill:muted,'font-size':12},new Date(t).toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric'}));}
+  for(const [column,color,dash]of [[2,'var(--other)','5 4'],[1,'var(--line)','']]){const d=p.map((r,i)=>`${i?'L':'M'}${x(r[0]).toFixed(2)},${y(r[column]).toFixed(2)}`).join('');element('path',{d,fill:'none',stroke:color,'stroke-width':column===1?2:1.3,'stroke-dasharray':dash,'stroke-linejoin':'round'});}
+  element('line',{id:'cursor',x1:0,x2:0,y1:top,y2:h-bottom,stroke:'var(--muted)','stroke-width':1,visibility:'hidden'});
+  element('circle',{id:'dot',r:4,fill:'var(--line)',visibility:'hidden'});read(selected);
+ }
+ function point(event){const bounds=svg.getBoundingClientRect(),fraction=Math.max(0,Math.min(1,(event.clientX-bounds.left-scale.left)/scale.width));const t=scale.begin+fraction*(scale.end-scale.begin);let low=0,high=p.length-1;while(low<high){const mid=(low+high)>>1;if(p[mid][0]<t)low=mid+1;else high=mid;}if(low>0&&t-p[low-1][0]<p[low][0]-t)low--;read(low);const xx=scale.x(p[low][0]);for(const id of ['cursor','dot'])el(id).setAttribute('visibility','visible');el('cursor').setAttribute('x1',xx);el('cursor').setAttribute('x2',xx);el('dot').setAttribute('cx',xx);el('dot').setAttribute('cy',scale.y(p[low][1]));}
+ svg.addEventListener('pointermove',point);svg.addEventListener('pointerdown',point);svg.addEventListener('pointerleave',()=>{for(const id of ['cursor','dot'])el(id).setAttribute('visibility','hidden');read(p.length-1);});new ResizeObserver(draw).observe(svg);draw();
+})();
+</script>
+</html>

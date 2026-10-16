@@ -1,18 +1,21 @@
 #pragma once
-#include "maker-backtest.h"
+#include "events.h"
 
 namespace btc::basis_maker {
-using maker_backtest::Event;
-using maker_backtest::Millis;
+using events::Event;
+using events::Millis;
 struct Config {
     double equilibrium_bps = -5;
-    double order_btc = 0.01, max_gross_perp_btc = 0.05, quantity_step = 0.001, tick = 0.1;
-    double perp_maker_bps = 2, spot_taker_bps = 10;
+    double order_btc = 0.01, max_gross_perp_btc = 0, quantity_step = 0.001, tick = 0.1;
+    double perp_maker_bps = 0, perp_taker_bps = 0, spot_taker_bps = 0;
     double proxy_spot_half_spread_bps = 0.5; // Explicit assumption when S events lack actual bid/ask.
     double participation = 0.1;
     double perp_min_notional = 100, spot_min_notional = 5;
     Millis funding_cancel_ms = 60000, max_spot_age_ms = 90000, max_perp_age_ms = 10000;
     bool fill_at_touch = true; // Joining best bid/ask: participation approximates queue allocation.
+    bool exit_on_equilibrium = false;
+    bool exit_before_funding = true, funding_exit_payers_only = true, funding_cashflows = true;
+    double funding_interest_bps = 1, funding_clamp_bps = 5;
 };
 struct Fill {
     Millis time;
@@ -20,12 +23,18 @@ struct Fill {
     std::string leg, liquidity;
     int side;
     double price, btc, notional, fee;
+    std::string phase = "ENTRY";
 };
 struct Pair {
     std::size_t id;
     Millis time;
     int direction;
     double btc, perp_price, spot_price, entry_basis_bps, fees;
+    bool closed = false;
+    Millis exit_time = -1;
+    double exit_perp_price = 0, exit_spot_price = 0, exit_fees = 0, realized_pnl = 0;
+    double funding_pnl = 0;
+    std::string exit_reason = "";
 };
 struct Decision {
     Millis time;
@@ -36,6 +45,7 @@ struct Decision {
 struct Totals {
     double price_pnl = 0, fees = 0, funding_pnl = 0;
     double perp_btc = 0, spot_btc = 0, gross_perp_btc = 0;
+    double open_gross_perp_btc = 0, realized_pnl = 0;
     double net() const { return price_pnl-fees+funding_pnl; }
 };
 struct Equity { Millis time; Totals totals; };
@@ -53,11 +63,21 @@ public:
     double max_drawdown() const { return drawdown_; }
     int spot_proxy_events() const { return proxy_events_; }
     int spot_mid_events() const { return mid_events_; }
+    double final_perp_mid() const { return (perp_bid_+perp_ask_)/2; }
+    double final_spot_mid() const { return (spot_bid_+spot_ask_)/2; }
+    bool premium_ready() const;
+    double average_premium_bps() const;
+    double estimated_funding_bps() const;
 private:
     bool ready() const;
     bool funding_guard() const;
     void decide();
     void trade(const Event& event);
+    void close_converged();
+    void close_before_funding();
+    void close_pair(Pair& pair, const std::string& reason);
+    double used_capacity() const;
+    double available_capacity() const;
     double basis() const;
     double quantity(double size) const;
     Config config_;
@@ -67,12 +87,19 @@ private:
     int quote_side_ = 0;
     Millis quote_since_ = -1;
     double perp_btc_ = 0, spot_btc_ = 0, gross_btc_ = 0, cash_ = 0, fees_ = 0, peak_ = 0, drawdown_ = 0;
+    double open_gross_btc_ = 0, realized_pnl_ = 0;
+    double open_long_btc_ = 0, open_short_btc_ = 0, funding_pnl_ = 0;
+    Millis premium_period_start_ = -1, premium_time_ = -1;
+    double premium_weighted_ = 0, premium_weight_ = 0;
+    bool premium_complete_ = true;
     int proxy_events_ = 0, mid_events_ = 0;
     std::vector<Fill> fills_;
     std::vector<Pair> pairs_;
+    std::vector<std::size_t> open_pairs_;
     std::vector<Decision> decisions_;
     std::vector<Equity> equity_;
 };
 void replay(Engine& engine, const std::string& events_file);
-void write_results(const Engine& engine, const std::string& directory);
+void replay_files(Engine& engine, const std::vector<std::string>& events_files, const std::string& premium_file = "");
+void write_results(const Engine& engine, const std::string& directory, bool details = false);
 } // namespace btc::basis_maker

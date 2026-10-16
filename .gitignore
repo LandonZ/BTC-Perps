@@ -1,12 +1,12 @@
-# Large market data: regenerate with `python3 data/fetch_data.py all`
+# Regeneratable market data and local caches
 data/**/*.csv
 data/**/*.tmp
 !data/**/*_funding*.csv
+data/binance/maker/**/archives/
 __pycache__/
 
-# Local builds and paper-trading output
+# Local builds; retain only the latest self-contained report
 Primary-Market-Model/build/
-Primary-Market-Model/results/paper/
-data/binance/maker/**/archives/
-Primary-Market-Model/results/binance-maker*/
-Primary-Market-Model/results/binance-basis-maker*/
+Primary-Market-Model/results/*
+!Primary-Market-Model/results/result.html
+!Primary-Market-Model/results/result.png

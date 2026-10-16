@@ -1,0 +1,51 @@
+{
+  "symbol": "BTCUSDT",
+  "venue": "Binance USD-M perpetual",
+  "start_ms": 1688342400000,
+  "end_ms": 1688428800000,
+  "events": "/Users/allen/src/BTC-Perps/data/binance/maker/2023-07-03/events-spot-trades-full-day.csv",
+  "counts": {
+    "R": 1,
+    "F": 3,
+    "Q": 10711614,
+    "S": 586890,
+    "T": 958950
+  },
+  "sources": {
+    "book": {
+      "url": "https://data.binance.vision/data/futures/um/daily/bookTicker/BTCUSDT/BTCUSDT-bookTicker-2023-07-03.zip",
+      "path": "data/binance/maker/2023-07-03/archives/BTCUSDT-bookTicker-2023-07-03.zip",
+      "sha256": "afacc37e68c0d6355ef3822db7685dbbdbd62e38ecadc5fe8bc0836577442a8e",
+      "bytes": 130717117
+    },
+    "trades": {
+      "url": "https://data.binance.vision/data/futures/um/daily/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-07-03.zip",
+      "path": "data/binance/maker/2023-07-03/archives/BTCUSDT-aggTrades-2023-07-03.zip",
+      "sha256": "c35b63f32ee46bb9713d00b37bfcf7ee927bdfb81973f6f0f9fb4849f69f8775",
+      "bytes": 12767467
+    },
+    "mark": {
+      "url": "https://data.binance.vision/data/futures/um/daily/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2023-07-03.zip",
+      "path": "data/binance/maker/2023-07-03/archives/mark/BTCUSDT-1m-2023-07-03.zip",
+      "sha256": "7c6fad32874729502b0fadad2376fb1b54470f2e39aeb5fc308af56625dcab99",
+      "bytes": 34329
+    },
+    "funding": {
+      "url": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2023-07.zip",
+      "path": "data/binance/maker/2023-07-03/archives/BTCUSDT-fundingRate-2023-07.zip",
+      "sha256": "0304baed9fd407293a8a8040b30a1b68bd344803b630d33530375b421733a930",
+      "bytes": 861
+    },
+    "spot_trades": {
+      "url": "https://data.binance.vision/data/spot/daily/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-07-03.zip",
+      "path": "data/binance/maker/2023-07-03/archives/spot_trades/BTCUSDT-aggTrades-2023-07-03.zip",
+      "sha256": "071144488f73599f9d2d665a3de1de5cafa7e95e6795b7cd772fb6a2a529283e",
+      "bytes": 8480767
+    }
+  },
+  "spot_reference": "Latest observed spot trade; proxy, NOT an observed spot midpoint",
+  "funding_signal": "Last settled rate only; final next-settlement rate is never used early",
+  "funding_mark": "Settlement minute mark-price candle OPEN; proxy for official funding mark",
+  "book_clock": "Historical exchange transaction_time; receive-clock latency is simulated",
+  "ordering": "Same millisecond: funding, spot, book, trades; strategy decides after batch"
+}

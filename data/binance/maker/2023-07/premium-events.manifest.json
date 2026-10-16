@@ -1,0 +1,10 @@
+{
+  "source": {
+    "url": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2023-07.zip",
+    "path": "data/binance/maker/2023-07/archives/premium/BTCUSDT-1m-2023-07.zip",
+    "sha256": "7a5451650e882722038157ffa80af92eb58545fca989b75e546a0b02b81b76ce",
+    "bytes": 847570
+  },
+  "count": 44640,
+  "availability": "Completed 1m premium index CLOSE at close_time+1ms; causal proxy for exchange 5s samples"
+}

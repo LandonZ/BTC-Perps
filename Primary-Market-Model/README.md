@@ -1,299 +1,84 @@
-# BTC paired basis maker
+# BTC basis strategy
 
-The active model joins the **Binance BTCUSDT perp bid below -5 bps equilibrium**
-and the **perp ask above -5 bps**. Every partial perp fill immediately crosses
-spot in the opposite direction for the **same BTC quantity**. This scenario has
-zero latency, **no exits**, and **zero funding cash flows**. Entry quotes cancel
-60 seconds before known funding times. Both entry legs pay their respective
-fees: 2 bps perp maker and 10 bps spot taker by default.
+Quote the Binance BTCUSDT perp bid below **−5 bps versus spot**, or its ask above
+−5 bps. Every partial fill immediately gets an opposite **equal-BTC spot hedge**.
+Quotes are 0.01 BTC; concurrent pairs and position size are uncapped by default.
+**Execution fees are zero. Convergence never closes a position.**
 
-```bash
-python3 Primary-Market-Model/tools/download_binance_maker.py
-make -C Primary-Market-Model test
-make -C Primary-Market-Model backtest
-```
+## Funding-only exits
 
-The default sample is 2023-07-20 00:00-01:00 UTC. Outputs go to
-`Primary-Market-Model/results/binance-basis-maker/`. Spot crossing uses a latest-trade
-midpoint **proxy** with an assumed 1 bp full spot spread, because observed spot
-books were unavailable. See [paired basis model](BASIS-MAKER.md) for sizing, fees,
-position caps and limitations. The earlier unhedged model is `make maker-backtest`.
-Existing Coinbase programs below remain legacy comparisons; use
-`make basis-backtest` to run the historical Coinbase paired strategy.
+During the final **60 seconds before funding**, close both legs only for pairs
+expected to **pay** funding, and only when the funding calculation is outside its
+flat region. All other pairs remain open, including at the end of the replay.
+Entry quotes pause during that final minute and resume after settlement.
 
-## Legacy Coinbase models
+Binance's eight-hour funding calculation is
+`F = P + clamp(I - P, -5 bps, +5 bps)`, with the standard interest component
+`I = 1 bp`. Therefore averaged premium **P from −4 to +6 bps** produces a flat
+**1 bp** funding rate. Beyond those boundaries the rate scales linearly. Positive
+estimated funding selects long-perp payers for exit; negative funding selects
+short-perp payers. Receiving pairs stay open. The flat rate is low, but not zero.
+See [Binance's funding explanation](https://www.binance.com/en/support/faq/detail/360033525031).
 
-The event-driven paper trader defaults to **market making**: resting post-only
-perp bids and asks around spot-derived fair value, with inventory skew and caps.
-It simulates orders only; there is no authenticated exchange order submission.
-Maker inventory is currently unhedged. Use recorded quote/trade events or the
-live public feed to evaluate fills; minute candles cannot establish maker fills.
+The exit signal uses a causal, linearly weighted prefix average of completed
+**official premium-index 1-minute CLOSEs** within the funding period. A candle
+becomes available at `close_time + 1 ms`. This approximates Binance's more
+frequent premium sampling; it is not an exact historical funding forecast.
+It is separate from the instantaneous perp/spot basis used for entries. Missing,
+incomplete or stale premium history cannot trigger a funding exit. The upcoming
+final settlement rate is never used early.
 
-The historical basis backtest below buys a discounted perp against a spot short
-and sells a premium perp against a spot long. It assumes immediate execution,
-so its existing results do not demonstrate market-making performance. Define
-`basis_bps = 10,000 * (perp / spot - 1)`; a perp 10 bps below spot has a basis of
-**-10 bps**, or a positive 10 bps discount.
-
-## Historical basis rule
-
-- Buy basis: enter **long perp / short spot** when basis is **below -5 bps**.
-- Sell basis: enter **short perp / long spot** when basis is **above +5 bps**.
-- Both entries require positive projected profit for that side.
-- Forecast the exit at **-5 bps for longs / +5 bps for shorts**, with a
-  **five-minute maximum** holding period.
-- Close at the first observed positive total PnL, when a long basis reaches
-  -5 bps or higher or a short basis reaches +5 bps or lower, or at the
-  five-minute deadline, whichever comes first.
-- Hold one equal-BTC pair at a time. Do not close and reopen in the same minute.
-- Fees, spreads, slippage, borrowing, and financing default to **zero**. Funding
-  remains included. Default quantity is 0.01 BTC per leg.
-
-A profitable exit can happen before the -5 bps target is reached. For example,
-buying at -10 and exiting at -7 earns 3 bps from the basis when spot is unchanged,
-before funding. The target is an assumption, not a guarantee of convergence.
+Held positions pay or receive the **recorded funding at settlement**. Funding
+cash is realized immediately; open-position unrealized PnL contains price marks
+and paid entry fees. Closed-pair lifetime PnL also attributes that pair's funding
+without counting it twice in the portfolio. The funding mark is the settlement
+minute's mark-price OPEN, a proxy for the official funding mark. July 2023 uses
+00:00, 08:00 and 16:00 UTC; the engine follows archived interval updates.
 
 ## Run
 
 From the repository root:
 
 ```bash
-make -C Primary-Market-Model theo
 make -C Primary-Market-Model test
-make -C Primary-Market-Model basis-backtest
+make -C Primary-Market-Model run
 ```
 
-`theo` runs a **synthetic five-minute scenario**, not live data. `basis-backtest` uses
-retained/reacquired historical Coinbase minute candles and hourly funding. Its
-outputs are `Primary-Market-Model/results/basis-both-5m/{summary.json,trades.csv,equity.csv}`.
+The default run uses the July 20, 2023 first-hour sample. Prepare missing data
+with `make -C Primary-Market-Model sample`. The report runner downloads and
+caches the month's premium-index feed when needed.
 
-Regenerate the minute price history if needed:
+For a continuous month:
 
 ```bash
-python3 Primary-Market-Model/tools/download_basis_data.py \
-  --start 2026-06-03 --end 2026-10-01
+make -C Primary-Market-Model month MONTH=2023-07
 ```
 
-Plot the completed results with Python/matplotlib:
+The compact report is [results/result.html](results/result.html), with the
+current July profit curve also exported as [results/result.png](results/result.png).
+The HTML contains its own chart data. Temporary intermediate outputs are removed
+by the report runner. A new run replaces the HTML; use
+`ARGS="--output results/sample.html"` to retain another run.
 
-```bash
-python3 Primary-Market-Model/tools/plot_backtest.py \
-  Primary-Market-Model/results/basis-both-5m
-```
+Options include `--funding-cancel-seconds 60`, `--funding-interest-bps 1`,
+`--funding-clamp-bps 5`, `--cycle-fee-bps 0`, `--funding-cashflows 1`, and
+`--max-gross-perp-btc 0`. Per-leg fee overrides remain available for comparisons.
+The convergence rule can be enabled explicitly with `--exit-on-equilibrium 1`;
+it is disabled in the active strategy. `--premium-events FILE` supplies a custom
+causal P-event feed. See the C++ runner's `--help` for all parameters.
 
-The plotter writes `pnl.png`, `pnl.svg`, and `report.md`. If matplotlib is installed
-in a separate directory, provide `--python-packages DIRECTORY`. Matplotlib is
-used only for reporting; the pricer and backtest are C++17.
+## Execution assumptions
 
-To disable early profit-taking and wait for convergence or timeout:
+Spot uses the latest trade as a midpoint proxy with an assumed **1 bp full
+spread**. Every market exit crosses the applicable bid/ask. Zero fees do not
+remove crossed spreads. Maker entries allow touch prints, at most 10% of each
+observed aggressor print, rounded down to 0.001 BTC; a quote cannot fill at its
+creation timestamp. Depth, impact, queue priority, borrow costs, margin and
+liquidation are not modeled. Equal BTC removes common dollar price moves;
+basis risk remains. Unrealized PnL can be positive or negative.
 
-```bash
-make -C Primary-Market-Model basis-backtest \
-  BACKTEST_ARGS="--profit-exit 0 --output results/basis-both-5m-target"
-```
-
-The default is **early profit-taking enabled**. This alternative is an optional
-sensitivity check, not an optimized result or the main strategy.
-
-## Funding and theo
-
-The pricer implements the hourly rule supplied in the reference image:
-
-```text
-mark = median(perp_bid, perp_ask, last_trade)
-B = 1-hour TWAP of 10,000 * (mark / index - 1)
-F_next_bps = 0.75 * (B / 24) + 0.25 * F_previous_bps
-long_funding_paid_per_BTC = sum(projected_mark * F_hourly_bps / 10,000)
-expected_exit_perp_mid = spot_reference * (1 + exit_basis_bps / 10,000)
-theo = expected_exit_perp_mid - long_funding_paid_per_BTC
-```
-
-The one-hour TWAP gap is supplied **before** division by 24. Future TWAP and
-funding mark are held at the supplied levels in this scenario forecast. Positive
-funding is paid by long perps; negative funding is received. Only settlement
-boundaries in `(entry, exit]` count. Five-minute holds often cross no hourly
-boundary, but a hold entering two minutes before one can pay or receive funding.
-
-With constant B, funding approaches B/24. This formula has a steady
-funding-neutral gap of **zero**, not -5 bps. The **-5 bps trading threshold is a
-strategy choice**, not an equilibrium implied by this funding rule.
-
-The formula matches the [original INTX rules](https://www.coinbase.com/international-exchange/legal/trading-rules).
-The upgraded international product has continuous funding; the project uses the
-**supplied historical hourly assumption** and the corresponding retained history.
-[Coinbase migration details](https://help.coinbase.com/en/international-exchange/deribit/coinbase-faqs).
-
-Example valuation:
-
-```bash
-Primary-Market-Model/build/theo-pricer \
-  --spot 100000 --perp 99900 --index 100000 \
-  --twap-basis-bps -10 --previous-funding-bps -0.05 \
-  --horizon-minutes 5 --minutes-to-funding 60 --exit-basis-bps -5
-```
-
-No funding boundary is crossed. Expected exit perp price and theo are 99,950.
-The conditional long-basis profit is 5 bps, or 0.50 at 0.01 BTC. This is a
-scenario calculation, not evidence of an actual fill or future convergence.
-For a perp above spot, the scenario pricer defaults its target to +5 bps and
-selects the short-perp pair only when basis exceeds +5 bps with positive edge.
-
-## Coinbase US BIP funding (live venue)
-
-INTX BTC-PERP has been paused since 2026-10-01, so live/paper trading uses the
-Coinbase Derivatives nano BTC perp-style future `BIP-20DEC30-CDE` (0.01 BTC,
-$5 tick, hourly funding) hedged with `BTC-USD` spot. `model/bip-funding.{h,cpp}`
-implements Coinbase's published rule:
-
-```text
-futures mark = 3m VWAP | else 3m TWAP of mid | else spot mark + previous gap
-spot mark    = 3m VWAP | else 3m TWAP of mid | else futures mark + previous gap
-Premium      = mean over the hour's 20 samples of (futures mark - spot mark) / spot mark / 24
-Rate         = 0.75 * Premium + 0.25 * Previous rate     (no published cap)
-Long pays    = contracts * 0.01 * mark * Rate            (negative rate: long receives)
-```
-
-This is the same recurrence as `next_funding_bps` above. Only the mark inputs
-(3-minute VWAP samples instead of a median mark) and the per-contract payment
-differ. `FundingEstimator` builds the marks and projected rate from streamed
-trades and quotes for the paper trader. It publishes no rate for an hour with
-no futures data, and none for a partial first hour.
-
-Funding accrues hourly but is cash-settled at the midday and end-of-day margin
-runs. Coinbase's "examples" page shows 0.010% on $1,000 notional as $1.00; the
-correct product is $0.10. The funding-rate page's 0.1% -> $1.00 example is the
-one the tests use. Open questions: whether "spot" means Coinbase BTC-USD or the
-`index_price` in the product API, and where to get historical BIP funding
-(Coinbase says "available upon request").
-
-## Live recording and paper trading (BIP vs BTC-USD)
-
-One C++ engine (`paper/paper-engine.{h,cpp}`) runs recorded ticks, Allen's minute
-candles, and a live stream, so the backtest and the paper trader use the same
-decision and fill code.
-
-1. Record (on a laptop; the cloud sandbox cannot reach Coinbase). Needs `pip install websockets`:
-
-   ```bash
-   python3 Primary-Market-Model/tools/record_coinbase.py              # Ctrl-C to stop
-   ```
-
-   This writes `data/live/YYYY-MM-DD/events.csv` (top-of-book changes `Q` and trades `T`
-   for both legs, from the public level2 and market_trades channels) and `funding.csv`
-   (a REST poll every 15 s of the BIP product: `funding_rate`, `funding_time`, `index_price`).
-   Compare the poll with `FundingEstimator` to settle the open questions above.
-
-2. Replay the recording, with one run per latency (best, middle and worst case):
-
-   ```bash
-   cd Primary-Market-Model && make build/paper-trader
-   ./build/paper-trader --mode maker --events ../data/live/2026-10-15/events.csv --latency-ms 5,50,250 \
-       --perp-fee-usd 0.15       # placeholder fee: use our real maker tier
-   ```
-
-3. Paper trade live: `python3 tools/record_coinbase.py --stdout | ./build/paper-trader --live`.
-   Results are rewritten every minute and a status line is printed to stderr.
-
-4. Minute candles: `./build/paper-trader --candles --mode taker` (same files as `basis-backtester`, bid = ask
-   = open, latency 0). Taker mode should come close to the zero-fee `basis-backtester` result,
-   and it lets fees be added. Funding here uses the BIP rule, not the recorded INTX rates.
-
-Modes:
-
-- `--mode taker` explicitly selects Allen's basis rule on **executable** prices. It sells the basis when
-  `perp_bid / spot_ask - 1 > center + threshold` and buys when `perp_ask / spot_bid - 1 < center - threshold`.
-  It exits on the first profit net of fees, convergence back to the band, or `--hold-minutes`.
-- `--mode maker` (default) is the naive market maker. It quotes the perp at `spot_mid * (1 + center) * (1 -/+ threshold)`
-  on the $5 grid, with inventory skew and a `--max-inventory` cap, and never crosses the book.
-  It does not hedge yet; cop and lean comes after the Thursday meeting.
-- `--ema-halflife-min N` replaces the fixed `--center-bps` with a causal EMA of the mid basis.
-  INTX traded at a persistent premium, which a fixed 0 center ignores.
-
-Fill model:
-
-- An order decided at time t reaches the exchange at t + latency. A taker order fills at the
-  top of book in force at that moment. `signal_basis_bps` vs `entry_basis_bps` in `trades.csv`
-  is the latency slippage.
-- A maker quote (or its replacement or cancel) goes live after the latency. It fills only when a
-  perp trade prints **through** its price (`--fill-at-touch 1` also counts prints at the price),
-  for the full quote size. That is optimistic about queue position and size.
-- Post-only is checked again against the book at arrival. Bids at/above the ask and asks
-  at/below the bid are rejected. Replacement models cancel-then-post, so rejection removes
-  the old quote. Remaining inventory is marked at the perp mid at the end, without a taker exit.
-- Maker mode requires trade events; `--candles` is rejected unless `--mode taker` is explicit.
-- Time is our receive clock (`recv_ms`). Events sharing a timestamp are applied together before
-  deciding. `--from-ms/--to-ms` select train/test windows.
-- Fees default to zero and the CLI warns about it. Set them before reading anything into PnL.
-
-Outputs per latency go to `results/paper/latency-<N>ms/`: `trades.csv` (Allen's columns plus
-fees and signal basis), `fills.csv`, `equity.csv` and `summary.json`.
-
-## Historical accounting
-
-At each available minute open, the backtester evaluates the entry/exit rules.
-The preceding 60 **completed** minute closes proxy the funding premium TWAP;
-the latest funding timestamp at or before entry supplies the prior rate. An
-incomplete trailing hour skips that entry check. No future exit price or
-funding rate is used to select the entry.
-
-The forecast uses the supplied recurrence. **Realized funding PnL uses actual
-recorded rates and funding marks**, not the forecast. Equal BTC quantities use
-these exact cash-flow formulas as spot and perp prices change:
-
-```text
-price_PnL = direction * q * [(perp_exit - perp_entry) - (spot_exit - spot_entry)]
-funding_PnL = -direction * q * sum(recorded_mark * recorded_rate)
-net_PnL = price_PnL + funding_PnL
-trade_PnL_bps = 10,000 * net_PnL / (q * entry_spot)
-```
-
-Direction is +1 for buy basis and -1 for sell basis. Positive funding is a
-long-perp debit and short-perp receipt; negative funding reverses the signs.
-
-The equity CSV includes realized PnL plus mark-to-market changes while a pair
-is open. Drawdown is measured at matched minute opens. Trade bps are normalized
-to each entry's spot notional; their average is not an account return.
-
-## Data limits
-
-The historical prices are Coinbase BTC-USD spot and BTC-PERP-INTX perp candles,
-from the [public candle API](https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/public/get-public-product-candles).
-USD and USDC are assumed at parity. Minute trade opens are idealized simultaneous
-fills, not actual executable books. The TWAP proxy is not the venue's official
-per-second mark/index series. Funding timestamps are assumed to be settlement
-and publication times, with no latency.
-
-Minute data checks profitability only at observed minute prices. It cannot
-verify the first profitable second, resting maker orders, queue position, or
-intra-minute drawdown. Missing prices are not interpolated. If a deadline quote
-is missing, the entire trade is excluded from PnL/equity and counted explicitly;
-the resulting sample is conditional on measurable trades. The final pair can
-close early at the end of the dataset and is flagged.
-
-No borrow availability, partial fills, currency hedge, funding publication
-latency, financing, or liquidation is simulated. A positive zero-cost backtest
-is not proof of executable arbitrage. See [data inventory](../data/README.md).
-
-## Source files
-
-- `model/theo-model.{h,cpp}`: funding and paired valuation.
-- `model/theo-pricer.cpp`: scenario CLI, targeting the respective side's threshold.
-- `backtester/basis-backtest.{h,cpp}`: chronological historical simulator.
-- `backtester/backtest-cli.cpp`: backtest CLI.
-- `tests/backtest-tests.cpp`: causal entry checks, both cash-flow signs,
-  profit/convergence exits, strict time cap, missing data, and equity reconciliation.
-
-The older directional regression sources and original committed files remain
-preserved. They are inactive in this build. The default is `--strategy both-basis`. To run just one side:
-
-```bash
-make -C Primary-Market-Model basis-backtest \
-  BACKTEST_ARGS="--strategy long-basis --output results/basis-long-5m"
-make -C Primary-Market-Model basis-backtest \
-  BACKTEST_ARGS="--strategy short-basis --output results/basis-short-5m"
-```
-
-The earlier 24-hour carry engine remains available with `--strategy theo-carry`
-for comparison; it is not the default. The earlier long-only report is preserved
-under `results/basis-5m/`. Combined-run side totals share a single position limit;
-they need not equal independent side-only runs when opportunities overlap.
+The graph samples minute equity; maximum drawdown uses every replay event.
+Positions, cash and funding carry across day boundaries. Cached Binance archives
+remain under `data/binance/maker/`. `backtester/` contains the active strategy and
+CSV reader, `tools/` the data/report helpers, and `tests/` the strategy/data checks.
+The low-level runner's optional `--details 1` exports full ledgers for debugging.
