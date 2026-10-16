@@ -35,7 +35,7 @@ int main() {
 
         // Taker: the signal fires on the current book, but the order fills at the book
         // in force when it arrives `latency` later. Fees on both legs.
-        Config c;
+        Config c; c.mode = Mode::Taker;
         c.latency_ms = 50; c.perp_taker_bps = 2; c.spot_taker_bps = 1; c.perp_fee_usd_per_contract = 0.05;
         Engine taker(c);
         taker.on_event(quote(t0,Spot,100000,100010));
@@ -63,7 +63,7 @@ int main() {
         close(taker.totals().net(),trip.net_pnl,"Totals match the closed trade");
 
         // Timeout and forced end with zero latency.
-        Config z; z.latency_ms = 0; z.exit_on_profit = false; z.max_hold_ms = 60000;
+        Config z; z.mode = Mode::Taker; z.latency_ms = 0; z.exit_on_profit = false; z.max_hold_ms = 60000;
         Engine timeout(z);
         timeout.on_event(quote(t0,Spot,100000,100000),false);
         timeout.on_event(quote(t0,Perp,99900,99900));            // -10 bp: buy basis immediately
@@ -83,7 +83,7 @@ int main() {
         check(batch.fills().empty(),"No trade on a half-updated timestamp");
 
         // Funding: a position held across the hour pays the BIP rate on the perp leg.
-        Config f; f.latency_ms = 0; f.exit_on_profit = false; f.max_hold_ms = 2*3600000; f.threshold_bps = 50;
+        Config f; f.mode = Mode::Taker; f.latency_ms = 0; f.exit_on_profit = false; f.max_hold_ms = 2*3600000; f.threshold_bps = 50;
         Engine funding(f);
         funding.on_event(quote(t0,Spot,100000,100000),false);
         funding.on_event(quote(t0,Perp,99000,99000));             // -100 bp: long perp
@@ -96,7 +96,8 @@ int main() {
 
         // Maker: quotes around spot theo, on the $5 grid, live only after the latency,
         // and filled only by trades printing through them.
-        Config m; m.mode = Mode::Maker; m.latency_ms = 100; m.threshold_bps = 5; m.skew_bps_per_contract = 1;
+        Config m; m.latency_ms = 100; m.threshold_bps = 5; m.skew_bps_per_contract = 1;
+        check(m.mode == Mode::Maker,"Market making is the default");
         m.perp_maker_bps = 1;
         Engine maker(m);
         maker.on_event(quote(t0,Spot,99999,100001),false);
@@ -123,9 +124,29 @@ int main() {
         toucher.on_event(trade(t0+1,99950));
         check(toucher.fills().size() == 1,"--fill-at-touch fills on a print at our price");
 
+        // A passive decision can become marketable in flight. Reject it at
+        // arrival, including equality with the opposite touch, on both sides.
+        for (int side = 0; side < 2; ++side) {
+            for (double move : {0.0, 5.0}) {
+                Engine post_only(m);
+                post_only.on_event(quote(t0,Spot,99999,100001),false);
+                post_only.on_event(quote(t0,Perp,99900,100100)); // 99950 / 100050
+                const double bid = side == 0 ? 99900 : 100050 + move;
+                const double ask = side == 0 ? 99950 - move : 100100;
+                post_only.on_event(quote(t0+50,Perp,bid,ask),false);
+                // No intervening decision: the original quote reaches the new book.
+                post_only.on_event(trade(t0+100,side == 0 ? 99945 : 100055));
+                check(post_only.fills().empty(),"Marketable post-only quote is rejected on arrival");
+            }
+        }
+
+        const auto fills_before_finish = maker.fills().size();
+        maker.finish();
+        check(maker.fills().size() == fills_before_finish,"Maker finish does not cross to liquidate");
+
         std::cout << "PASS: event CSV parsing, latency-delayed taker fills at the arrival book, fees,\n"
             << "profit/timeout/forced exits, same-timestamp batching, BIP funding on held positions,\n"
-            << "maker quote grid, through-only fills, touch fills and inventory skew.\n";
+            << "maker default, quote grid, through/touch fills, inventory skew and arrival post-only checks.\n";
         return 0;
     } catch (const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }
 }

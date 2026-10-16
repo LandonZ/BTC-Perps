@@ -10,9 +10,15 @@ BIP_HEADER = model/bip-funding.h
 PAPER = paper/paper-engine.cpp
 PAPER_HEADER = paper/paper-engine.h
 PAPER_ARGS ?= --help
+MAKER = model/maker-model.cpp backtester/maker-backtest.cpp
+MAKER_HEADERS = model/maker-model.h backtester/maker-backtest.h
+MAKER_ARGS ?=
+BASIS_MAKER = $(MAKER) backtester/basis-maker.cpp
+BASIS_MAKER_HEADERS = $(MAKER_HEADERS) backtester/basis-maker.h
+BASIS_MAKER_ARGS ?=
 
-.PHONY: all test run theo backtest paper clean
-all: build/theo-pricer
+.PHONY: all test run theo backtest basis-backtest maker-backtest basis-maker paper clean
+all: build/basis-maker
 
 build:
 	mkdir -p build
@@ -41,14 +47,37 @@ build/paper-trader: $(PAPER) $(PAPER_HEADER) $(BIP) $(BIP_HEADER) $(MODEL) $(HEA
 build/paper-tests: $(PAPER) $(PAPER_HEADER) $(BIP) $(BIP_HEADER) tests/paper-tests.cpp | build
 	$(CXX) $(CXXFLAGS) $(PAPER) $(BIP) tests/paper-tests.cpp -o $@
 
-test: build/theo-tests build/funding-tests build/bip-funding-tests build/backtest-tests build/paper-tests
+build/maker-backtester: $(MAKER) $(MAKER_HEADERS) backtester/maker-backtest-cli.cpp | build
+	$(CXX) $(CXXFLAGS) $(MAKER) backtester/maker-backtest-cli.cpp -o $@
+
+build/maker-tests: $(MAKER) $(MAKER_HEADERS) tests/maker-tests.cpp | build
+	$(CXX) $(CXXFLAGS) $(MAKER) tests/maker-tests.cpp -o $@
+
+build/basis-maker: $(BASIS_MAKER) $(BASIS_MAKER_HEADERS) backtester/basis-maker-cli.cpp | build
+	$(CXX) $(CXXFLAGS) $(BASIS_MAKER) backtester/basis-maker-cli.cpp -o $@
+
+build/basis-maker-tests: $(BASIS_MAKER) $(BASIS_MAKER_HEADERS) tests/basis-maker-tests.cpp | build
+	$(CXX) $(CXXFLAGS) $(BASIS_MAKER) tests/basis-maker-tests.cpp -o $@
+
+test: build/theo-tests build/funding-tests build/bip-funding-tests build/backtest-tests build/paper-tests build/maker-tests build/basis-maker-tests
 	./build/theo-tests
 	./build/funding-tests
 	./build/bip-funding-tests
 	./build/backtest-tests
 	./build/paper-tests
+	./build/maker-tests
+	./build/basis-maker-tests
+	python3 tests/binance-data-tests.py
 
-backtest: build/basis-backtester
+backtest: basis-maker
+
+basis-maker: build/basis-maker
+	./build/basis-maker $(BASIS_MAKER_ARGS)
+
+maker-backtest: build/maker-backtester
+	./build/maker-backtester $(MAKER_ARGS)
+
+basis-backtest: build/basis-backtester
 	./build/basis-backtester $(BACKTEST_ARGS)
 
 paper: build/paper-trader
@@ -57,7 +86,7 @@ paper: build/paper-trader
 theo: build/theo-pricer
 	./build/theo-pricer --demo
 
-run: theo
+run: basis-maker
 
 clean:
-	rm -f build/theo-pricer build/theo-tests build/funding-tests build/basis-backtester build/backtest-tests build/bip-funding-tests build/paper-trader build/paper-tests
+	rm -f build/theo-pricer build/theo-tests build/funding-tests build/basis-backtester build/backtest-tests build/bip-funding-tests build/paper-trader build/paper-tests build/maker-backtester build/maker-tests build/basis-maker build/basis-maker-tests

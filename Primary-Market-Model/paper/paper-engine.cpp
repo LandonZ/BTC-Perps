@@ -110,11 +110,19 @@ double Engine::max_drawdown() const {
 
 void Engine::run_due(Millis time) {
     if (order_ && order_->due <= time) { const Order o = *order_; order_.reset(); execute(o); }
-    for (auto& pending : pending_)
+    for (int side = 0; side < 2; ++side) {
+        auto& pending = pending_[side];
         if (pending && pending->due <= time) {
-            live_[&pending - pending_] = pending->quote;
+            Quote q = pending->quote;
+            // Model cancel-then-post: the old quote is removed even if the new
+            // post-only order is rejected against the book at arrival.
+            const auto& p = book_[Perp];
+            if (q.active && (!p.valid() || q.price <= 0 ||
+                (side == 0 ? q.price >= p.ask : q.price <= p.bid))) q.active = false;
+            live_[side] = q;
             pending.reset();
         }
+    }
 }
 
 void Engine::advance_to(Millis time) {

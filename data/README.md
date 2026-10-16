@@ -1,6 +1,34 @@
-# Data for the current BTC basis theo
+# Market data
 
-The active model is `Primary-Market-Model/model/theo-model.cpp`, run through
+The active paired basis model makes passive **Binance BTCUSDT perp** entries
+and immediately crosses spot for equal BTC in the opposite direction. Download checksum-verified perp book updates, perp and spot aggregate
+trades, mark-price minute candles and historical funding with:
+
+```bash
+python3 Primary-Market-Model/tools/download_binance_maker.py
+make -C Primary-Market-Model backtest
+```
+
+The default prepares 2023-07-20 00:00–01:00 UTC from full daily archives under
+`data/binance/maker/2023-07-20/archives/`. `events-spot-trades.csv` contains the replay window;
+`events-spot-trades.manifest.json` records sources, SHA-256 hashes and approximations. A
+2024-03-30 one-hour high-funding comparison is also retained locally. Recent
+bookTicker archives are unavailable; no book data is synthesized. See the
+[paired basis documentation](../Primary-Market-Model/BASIS-MAKER.md).
+
+Historical funding is recorded per settlement, with each archive row's interval.
+Positive rates are a long debit and short credit. The current paired strategy uses fixed -5 bps equilibrium, cancels entry quotes
+before funding, has no exits and assumes zero funding cash flows. The earlier
+unhedged spot-fee comparison charged recorded funding. Spot references use the latest observed spot
+trade as a midpoint proxy with an assumed crossing spread; perp fills use tick
+trades. Legacy funding settlement marks use
+the mark-price minute OPEN as a proxy. True historical spot bid/ask data was
+unavailable from the checked public sources. The older minute-close stream and
+last-settled-rate cost-budget strategy remain available as comparisons.
+
+## Legacy Coinbase and other datasets
+
+The legacy Coinbase scenario model is `Primary-Market-Model/model/theo-model.cpp`, run through
 `Primary-Market-Model/build/theo-pricer`. It uses supplied scenario inputs and
 **does not load historical CSVs or train a regression**. The new C++ backtester
 uses the relevant historical files listed below. Trading and carrying
@@ -64,7 +92,7 @@ Run the model from the repository root:
 make -C Primary-Market-Model theo
 ```
 
-Run the backtest with `make -C Primary-Market-Model backtest`. Its PnL report
+Run the backtest with `make -C Primary-Market-Model basis-backtest`. Its PnL report
 and chart are under `Primary-Market-Model/results/basis-both-5m/`.
 
 Regenerate minute prices with:

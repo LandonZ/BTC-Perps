@@ -1,11 +1,41 @@
-# BTC basis theo and historical backtest
+# BTC paired basis maker
 
-The current strategy buys a discounted perp against a spot short and sells a
-premium perp against a spot long. Define
+The active model joins the **Binance BTCUSDT perp bid below -5 bps equilibrium**
+and the **perp ask above -5 bps**. Every partial perp fill immediately crosses
+spot in the opposite direction for the **same BTC quantity**. This scenario has
+zero latency, **no exits**, and **zero funding cash flows**. Entry quotes cancel
+60 seconds before known funding times. Both entry legs pay their respective
+fees: 2 bps perp maker and 10 bps spot taker by default.
+
+```bash
+python3 Primary-Market-Model/tools/download_binance_maker.py
+make -C Primary-Market-Model test
+make -C Primary-Market-Model backtest
+```
+
+The default sample is 2023-07-20 00:00-01:00 UTC. Outputs go to
+`Primary-Market-Model/results/binance-basis-maker/`. Spot crossing uses a latest-trade
+midpoint **proxy** with an assumed 1 bp full spot spread, because observed spot
+books were unavailable. See [paired basis model](BASIS-MAKER.md) for sizing, fees,
+position caps and limitations. The earlier unhedged model is `make maker-backtest`.
+Existing Coinbase programs below remain legacy comparisons; use
+`make basis-backtest` to run the historical Coinbase paired strategy.
+
+## Legacy Coinbase models
+
+The event-driven paper trader defaults to **market making**: resting post-only
+perp bids and asks around spot-derived fair value, with inventory skew and caps.
+It simulates orders only; there is no authenticated exchange order submission.
+Maker inventory is currently unhedged. Use recorded quote/trade events or the
+live public feed to evaluate fills; minute candles cannot establish maker fills.
+
+The historical basis backtest below buys a discounted perp against a spot short
+and sells a premium perp against a spot long. It assumes immediate execution,
+so its existing results do not demonstrate market-making performance. Define
 `basis_bps = 10,000 * (perp / spot - 1)`; a perp 10 bps below spot has a basis of
 **-10 bps**, or a positive 10 bps discount.
 
-## Current rule
+## Historical basis rule
 
 - Buy basis: enter **long perp / short spot** when basis is **below -5 bps**.
 - Sell basis: enter **short perp / long spot** when basis is **above +5 bps**.
@@ -30,10 +60,10 @@ From the repository root:
 ```bash
 make -C Primary-Market-Model theo
 make -C Primary-Market-Model test
-make -C Primary-Market-Model backtest
+make -C Primary-Market-Model basis-backtest
 ```
 
-`theo` runs a **synthetic five-minute scenario**, not live data. `backtest` uses
+`theo` runs a **synthetic five-minute scenario**, not live data. `basis-backtest` uses
 retained/reacquired historical Coinbase minute candles and hourly funding. Its
 outputs are `Primary-Market-Model/results/basis-both-5m/{summary.json,trades.csv,equity.csv}`.
 
@@ -58,7 +88,7 @@ used only for reporting; the pricer and backtest are C++17.
 To disable early profit-taking and wait for convergence or timeout:
 
 ```bash
-make -C Primary-Market-Model backtest \
+make -C Primary-Market-Model basis-backtest \
   BACKTEST_ARGS="--profit-exit 0 --output results/basis-both-5m-target"
 ```
 
@@ -157,23 +187,23 @@ decision and fill code.
 
    ```bash
    cd Primary-Market-Model && make build/paper-trader
-   ./build/paper-trader --events ../data/live/2026-10-15/events.csv --latency-ms 5,50,250 \
-       --perp-fee-usd 0.15 --spot-taker-bps 6       # placeholder fees: use our real tier
+   ./build/paper-trader --mode maker --events ../data/live/2026-10-15/events.csv --latency-ms 5,50,250 \
+       --perp-fee-usd 0.15       # placeholder fee: use our real maker tier
    ```
 
 3. Paper trade live: `python3 tools/record_coinbase.py --stdout | ./build/paper-trader --live`.
    Results are rewritten every minute and a status line is printed to stderr.
 
-4. Minute candles: `./build/paper-trader --candles` (same files as `basis-backtester`, bid = ask
+4. Minute candles: `./build/paper-trader --candles --mode taker` (same files as `basis-backtester`, bid = ask
    = open, latency 0). Taker mode should come close to the zero-fee `basis-backtester` result,
    and it lets fees be added. Funding here uses the BIP rule, not the recorded INTX rates.
 
 Modes:
 
-- `--mode taker` (default) is Allen's basis rule on **executable** prices. It sells the basis when
+- `--mode taker` explicitly selects Allen's basis rule on **executable** prices. It sells the basis when
   `perp_bid / spot_ask - 1 > center + threshold` and buys when `perp_ask / spot_bid - 1 < center - threshold`.
   It exits on the first profit net of fees, convergence back to the band, or `--hold-minutes`.
-- `--mode maker` is the naive market maker. It quotes the perp at `spot_mid * (1 + center) * (1 -/+ threshold)`
+- `--mode maker` (default) is the naive market maker. It quotes the perp at `spot_mid * (1 + center) * (1 -/+ threshold)`
   on the $5 grid, with inventory skew and a `--max-inventory` cap, and never crosses the book.
   It does not hedge yet; cop and lean comes after the Thursday meeting.
 - `--ema-halflife-min N` replaces the fixed `--center-bps` with a causal EMA of the mid basis.
@@ -187,6 +217,10 @@ Fill model:
 - A maker quote (or its replacement or cancel) goes live after the latency. It fills only when a
   perp trade prints **through** its price (`--fill-at-touch 1` also counts prints at the price),
   for the full quote size. That is optimistic about queue position and size.
+- Post-only is checked again against the book at arrival. Bids at/above the ask and asks
+  at/below the bid are rejected. Replacement models cancel-then-post, so rejection removes
+  the old quote. Remaining inventory is marked at the perp mid at the end, without a taker exit.
+- Maker mode requires trade events; `--candles` is rejected unless `--mode taker` is explicit.
 - Time is our receive clock (`recv_ms`). Events sharing a timestamp are applied together before
   deciding. `--from-ms/--to-ms` select train/test windows.
 - Fees default to zero and the CLI warns about it. Set them before reading anything into PnL.
@@ -253,9 +287,9 @@ The older directional regression sources and original committed files remain
 preserved. They are inactive in this build. The default is `--strategy both-basis`. To run just one side:
 
 ```bash
-make -C Primary-Market-Model backtest \
+make -C Primary-Market-Model basis-backtest \
   BACKTEST_ARGS="--strategy long-basis --output results/basis-long-5m"
-make -C Primary-Market-Model backtest \
+make -C Primary-Market-Model basis-backtest \
   BACKTEST_ARGS="--strategy short-basis --output results/basis-short-5m"
 ```
 

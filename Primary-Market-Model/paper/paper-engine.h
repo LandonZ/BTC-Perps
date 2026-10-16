@@ -42,7 +42,7 @@ enum class Mode {
 };
 
 struct Config {
-    Mode mode = Mode::Taker;
+    Mode mode = Mode::Maker;
     Millis latency_ms = 50;           // Decision -> order live/filled at the exchange.
     double threshold_bps = 5;         // Taker entry band; maker quote half-width.
     double center_bps = 0;            // Fixed fair basis when ema_halflife_min is 0.

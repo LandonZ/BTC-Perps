@@ -29,11 +29,11 @@ const char* help =
     "  --events FILE [--events FILE ...]  recorder events.csv files, in time order ('-' = stdin)\n"
     "  --live                             read events from stdin as they arrive, e.g.\n"
     "      python3 tools/record_coinbase.py --stdout | ./build/paper-trader --live\n"
-    "  --candles                          Allen's minute candles as quotes (bid = ask = open);\n"
+    "  --candles                          taker only: minute candles as quotes (bid = ask = open);\n"
     "      --spot-csv F --perp-csv F --funding-csv F (defaults match basis-backtester)\n"
     "Strategy:\n"
-    "  --mode taker|maker      taker: cross both legs when basis leaves the band (default)\n"
-    "                          maker: quote the perp around spot theo, no hedge (cop and lean comes later)\n"
+    "  --mode maker|taker      maker (default): post-only perp quotes around spot theo, no hedge\n"
+    "                          taker: cross both legs when basis leaves the band\n"
     "  --latency-ms 5,50,250   one run per latency (default 5,50,250 = best/middle/worst; candles: 0)\n"
     "  --threshold-bps 5       taker entry band / maker quote half-width\n"
     "  --center-bps 0          fixed fair basis, or --ema-halflife-min N for a causal rolling center\n"
@@ -127,6 +127,8 @@ int main(int argc, char** argv) {
         }
         if (int(live) + int(candles) + int(!event_files.empty()) != 1)
             throw std::runtime_error("Choose exactly one of --events, --live or --candles (see --help)");
+        if (candles && base.mode == Mode::Maker)
+            throw std::runtime_error("Maker fills require trade events; use --events or --live, or --candles --mode taker");
 
         // Candle quotes change once a minute, so a latency would just mean "fill at the next open".
         if (latencies.empty()) latencies = candles ? "0" : "5,50,250";
