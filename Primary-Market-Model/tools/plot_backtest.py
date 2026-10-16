@@ -94,7 +94,7 @@ def main():
     fig.text(0.07, 0.02,
              "Past 60 candle closes proxy premium TWAP. Recorded funding settles PnL. "
              "USD/USDC assumed at parity.\n"
-             "One pair at a time; idealized minute-open fills; zero costs. Missing deadline quotes exit at the next one. "
+             "One pair at a time; idealized minute-open fills; zero costs. Missing deadline fills are excluded. "
              "No market-maker fill simulation.", fontsize=9, color="#56616a")
     fig.subplots_adjust(left=0.10, right=0.97, top=0.87, bottom=0.13, hspace=0.25)
     fig.savefig(args.directory / "pnl.png", dpi=160)
@@ -137,9 +137,9 @@ or at the {summary['holding_minutes']:g}-minute deadline.
 Never close and reopen in the same minute. Hold one equal-BTC pair at a time.
 No future prices select an entry. A final open pair is closed at data end.
 
-If no matched price exists at the exact deadline, the pair closes at the next
-observed minute open (LATE_TIMEOUT). Trades are never dropped based on whether
-later data exists, so the sample is not conditioned on future information.
+If no matched price exists at the exact deadline, the trade is unmeasurable and
+excluded from both PnL and the equity curve. The exclusion count below makes
+this conditional sample visible; an actual position would still need a fill.
 """
     else:
         rule_text = f"""At each flat hourly boundary, use the previous 60 completed minute closes
@@ -159,8 +159,7 @@ With an unchanged-basis forecast, this signal mainly forecasts funding carry.
                     if funding_events == 0 else
                     f"The measured trades crossed {funding_events} hourly funding events; actual cash flows are included.")
     if threshold_strategy:
-        assert all(int(row["exit_ts"]) - int(row["entry_ts"]) <= summary["holding_minutes"] * 60
-                   for row in trades if row["exit_reason"] != "LATE_TIMEOUT")
+        assert maximum_hold <= summary["holding_minutes"]
     report = f"""# Historical BTC basis backtest
 
 **Total PnL: {summary['net_pnl']:+.6f} USDC equivalent**, consisting of
@@ -187,6 +186,7 @@ With an unchanged-basis forecast, this signal mainly forecasts funding carry.
 | Entry checks skipped for missing features | {summary.get('skipped_feature_checks', summary['skipped_feature_hours'])} |
 | Exits delayed until next matched minute open | {summary['delayed_exits']} |
 | Final pairs closed early at data end | {forced} |
+| Unmeasurable missing-deadline trades excluded | {summary.get('excluded_missing_deadline', 0)} |
 
 {funding_note}
 

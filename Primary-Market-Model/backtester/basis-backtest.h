@@ -41,6 +41,7 @@ struct Result {
     std::vector<Trade> trades;
     std::vector<Equity> equity;
     std::size_t missing_minutes = 0, skipped_feature_hours = 0, delayed_exits = 0;
+    std::size_t excluded_missing_deadline = 0;
     double price_pnl = 0, funding_pnl = 0, net_pnl = 0, max_drawdown = 0;
     double mean_trade_bps = 0;
     int wins = 0, long_trades = 0, short_trades = 0;

@@ -1,14 +1,12 @@
+# Kalshi-Market-Model: regenerable backtest output, builds, and live paper-trading logs
+Kalshi-Market-Model/results/**/equity.csv
+Kalshi-Market-Model/results/**/trades.csv
+Kalshi-Market-Model/results/**/pnl.svg
+Kalshi-Market-Model/build/
+Kalshi-Market-Model/live/logs/
+
 # Large market data: regenerate with `python3 data/fetch_data.py all`
 data/**/*.csv
 data/**/*.tmp
 !data/**/*_funding*.csv
 __pycache__/
-
-# Regenerable backtest output: rerun the backtester / plot_backtest.py
-**/results/**/equity.csv
-**/results/**/trades.csv
-**/results/**/pnl.svg
-**/build/
-
-# Live paper-trading logs
-**/live/logs/

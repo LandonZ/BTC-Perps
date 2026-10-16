@@ -118,11 +118,10 @@ int main() {
         check(timeout.trades.front().exit == entry+300 && timeout.trades.front().exit_reason == "TIMEOUT",
               "Flat or losing trades must close at the five-minute deadline");
         discount.prices.erase(entry+300);
-        const auto late = run(discount,scalp);
-        check(late.delayed_exits >= 1 && late.trades.front().exit == entry+360 &&
-              late.trades.front().exit_reason == "LATE_TIMEOUT",
-              "A missing deadline quote exits at the next observed minute instead of dropping the trade");
-        close(late.equity.back().net_pnl,late.net_pnl,"Late exits reconcile with published equity");
+        const auto unmeasurable = run(discount,scalp);
+        check(unmeasurable.excluded_missing_deadline >= 1,"Exclude unknown deadline fills rather than overrun the cap");
+        close(unmeasurable.equity.back().net_pnl,unmeasurable.net_pnl,
+              "Excluded trades leave no invented PnL in published equity");
 
         auto threshold = fixture();
         for (auto& [t,p] : threshold.prices) { (void)t; p.perp_open = p.perp_close = 99.95; }
