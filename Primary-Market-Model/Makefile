@@ -38,8 +38,8 @@ build/backtest-tests: $(MODEL) $(HEADER) $(BACKTEST) $(BACKTEST_HEADER) tests/ba
 build/paper-trader: $(PAPER) $(PAPER_HEADER) $(BIP) $(BIP_HEADER) $(MODEL) $(HEADER) $(BACKTEST) $(BACKTEST_HEADER) paper/paper-cli.cpp | build
 	$(CXX) $(CXXFLAGS) $(PAPER) $(BIP) $(MODEL) $(BACKTEST) paper/paper-cli.cpp -o $@
 
-build/paper-tests: $(PAPER) $(PAPER_HEADER) $(BIP) $(BIP_HEADER) tests/paper-tests.cpp | build
-	$(CXX) $(CXXFLAGS) $(PAPER) $(BIP) tests/paper-tests.cpp -o $@
+build/paper-tests: $(PAPER) $(PAPER_HEADER) $(BIP) $(BIP_HEADER) $(MODEL) $(HEADER) tests/paper-tests.cpp | build
+	$(CXX) $(CXXFLAGS) $(PAPER) $(BIP) $(MODEL) tests/paper-tests.cpp -o $@
 
 test: build/theo-tests build/funding-tests build/bip-funding-tests build/backtest-tests build/paper-tests
 	./build/theo-tests

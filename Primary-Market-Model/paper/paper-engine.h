@@ -38,22 +38,25 @@ private:
 
 enum class Mode {
     Taker, // Allen's basis rule on executable prices: cross both legs, exit on profit/convergence/timeout.
-    Maker  // Naive market making: quote the perp around a spot-derived theo; no hedge yet.
+    Maker  // Naive market making with Allen's theo::price() quotes on the perp; no hedge yet.
 };
 
 struct Config {
     Mode mode = Mode::Taker;
     Millis latency_ms = 50;           // Decision -> order live/filled at the exchange.
-    double threshold_bps = 5;         // Taker entry band; maker quote half-width.
+    double threshold_bps = 5;         // Taker entry band (unused by the maker).
     double center_bps = 0;            // Fixed fair basis when ema_halflife_min is 0.
     double ema_halflife_min = 0;      // >0: fair basis = causal EMA of the mid basis.
     int contracts = 1;                // 0.01 BTC each; the spot hedge is the same BTC.
     // Taker exits.
     Millis max_hold_ms = 5 * 60 * 1000;
     bool exit_on_profit = true;       // First positive PnL net of fees (including the exit fee).
-    // Maker quoting.
+    // Maker quoting via theo::price(). Half-width = (round-trip maker fees + profit) / 2,
+    // where the fees are the two perp maker fills implied by the cost settings below.
     int max_inventory_contracts = 5;
-    double skew_bps_per_contract = 1; // Reservation price moves against inventory.
+    double profit_bps = 1;            // Allen's round_trip_profit_bps.
+    double skew_bps_per_btc = 4;      // Allen's inventory_skew_bps_per_btc.
+    double horizon_min = 5;           // Holding horizon for the projected funding in theo.
     bool fill_at_touch = false;       // false: a trade must print THROUGH our price to fill us.
     // Costs. Coinbase BIP charges a per-contract fee; spot is bps of notional.
     double perp_taker_bps = 0, perp_maker_bps = 0, perp_fee_usd_per_contract = 0;

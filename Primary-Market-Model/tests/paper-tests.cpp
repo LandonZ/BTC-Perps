@@ -94,38 +94,48 @@ int main() {
         close(funding.totals().funding_pnl,-btc::bip::payment_usd(1,99000,rate),"Long receives negative funding");
         check(funding.totals().funding_pnl > 0,"Negative funding credits the long perp");
 
-        // Maker: quotes around spot theo, on the $5 grid, live only after the latency,
-        // and filled only by trades printing through them.
-        Config m; m.mode = Mode::Maker; m.latency_ms = 100; m.threshold_bps = 5; m.skew_bps_per_contract = 1;
-        m.perp_maker_bps = 1;
+        // Maker: Allen's theo::price() quotes. Half-width = (2 * 1 bp maker fee + 1 bp profit) / 2
+        // = 1.5 bp around spot theo, on the $5 grid; live only after the latency; filled only
+        // by trades printing through them.
+        Config m; m.mode = Mode::Maker; m.latency_ms = 100; m.perp_maker_bps = 1; m.profit_bps = 1;
+        m.skew_bps_per_btc = 400;                                   // 4 bp per 0.01 BTC contract.
         Engine maker(m);
         maker.on_event(quote(t0,Spot,99999,100001),false);
-        maker.on_event(quote(t0,Perp,99900,100100));                // bid 99950, ask 100050
+        maker.on_event(quote(t0,Perp,99900,100100));                // bid 99985, ask 100015
         maker.on_event(trade(t0+50,99940));
         check(maker.fills().empty(),"Quote not live before the latency");
-        maker.on_event(trade(t0+150,99950));
+        maker.on_event(trade(t0+150,99985));
         check(maker.fills().empty(),"A print AT our bid does not fill by default");
-        maker.on_event(trade(t0+160,99945));
+        maker.on_event(trade(t0+160,99980));
         check(maker.fills().size() == 1 && maker.position_contracts() == 1,"A print through our bid fills us");
-        close(maker.fills()[0].price,99950,"Filled at our quote, not the print");
-        close(maker.totals().fees,0.01*99950*1e-4,"Maker fee");
-        close(maker.totals().price_pnl,-0.01*99950+0.01*100000,"Inventory marked at the perp mid");
+        close(maker.fills()[0].price,99985,"Filled at our quote, not the print");
+        close(maker.totals().fees,0.01*99985*1e-4,"Maker fee");
+        close(maker.totals().price_pnl,-0.01*99985+0.01*100000,"Inventory marked at the perp mid");
         maker.on_event(trade(t0+170,99900));
         check(maker.fills().size() == 1,"Filled quote is gone until the re-quote arrives");
-        maker.on_event(trade(t0+300,100060));                        // skewed ask: ceil(100000*(1-1e-4)*(1+5e-4)) = 100040
+        maker.on_event(trade(t0+300,100060));                        // skewed ask: 100000 - 4 bp + 1.5 bp
         check(maker.fills().size() == 2 && maker.position_contracts() == 0,"Ask filled after the re-quote");
-        close(maker.fills()[1].price,100040,"Inventory skew lowers the ask from 100050 to 100040");
+        close(maker.fills()[1].price,99975,"Long inventory skews the ask down from 100015 to 99975");
 
         Config touch = m; touch.fill_at_touch = true; touch.latency_ms = 0;
         Engine toucher(touch);
         toucher.on_event(quote(t0,Spot,99999,100001),false);
         toucher.on_event(quote(t0,Perp,99900,100100));
-        toucher.on_event(trade(t0+1,99950));
+        toucher.on_event(trade(t0+1,99985));
         check(toucher.fills().size() == 1,"--fill-at-touch fills on a print at our price");
+
+        // Inventory cap: theo::price() sizes the bid to zero at max inventory.
+        Config cap = touch; cap.max_inventory_contracts = 1; cap.skew_bps_per_btc = 0;
+        Engine capped(cap);
+        capped.on_event(quote(t0,Spot,99999,100001),false);
+        capped.on_event(quote(t0,Perp,99900,100100));
+        capped.on_event(trade(t0+1,99980));
+        capped.on_event(trade(t0+2,99980));
+        check(capped.position_contracts() == 1 && capped.fills().size() == 1,"No bid beyond max inventory");
 
         std::cout << "PASS: event CSV parsing, latency-delayed taker fills at the arrival book, fees,\n"
             << "profit/timeout/forced exits, same-timestamp batching, BIP funding on held positions,\n"
-            << "maker quote grid, through-only fills, touch fills and inventory skew.\n";
+            << "Allen's price() maker quotes, through-only and touch fills, skew and inventory cap.\n";
         return 0;
     } catch (const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }
 }

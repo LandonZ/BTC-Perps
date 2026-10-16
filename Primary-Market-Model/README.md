@@ -173,9 +173,12 @@ Modes:
 - `--mode taker` (default) is Allen's basis rule on **executable** prices. It sells the basis when
   `perp_bid / spot_ask - 1 > center + threshold` and buys when `perp_ask / spot_bid - 1 < center - threshold`.
   It exits on the first profit net of fees, convergence back to the band, or `--hold-minutes`.
-- `--mode maker` is the naive market maker. It quotes the perp at `spot_mid * (1 + center) * (1 -/+ threshold)`
-  on the $5 grid, with inventory skew and a `--max-inventory` cap, and never crosses the book.
-  It does not hedge yet; cop and lean comes after the Thursday meeting.
+- `--mode maker` is the naive market maker, quoting with Allen's `theo::price()`. Theo is the spot mid
+  shifted by the fair basis and the projected BIP funding over `--horizon-min`. The half-width is
+  `(two perp maker fees + --profit-bps) / 2`, with `--skew-bps-per-btc` inventory skew, a
+  `--max-inventory` cap and the $5 tick. Quotes never cross the book. It does not hedge yet;
+  cop and lean comes after the Thursday meeting. The ±5 bp taker band comes from Binance's
+  funding kink; BIP's funding has no such kink, so the maker does not use it.
 - `--ema-halflife-min N` replaces the fixed `--center-bps` with a causal EMA of the mid basis.
   INTX traded at a persistent premium, which a fixed 0 center ignores.
 

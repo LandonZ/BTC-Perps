@@ -1,4 +1,5 @@
 #include "paper-engine.h"
+#include "../model/theo-model.h"
 #include <algorithm>
 #include <cmath>
 #include <ctime>
@@ -224,15 +225,32 @@ void Engine::execute(const Order& o) {
 void Engine::decide_maker() {
     Quote target[2];
     if (ready()) {
-        const double tick = bip::price_tick, hw = config_.threshold_bps / bps;
-        const double theo = mid(Spot) * (1 + center_ / bps);
-        const double reservation = theo * (1 - config_.skew_bps_per_contract * inventory_ / bps);
-        double bid = std::floor(reservation * (1 - hw) / tick + 1e-9) * tick;
-        double ask = std::ceil(reservation * (1 + hw) / tick - 1e-9) * tick;
-        bid = std::min(bid, book_[Perp].ask - tick); // Post-only: never cross the book.
-        ask = std::max(ask, book_[Perp].bid + tick);
-        if (inventory_ + config_.contracts <= config_.max_inventory_contracts) target[0] = {true, bid};
-        if (inventory_ - config_.contracts >= -config_.max_inventory_contracts) target[1] = {true, ask};
+        const double spot = mid(Spot);
+        const double contract_usd = bip::contract_btc * mid(Perp);
+        theo::Inputs in;
+        in.spot = spot;
+        in.expected_exit_basis_bps = center_;
+        Millis to_hour = bip::hour_ms - ((now_ % bip::hour_ms) + bip::hour_ms) % bip::hour_ms;
+        in.expected_funding_paid_bps = theo::projected_hourly_funding_bps(
+            funding_.projected_rate_bps(), config_.horizon_min, to_hour / 60000.0);
+        in.inventory_btc = inventory_ * bip::contract_btc;
+        in.perp_bid = book_[Perp].bid; in.perp_ask = book_[Perp].ask;
+        theo::Config qc;
+        // Two perp maker fills per bid/ask cycle; no hedge legs until cop and lean.
+        qc.round_trip_fee_bps = 2 * (config_.perp_maker_bps + config_.perp_fee_usd_per_contract / contract_usd * bps);
+        qc.round_trip_profit_bps = config_.profit_bps;
+        qc.inventory_skew_bps_per_btc = config_.skew_bps_per_btc;
+        qc.quote_size_btc = btc_;
+        qc.max_inventory_btc = config_.max_inventory_contracts * bip::contract_btc;
+        qc.price_tick = bip::price_tick;
+        qc.size_increment_btc = bip::contract_btc;
+        qc.min_order_notional = 0;
+        try {
+            const auto q = theo::price(in, qc);
+            const double size = btc_ - 1e-9;
+            if (q.bid_size_btc >= size) target[0] = {true, q.bid};
+            if (q.ask_size_btc >= size) target[1] = {true, q.ask};
+        } catch (const std::runtime_error&) {} // Locked/odd book: pull quotes until it clears.
     }
     for (int side = 0; side < 2; ++side) {
         const Quote& intent = pending_[side] ? pending_[side]->quote : live_[side];
@@ -318,6 +336,8 @@ void write_results(const Engine& engine, const std::string& directory, const std
             << "  \"end_utc\": \"" << (eq.empty() ? "" : utc(eq.back().time)) << "\",\n"
             << "  \"latency_ms\": " << c.latency_ms << ",\n"
             << "  \"threshold_bps\": " << c.threshold_bps << ",\n"
+            << "  \"maker_profit_bps\": " << c.profit_bps << ", \"maker_skew_bps_per_btc\": " << c.skew_bps_per_btc
+            << ", \"maker_horizon_min\": " << c.horizon_min << ", \"fill_at_touch\": " << c.fill_at_touch << ",\n"
             << "  \"center_bps\": " << c.center_bps << ",\n"
             << "  \"ema_halflife_min\": " << c.ema_halflife_min << ",\n"
             << "  \"contracts\": " << c.contracts << ",\n"

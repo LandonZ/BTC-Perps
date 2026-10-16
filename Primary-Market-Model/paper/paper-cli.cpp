@@ -33,12 +33,13 @@ const char* help =
     "      --spot-csv F --perp-csv F --funding-csv F (defaults match basis-backtester)\n"
     "Strategy:\n"
     "  --mode taker|maker      taker: cross both legs when basis leaves the band (default)\n"
-    "                          maker: quote the perp around spot theo, no hedge (cop and lean comes later)\n"
+    "                          maker: Allen's theo::price() quotes on the perp, no hedge (cop and lean later)\n"
     "  --latency-ms 5,50,250   one run per latency (default 5,50,250 = best/middle/worst; candles: 0)\n"
-    "  --threshold-bps 5       taker entry band / maker quote half-width\n"
+    "  --threshold-bps 5       taker entry band\n"
     "  --center-bps 0          fixed fair basis, or --ema-halflife-min N for a causal rolling center\n"
     "  --contracts 1           0.01 BTC each   --hold-minutes 5   --profit-exit 1\n"
-    "  --max-inventory 5 --skew-bps 1 --fill-at-touch 0   (maker)\n"
+    "  maker: --profit-bps 1 (half-width = (2 maker fees + profit)/2) --skew-bps-per-btc 4\n"
+    "         --horizon-min 5 --max-inventory 5 (contracts) --fill-at-touch 0\n"
     "Costs (default 0 -- set your fee tier!):\n"
     "  --perp-taker-bps --perp-maker-bps --perp-fee-usd (per contract) --spot-taker-bps\n"
     "Other: --prev-funding-bps 0 --from-ms T --to-ms T (train/test windows) --output DIR\n"
@@ -114,7 +115,9 @@ int main(int argc, char** argv) {
             else if (option == "--hold-minutes") base.max_hold_ms = static_cast<Millis>(number(value) * 60000);
             else if (option == "--profit-exit") base.exit_on_profit = flag(value);
             else if (option == "--max-inventory") base.max_inventory_contracts = static_cast<int>(number(value));
-            else if (option == "--skew-bps") base.skew_bps_per_contract = number(value);
+            else if (option == "--profit-bps") base.profit_bps = number(value);
+            else if (option == "--skew-bps-per-btc") base.skew_bps_per_btc = number(value);
+            else if (option == "--horizon-min") base.horizon_min = number(value);
             else if (option == "--fill-at-touch") base.fill_at_touch = flag(value);
             else if (option == "--perp-taker-bps") base.perp_taker_bps = number(value);
             else if (option == "--perp-maker-bps") base.perp_maker_bps = number(value);
