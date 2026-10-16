@@ -46,7 +46,7 @@ struct Config {
     Millis latency_ms = 50;           // Decision -> order live/filled at the exchange.
     double threshold_bps = 5;         // Taker entry band (unused by the maker).
     double center_bps = 0;            // Fixed fair basis when ema_halflife_min is 0.
-    double ema_halflife_min = 0;      // >0: fair basis = causal EMA of the mid basis.
+    double ema_halflife_min = 10;     // >0: fair basis = causal EMA of the mid basis; 0 = fixed center.
     int contracts = 1;                // 0.01 BTC each; the spot hedge is the same BTC.
     // Taker exits.
     Millis max_hold_ms = 5 * 60 * 1000;
@@ -55,13 +55,16 @@ struct Config {
     // where the fees are the two perp maker fills implied by the cost settings below.
     int max_inventory_contracts = 5;
     double profit_bps = 1;            // Allen's round_trip_profit_bps.
-    double skew_bps_per_btc = 4;      // Allen's inventory_skew_bps_per_btc.
+    double skew_bps_per_btc = 100;    // Allen's inventory_skew_bps_per_btc (his default 4 is < 1 tick here).
     double horizon_min = 5;           // Holding horizon for the projected funding in theo.
     bool fill_at_touch = false;       // false: a trade must print THROUGH our price to fill us.
     // Costs. Coinbase BIP charges a per-contract fee; spot is bps of notional.
     double perp_taker_bps = 0, perp_maker_bps = 0, perp_fee_usd_per_contract = 0;
     double spot_taker_bps = 0;
     double previous_funding_bps = 0;  // Seed for the hourly BIP funding estimator.
+    // Silence longer than this on both feeds is a disconnect (e.g. laptop asleep): pull all
+    // quotes and in-flight entries and wait for fresh books, like cancel-on-disconnect. 0 = off.
+    Millis max_gap_ms = 10000;
 };
 
 struct Totals {
@@ -98,6 +101,7 @@ public:
     double max_drawdown() const;
     int position_contracts() const;
     Millis now() const { return now_; }
+    int gaps() const { return gaps_; }
     std::optional<double> mid_basis_bps() const;
     double center_bps() const { return center_; }
     double projected_funding_bps() const { return funding_.projected_rate_bps(); }
@@ -115,6 +119,7 @@ private:
 
     bool ready() const;
     double mid(Leg leg) const { return (book_[leg].bid + book_[leg].ask) / 2; }
+    double last_mid_[2] = {0, 0}; // Marks survive a disconnect so equity does not jump.
     double perp_fee(double price, double fee_bps) const;
     void advance_to(Millis time);
     void run_due(Millis time);
@@ -132,6 +137,7 @@ private:
     Millis now_ = -1, next_equity_ = -1, center_start_ = -1, center_time_ = -1;
     double center_ = 0;
     bool center_seeded_ = false;
+    int gaps_ = 0;
     bip::FundingEstimator funding_;
     Totals realized_;
     // Taker.

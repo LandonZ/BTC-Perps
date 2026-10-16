@@ -16,6 +16,8 @@ void close(double actual,double expected,const char* message) {
 Event quote(Millis t,Leg leg,double bid,double ask) { return Event{t,'Q',leg,bid,1,ask,1,0,0}; }
 Event trade(Millis t,double price) { return Event{t,'T',Perp,0,0,0,0,price,1}; }
 const Millis t0 = 1760000400000; // Exact UTC hour.
+// Fixed zero center and no disconnect guard, so each test controls exactly what it checks.
+Config plain() { Config c; c.ema_halflife_min = 0; c.max_gap_ms = 0; return c; }
 }
 
 int main() {
@@ -35,7 +37,7 @@ int main() {
 
         // Taker: the signal fires on the current book, but the order fills at the book
         // in force when it arrives `latency` later. Fees on both legs.
-        Config c;
+        Config c = plain();
         c.latency_ms = 50; c.perp_taker_bps = 2; c.spot_taker_bps = 1; c.perp_fee_usd_per_contract = 0.05;
         Engine taker(c);
         taker.on_event(quote(t0,Spot,100000,100010));
@@ -63,7 +65,7 @@ int main() {
         close(taker.totals().net(),trip.net_pnl,"Totals match the closed trade");
 
         // Timeout and forced end with zero latency.
-        Config z; z.latency_ms = 0; z.exit_on_profit = false; z.max_hold_ms = 60000;
+        Config z = plain(); z.latency_ms = 0; z.exit_on_profit = false; z.max_hold_ms = 60000;
         Engine timeout(z);
         timeout.on_event(quote(t0,Spot,100000,100000),false);
         timeout.on_event(quote(t0,Perp,99900,99900));            // -10 bp: buy basis immediately
@@ -83,7 +85,7 @@ int main() {
         check(batch.fills().empty(),"No trade on a half-updated timestamp");
 
         // Funding: a position held across the hour pays the BIP rate on the perp leg.
-        Config f; f.latency_ms = 0; f.exit_on_profit = false; f.max_hold_ms = 2*3600000; f.threshold_bps = 50;
+        Config f = plain(); f.latency_ms = 0; f.exit_on_profit = false; f.max_hold_ms = 2*3600000; f.threshold_bps = 50;
         Engine funding(f);
         funding.on_event(quote(t0,Spot,100000,100000),false);
         funding.on_event(quote(t0,Perp,99000,99000));             // -100 bp: long perp
@@ -97,7 +99,7 @@ int main() {
         // Maker: Allen's theo::price() quotes. Half-width = (2 * 1 bp maker fee + 1 bp profit) / 2
         // = 1.5 bp around spot theo, on the $5 grid; live only after the latency; filled only
         // by trades printing through them.
-        Config m; m.mode = Mode::Maker; m.latency_ms = 100; m.perp_maker_bps = 1; m.profit_bps = 1;
+        Config m = plain(); m.mode = Mode::Maker; m.latency_ms = 100; m.perp_maker_bps = 1; m.profit_bps = 1;
         m.skew_bps_per_btc = 400;                                   // 4 bp per 0.01 BTC contract.
         Engine maker(m);
         maker.on_event(quote(t0,Spot,99999,100001),false);
@@ -133,9 +135,43 @@ int main() {
         capped.on_event(trade(t0+2,99980));
         check(capped.position_contracts() == 1 && capped.fills().size() == 1,"No bid beyond max inventory");
 
+        // Defaults: EMA fair basis (10 min) and the disconnect guard.
+        check(Config{}.ema_halflife_min == 10 && Config{}.max_gap_ms == 10000,"EMA center and gap guard on by default");
+        Config d; d.mode = Mode::Maker; d.latency_ms = 0; d.fill_at_touch = true;
+        Engine ema(d);
+        for (Millis t = t0; t <= t0 + 9*60000; t += 5000) {            // Perp 3 bp rich, constant.
+            ema.on_event(quote(t,Spot,99999,100001),false);
+            ema.on_event(quote(t,Perp,100025,100035));
+        }
+        ema.on_event(trade(t0+9*60000+1,100000));
+        check(ema.fills().empty(),"No quoting during the first half-life");
+        close(ema.center_bps(),3,"Center converges to the observed basis");
+        for (Millis t = t0 + 9*60000 + 5000; t <= t0 + 11*60000; t += 5000) {
+            ema.on_event(quote(t,Spot,99999,100001),false);
+            ema.on_event(quote(t,Perp,100025,100035));
+        }
+        // theo = spot * (1 + 3 bp) = 100030; zero fees + 1 bp profit -> bid 100030 - 0.5 bp -> 100025.
+        ema.on_event(trade(t0+11*60000+1,100025));
+        check(ema.fills().size() == 1 && ema.fills()[0].price == 100025,"After warm-up the bid tracks the perp's premium");
+
+        // Disconnect: after >10 s of silence the stale quotes must not fill.
+        Engine gap(d);
+        for (Millis t = t0; t <= t0 + 11*60000; t += 5000) {
+            gap.on_event(quote(t,Spot,99999,100001),false);
+            gap.on_event(quote(t,Perp,100025,100035));
+        }
+        const auto before = gap.fills().size();
+        gap.on_event(trade(t0+3600000,99000));                         // First event after an hour asleep.
+        check(gap.fills().size() == before && gap.gaps() == 1,"Quotes are pulled across a feed gap");
+        gap.on_event(quote(t0+3600001,Spot,99999,100001),false);
+        gap.on_event(quote(t0+3600001,Perp,100025,100035));
+        gap.on_event(trade(t0+3600002,100015));
+        check(gap.fills().size() == before+1,"Quoting resumes once both books are fresh");
+
         std::cout << "PASS: event CSV parsing, latency-delayed taker fills at the arrival book, fees,\n"
             << "profit/timeout/forced exits, same-timestamp batching, BIP funding on held positions,\n"
-            << "Allen's price() maker quotes, through-only and touch fills, skew and inventory cap.\n";
+            << "Allen's price() maker quotes, through-only and touch fills, skew and inventory cap,\n"
+            << "EMA fair-basis warm-up and the disconnect guard.\n";
         return 0;
     } catch (const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }
 }

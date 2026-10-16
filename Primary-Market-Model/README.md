@@ -179,8 +179,18 @@ Modes:
   `--max-inventory` cap and the $5 tick. Quotes never cross the book. It does not hedge yet;
   cop and lean comes after the Thursday meeting. The ±5 bp taker band comes from Binance's
   funding kink; BIP's funding has no such kink, so the maker does not use it.
-- `--ema-halflife-min N` replaces the fixed `--center-bps` with a causal EMA of the mid basis.
-  INTX traded at a persistent premium, which a fixed 0 center ignores.
+- The fair basis defaults to a causal EMA of the perp-vs-spot mid basis (`--ema-halflife-min 10`).
+  Nothing trades during the first half-life. BIP trades about 2–3 bp rich to BTC-USD, and with a
+  fixed 0 center the maker sold the perp below market until it hit the inventory cap.
+  `--ema-halflife-min 0 --center-bps X` restores a fixed center. Candle runs default to the fixed
+  center so they stay comparable to `basis-backtester`.
+- Default rows are latency 0 (idealized), 5, 50 and 250 ms. Maker skew defaults to 100 bp per BTC
+  (1 bp per contract); Allen's default of 4 moves the quotes by less than one $5 tick.
+- `--split 0.5` runs the first half of the recording (TRAIN) and the rest (TEST) as separate
+  backtests. Choose parameters on TRAIN and report TEST.
+- If both feeds go silent for over 10 s (`--max-gap-ms`), for example while the laptop is asleep,
+  the engine treats it as a disconnect: it pulls all quotes and in-flight entries and waits for
+  fresh books. The `gaps` column counts these.
 
 Fill model:
 

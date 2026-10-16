@@ -87,14 +87,14 @@ int Engine::position_contracts() const {
 }
 
 double Engine::unrealized_taker() const {
-    if (!position_ || !book_[Perp].valid() || !book_[Spot].valid()) return 0;
-    return position_->direction * btc_ * ((mid(Perp) - position_->entry_perp) - (mid(Spot) - position_->entry_spot));
+    if (!position_ || !last_mid_[Perp] || !last_mid_[Spot]) return 0;
+    return position_->direction * btc_ * ((last_mid_[Perp] - position_->entry_perp) - (last_mid_[Spot] - position_->entry_spot));
 }
 
 Totals Engine::totals() const {
     Totals t = realized_;
     if (config_.mode == Mode::Maker) {
-        t.price_pnl = cash_ + (inventory_ && book_[Perp].valid() ? inventory_ * bip::contract_btc * mid(Perp) : 0);
+        t.price_pnl = cash_ + inventory_ * bip::contract_btc * last_mid_[Perp];
     } else if (position_) {
         t.price_pnl += unrealized_taker();
         t.funding_pnl += position_->funding;
@@ -126,6 +126,12 @@ void Engine::advance_to(Millis time) {
         return;
     }
     time = std::max(time, now_); // Never let a clock blip move us backwards.
+    if (config_.max_gap_ms > 0 && time - now_ > config_.max_gap_ms) {
+        book_[Perp] = book_[Spot] = Top{};
+        for (int side = 0; side < 2; ++side) { live_[side] = Quote{}; pending_[side].reset(); }
+        if (order_ && !order_->exit) order_.reset();
+        ++gaps_;
+    }
     run_due(time);               // Orders that arrived before this event see the prior book.
     if (const auto rate = funding_.advance(time); rate && position_contracts() && book_[Perp].valid()) {
         const double paid = bip::payment_usd(position_contracts(), mid(Perp), *rate);
@@ -142,6 +148,7 @@ void Engine::on_event(const Event& e, bool decide_now) {
     const auto leg = e.leg == Perp ? bip::FundingEstimator::Futures : bip::FundingEstimator::Spot;
     if (e.kind == 'Q') {
         book_[e.leg] = {e.bid, e.bid_qty, e.ask, e.ask_qty};
+        last_mid_[e.leg] = mid(e.leg);
         funding_.on_quote(leg, now_, e.bid, e.ask);
     } else {
         funding_.on_trade(leg, now_, e.price, e.size);
@@ -349,6 +356,7 @@ void write_results(const Engine& engine, const std::string& directory, const std
             << "  \"long_basis_trades\": " << longs << ",\n"
             << "  \"short_basis_trades\": " << n - longs << ",\n"
             << "  \"fills\": " << engine.fills().size() << ",\n"
+            << "  \"feed_gaps\": " << engine.gaps() << ",\n"
             << "  \"mean_trade_bps\": " << (n ? net_bps / n : 0) << ",\n"
             << "  \"mean_entry_slippage_bps\": " << (n ? slippage / n : 0) << ",\n"
             << "  \"price_pnl\": " << total.price_pnl << ",\n"
