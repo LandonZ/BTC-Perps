@@ -22,15 +22,15 @@ int main(int argc,char** argv) {
         for (int i = 1; i < argc; ++i) {
             const std::string key = argv[i];
             if (key == "--help") {
-                std::cout << "Paired basis entries: equilibrium -5 bps, join perp bid below / ask above, immediate equal-BTC spot hedge.\n"
+                std::cout << "Paired basis entries: equilibrium -5 bps, bid at/below -6.5 / ask at/above -3.5 bps, immediate equal-BTC spot hedge.\n"
                     << "Hold through convergence; exit only funding payers in the linear premium region before settlement.\n"
                     << "  --events FILE (repeatable) --events-list FILE --output DIR --details 0|1\n"
-                    << "  --equilibrium-bps -5 --order-btc 0.01 --max-gross-perp-btc 0 (unlimited)\n"
+                    << "  --equilibrium-bps -5 --entry-offset-bps 1.5 --order-btc 0.01 --max-gross-perp-btc 0 (unlimited)\n"
                     << "  --premium-events FILE (required for pre-funding exits)\n"
                     << "  --exit-on-equilibrium 0 --exit-before-funding 1 --funding-cashflows 1\n"
                     << "  --funding-exit-payers-only 1 --funding-interest-bps 1 --funding-clamp-bps 5\n"
-                    << "  --cycle-fee-bps 0 (split equally across all four fills)\n"
-                    << "  --perp-maker-bps 0 --perp-taker-bps 0 --spot-taker-bps 0\n"
+                    << "  --cycle-fee-bps VALUE (optional comparison; splits equally across all four fills)\n"
+                    << "  --perp-maker-bps 0 --perp-taker-bps 0.5 --spot-taker-bps 0.5 (defaults, bps per fill)\n"
                     << "  --funding-cancel-seconds 60 --spot-half-spread-bps 0.5 (price-proxy input only)\n"
                     << "  --participation 0.1 --fill-at-touch 1 (queue approximation)\n"
                     << "  --quantity-step 0.001 --tick 0.1\n";
@@ -55,6 +55,7 @@ int main(int argc,char** argv) {
                 details = value == "1";
             }
             else if (key == "--equilibrium-bps") c.equilibrium_bps = number(value);
+            else if (key == "--entry-offset-bps") c.entry_offset_bps = number(value);
             else if (key == "--order-btc") c.order_btc = number(value);
             else if (key == "--max-gross-perp-btc") c.max_gross_perp_btc = number(value);
             else if (key == "--cycle-fee-bps") {

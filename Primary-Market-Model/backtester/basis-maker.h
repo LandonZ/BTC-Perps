@@ -5,9 +5,9 @@ namespace btc::basis_maker {
 using events::Event;
 using events::Millis;
 struct Config {
-    double equilibrium_bps = -5;
+    double equilibrium_bps = -5, entry_offset_bps = 1.5;
     double order_btc = 0.01, max_gross_perp_btc = 0, quantity_step = 0.001, tick = 0.1;
-    double perp_maker_bps = 0, perp_taker_bps = 0, spot_taker_bps = 0;
+    double perp_maker_bps = 0, perp_taker_bps = 0.5, spot_taker_bps = 0.5;
     double proxy_spot_half_spread_bps = 0.5; // Explicit assumption when S events lack actual bid/ask.
     double participation = 0.1;
     double perp_min_notional = 100, spot_min_notional = 5;
@@ -35,6 +35,7 @@ struct Pair {
     double exit_perp_price = 0, exit_spot_price = 0, exit_fees = 0, realized_pnl = 0;
     double funding_pnl = 0;
     std::string exit_reason = "";
+    double signal_basis_bps = 0; // Midpoint basis used to allow the entry, before executable spot spread.
 };
 struct Decision {
     Millis time;
@@ -79,6 +80,7 @@ private:
     double used_capacity() const;
     double available_capacity() const;
     double basis() const;
+    int entry_side(double observed_basis) const;
     double quantity(double size) const;
     Config config_;
     Millis now_ = -1, spot_time_ = -1, perp_time_ = -1, next_funding_ = -1, last_equity_ = -1;

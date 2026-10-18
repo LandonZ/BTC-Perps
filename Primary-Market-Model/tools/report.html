@@ -13,13 +13,13 @@
   <p id="period"></p>
   <section class="stats" aria-label="Backtest results">
     <div class="stat"><span>Total profit · USDT</span><strong id="net"></strong></div>
-    <div class="stat"><span>Realized profit · USDT</span><strong id="realized"></strong></div>
+    <div class="stat"><span>Realized incl. funding · USDT</span><strong id="realized"></strong></div>
     <div class="stat"><span>Open-position PnL · USDT</span><strong id="unrealized"></strong></div>
     <div class="stat"><span>Maximum drawdown · USDT</span><strong id="drawdown"></strong></div>
   </section>
   <section class="plot">
     <h2>Cumulative profit</h2>
-    <div class="legend"><span><i class="swatch"></i>Total PnL</span><span><i class="swatch realized"></i>Realized PnL</span></div>
+    <div class="legend"><span><i class="swatch"></i>Total PnL</span><span><i class="swatch realized"></i>Realized incl. funding</span></div>
     <svg id="chart" role="img" aria-label="Cumulative total and realized profit over UTC time"></svg>
     <div class="readout" id="readout" aria-live="polite"></div>
   </section>
@@ -40,8 +40,9 @@
  for(const [id,key] of [['net','net_pnl'],['realized','realized_pnl'],['unrealized','unrealized_pnl']])el(id).textContent=money(s[key]);
  el('drawdown').textContent=count(Number(s.max_drawdown.toFixed(2)));
  const rate=s.closed_pairs?100*s.winning_closed_pairs/s.closed_pairs:0;
- el('activity').textContent=`${count(s.closed_pairs)} partial-fill pairs closed · ${rate.toFixed(1)}% win rate · Peak open exposure ${count(s.max_open_gross_perp_btc)} BTC per leg`;
- el('assumptions').textContent=`Perp maker fee ${s.perp_maker_bps} bps · Perp taker fee ${s.perp_taker_bps} bps · Spot taker fee ${s.spot_taker_bps} bps · ${s.funding_cashflows?'Recorded funding cash flows':'Zero funding'} and zero latency · Assumed spot full spread ${2*s.proxy_spot_half_spread_bps} bps · Quote size ${s.order_btc} BTC · ${s.max_gross_perp_btc===0?'No position cap':`Position cap ${s.max_gross_perp_btc} BTC`}.`;
+ el('activity').textContent=`${count(s.closed_pairs)} partial-fill pairs closed · ${rate.toFixed(1)}% closed-pair win rate including funding · Peak open exposure ${count(s.max_open_gross_perp_btc)} BTC per leg`;
+ const lower=s.entry_bid_basis_bps??s.equilibrium_bps,upper=s.entry_ask_basis_bps??s.equilibrium_bps;
+ el('assumptions').textContent=`Entry midpoint basis: bid at/below ${lower} bps, offer at/above ${upper} bps · Equilibrium ${s.equilibrium_bps} bps · Perp maker fee ${s.perp_maker_bps} bps · Perp taker fee ${s.perp_taker_bps} bps · Spot taker fee ${s.spot_taker_bps} bps · ${s.funding_cashflows?'Recorded funding cash flows':'Zero funding'} and zero latency · Assumed spot full spread ${2*s.proxy_spot_half_spread_bps} bps · Quote size ${s.order_btc} BTC · ${s.max_gross_perp_btc===0?'No position cap':`Position cap ${s.max_gross_perp_btc} BTC`}.`;
  el('strategy').textContent=s.exit_on_equilibrium?'Convergence exits are enabled.':'Hold through convergence. In the final pre-funding minute, close only estimated payers outside the flat funding region. Signals use completed premium-index minute CLOSEs as a causal proxy. Held positions pay or receive recorded funding; funding cash is realized immediately.';
  const svg=el('chart'),ns='http://www.w3.org/2000/svg';let scale,selected=p.length-1;
  function element(tag,attributes,text){const node=document.createElementNS(ns,tag);for(const [key,value]of Object.entries(attributes))node.setAttribute(key,value);if(text!==undefined)node.textContent=text;svg.appendChild(node);return node;}

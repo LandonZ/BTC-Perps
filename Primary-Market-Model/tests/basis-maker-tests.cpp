@@ -30,7 +30,8 @@ void minutes(Engine& e,double value,int count=478) {
 }
 int main() {
     try {
-        Config legacy; legacy.exit_on_equilibrium=false; legacy.max_gross_perp_btc=.05;
+        Config unbuffered; unbuffered.entry_offset_bps=0;
+        Config legacy=unbuffered; legacy.exit_on_equilibrium=false; legacy.max_gross_perp_btc=.05;
         legacy.exit_before_funding=false; legacy.funding_cashflows=false;
         legacy.perp_maker_bps=2; legacy.perp_taker_bps=5; legacy.spot_taker_bps=10;
         Engine engine(legacy); seed(engine);
@@ -65,7 +66,7 @@ int main() {
         const auto n = engine.fills().size(); engine.finish();
         check(engine.fills().size()==n,"No automatic end-of-replay liquidation");
 
-        Config guarded_config; guarded_config.exit_before_funding=false; guarded_config.funding_cashflows=false;
+        Config guarded_config=unbuffered; guarded_config.exit_before_funding=false; guarded_config.funding_cashflows=false;
         Engine guarded(guarded_config); seed(guarded);
         const Millis due=start+8*3600000;
         guarded.on_event(spot(due-61000)); guarded.on_event(book(due-61000));
@@ -80,20 +81,20 @@ int main() {
         close(guarded.totals().funding_pnl,0,"User scenario forces funding to zero even for held pairs");
         check(!guarded.pairs().empty(),"Funding does not silently exit existing pairs");
 
-        Config strict; strict.fill_at_touch=false;
+        Config strict=unbuffered; strict.fill_at_touch=false;
         Engine through(strict); seed(through);
         through.on_event(trade(start+1,99940,true));
         check(through.fills().empty(),"Optional strict-through execution excludes touch prints");
         through.on_event(trade(start+2,99939.9,true));
         check(through.fills().size()==2,"Strict-through print hedges immediately");
 
-        Config capped; capped.max_gross_perp_btc=.005;
+        Config capped=unbuffered; capped.max_gross_perp_btc=.005;
         Engine cap(capped); seed(cap);
         cap.on_event(trade(start+1,99940,true,1));
         cap.on_event(trade(start+2,99939,true,1));
         close(cap.totals().gross_perp_btc,.005,"No-exit gross position cap cannot be exceeded");
 
-        Engine actual_book;
+        Engine actual_book(unbuffered);
         Event actual=spot(start); actual.bid=99998; actual.ask=100002;
         actual_book.on_event(actual); actual_book.on_event(book(start));
         actual_book.on_event(trade(start+1,99940,true));
@@ -105,7 +106,7 @@ int main() {
         for (const auto& fill:engine.fills()) { cash-=fill.side*fill.btc*fill.price; fees+=fill.fee; }
         close(t.price_pnl,cash+t.perp_btc*99950+t.spot_btc*100000,"Two-leg midpoint mark reconciles to signed cash flows");
         close(t.net(),t.price_pnl-fees,"Net includes fees on both entry legs and no invented exit costs");
-        Config exits; exits.exit_on_equilibrium=true; exits.exit_before_funding=false; exits.funding_cashflows=false; exits.perp_maker_bps=0; exits.perp_taker_bps=0; exits.spot_taker_bps=0;
+        Config exits=unbuffered; exits.exit_on_equilibrium=true; exits.exit_before_funding=false; exits.funding_cashflows=false; exits.perp_maker_bps=0; exits.perp_taker_bps=0; exits.spot_taker_bps=0;
         Engine convergence(exits); seed(convergence);
         convergence.on_event(trade(start+1,99940,true));
         convergence.on_event(trade(start+2,99940,true));
@@ -149,7 +150,7 @@ int main() {
         Config cycle=exits; cycle.perp_maker_bps=.5; cycle.perp_taker_bps=.5; cycle.spot_taker_bps=.5;
         Engine fees_exit(cycle); seed(fees_exit);
         close(fees_exit.config().perp_maker_bps+fees_exit.config().perp_taker_bps+2*fees_exit.config().spot_taker_bps,
-              2,"Default maker plus three taker rates total 2 bps per cycle");
+              2,"Comparison maker plus three taker rates total 2 bps per cycle");
         fees_exit.on_event(trade(start+1,99940,true));
         close(fees_exit.totals().fees,.004*(99940+99995)*.00005,
               "Open pair pays only its two entry fees; future exit fees are not charged early");
@@ -158,6 +159,16 @@ int main() {
         const double expected_fees=.004*(99940+99995+99950+100005)*.00005;
         close(fees_exit.totals().fees,expected_fees,"All four entry/exit fees use actual filled notionals");
         close(closed.realized_pnl,-expected_fees,"Convergence can realize a loss after costs");
+
+        Config maker_free=exits; maker_free.perp_maker_bps=0; maker_free.perp_taker_bps=.5; maker_free.spot_taker_bps=.5;
+        Engine three_takers(maker_free); seed(three_takers);
+        three_takers.on_event(trade(start+1,99940,true));
+        close(three_takers.fills()[0].fee,0,"Perp maker entry is free");
+        close(three_takers.totals().fees,.004*99995*.00005,"Open pair pays just the spot entry taker fee");
+        three_takers.on_event(book(start+2,99950,99960));
+        const double three_fees=.004*(99995+99950+100005)*.00005;
+        close(three_takers.totals().fees,three_fees,"Exactly three taker fees are charged on a completed cycle");
+        close(three_takers.pairs()[0].realized_pnl,-three_fees,"Realized PnL deducts the three actual taker fills");
 
         Engine stale(exits); seed(stale);
         stale.on_event(trade(start+1,99940,true));
@@ -190,10 +201,14 @@ int main() {
         std::filesystem::remove_all(directory);
 
         Config holding;
+        close(holding.entry_offset_bps,1.5,"Default entry offset is 1.5 bps on either side of equilibrium");
         check(!holding.exit_on_equilibrium && holding.exit_before_funding && holding.max_gross_perp_btc==0,
               "Default policy holds without a cap and exits only before funding");
-        close(holding.perp_maker_bps+holding.perp_taker_bps+2*holding.spot_taker_bps,0,"Default execution fees are zero");
-        Engine high; mixed(high);
+        close(holding.perp_maker_bps,0,"Default maker execution fee is zero");
+        close(holding.perp_taker_bps,.5,"Default perp taker fee is half a basis point");
+        close(holding.spot_taker_bps,.5,"Default spot taker fee is half a basis point");
+        close(holding.perp_maker_bps+holding.perp_taker_bps+2*holding.spot_taker_bps,1.5,"Default completed-cycle rate is 1.5 bps");
+        Engine high(unbuffered); mixed(high);
         check(high.pairs().size()==2 && !high.pairs()[0].closed && !high.pairs()[1].closed,
               "Opposite-direction pairs coexist and convergence does not close them");
         minutes(high,.0007);
@@ -210,14 +225,14 @@ int main() {
         close(high.totals().realized_pnl,high.pairs()[0].realized_pnl+.08,"Funding receipts are realized immediately while a pair stays open");
         check(!high.premium_ready(),"Settlement resets the premium window rather than reusing future-period data");
 
-        Engine negative; mixed(negative); minutes(negative,-.0008);
+        Engine negative(unbuffered); mixed(negative); minutes(negative,-.0008);
         negative.on_event(spot(due-61000)); negative.on_event(book(due-61000,99970,99980));
         negative.on_event(premium(due-60000,-.0008));
         check(!negative.pairs()[0].closed && negative.pairs()[1].closed,"Negative funding closes short payers while retaining long receivers");
         negative.on_event(funding(due,-.0003));
         close(negative.totals().funding_pnl,.12,"Retained long receives negative-rate settlement");
 
-        Engine flat; seed(flat); flat.on_event(trade(start+1,99940,true)); minutes(flat,0);
+        Engine flat(unbuffered); seed(flat); flat.on_event(trade(start+1,99940,true)); minutes(flat,0);
         flat.on_event(spot(due-61000)); flat.on_event(book(due-61000)); flat.on_event(premium(due-60000,0));
         close(flat.estimated_funding_bps(),1,"Binance flat funding region is +1 bp per eight hours, not zero");
         check(!flat.pairs()[0].closed,"Flat-region positions are held across funding");
@@ -226,25 +241,64 @@ int main() {
         close(flat.totals().realized_pnl,-.04,"Held-position funding payments are realized cash, not unrealized price PnL");
         flat.finish(); check(!flat.pairs()[0].closed,"Replay end leaves held lots open");
 
-        Engine lower; mixed(lower); minutes(lower,-.00045);
+        Engine lower(unbuffered); mixed(lower); minutes(lower,-.00045);
         lower.on_event(spot(due-61000)); lower.on_event(book(due-61000,99970,99980));
         lower.on_event(premium(due-60000,-.00045));
         close(lower.estimated_funding_bps(),.5,"Lower linear region can still have a positive funding rate");
         check(lower.pairs()[0].closed && !lower.pairs()[1].closed,"Payer direction follows estimated funding sign, not premium sign");
 
-        Engine gap; mixed(gap);
+        Engine gap(unbuffered); mixed(gap);
         for (int i=1;i<=478;++i) if (i!=200) gap.on_event(premium(start+i*60000,.0007));
         gap.on_event(spot(due-61000)); gap.on_event(book(due-61000,99970,99980));
         gap.on_event(premium(due-60000,.0007));
         check(!gap.premium_ready() && !gap.pairs()[0].closed,"Incomplete premium history cannot fabricate a funding-exit forecast");
 
-        Engine jitter;
+        Engine jitter(unbuffered);
         jitter.on_event(funding(start+1)); jitter.on_event(spot(start+1)); jitter.on_event(book(start+1));
         jitter.on_event(trade(start+2,99940,true)); minutes(jitter,.0007);
         jitter.on_event(spot(due-61000)); jitter.on_event(book(due-61000));
         jitter.on_event(premium(due-60000,.0007));
         check(jitter.premium_ready() && jitter.pairs()[0].closed,"Millisecond publication jitter does not invalidate premium coverage");
-        std::cout << "PASS: -5 bps equilibrium, passive perp entries, immediate equal-BTC spot hedges, both fee signs,\n"
+        Engine buffered; seed(buffered);
+        check(buffered.decisions().back().side==0,"No quote at -5.5 bps inside the new entry band");
+        buffered.on_event(trade(start+1,99940,true));
+        check(buffered.fills().empty(),"A print inside the entry band cannot create a pair");
+        buffered.on_event(book(start+2,99930.01,99940.01));
+        check(buffered.decisions().back().side==0,"A basis just above -6.5 bps is still inside the band");
+        buffered.on_event(book(start+3,99930,99940));
+        check(buffered.decisions().back().side==1,"At exactly -6.5 bps join the bid");
+        buffered.on_event(trade(start+4,99930,true));
+        check(buffered.pairs().size()==1 && buffered.fills()[1].side==-1,"Lower boundary entry immediately shorts equal BTC spot");
+        buffered.on_event(book(start+5,99930.01,99940.01));
+        buffered.on_event(trade(start+6,99930,true));
+        check(buffered.pairs().size()==1 && buffered.decisions().back().side==0,"Returning inside the band cancels the remaining quote");
+        buffered.on_event(book(start+7,99949,99951));
+        check(!buffered.pairs()[0].closed,"Crossing equilibrium still does not exit a buffered position");
+        buffered.on_event(book(start+8,99959.99,99969.99));
+        check(buffered.decisions().back().side==0,"A basis just below -3.5 bps is still inside the band");
+        buffered.on_event(book(start+9,99960,99970));
+        check(buffered.decisions().back().side==-1,"At exactly -3.5 bps join the offer");
+        buffered.on_event(trade(start+10,99970,false));
+        check(buffered.pairs().size()==2 && buffered.fills()[3].side==1,"Upper boundary entry immediately longs equal BTC spot");
+        buffered.on_event(book(start+11,99970,99980));
+        buffered.on_event(trade(start+12,99980,false));
+        check(buffered.pairs().size()==3,"Farther above the upper boundary permits another concurrent pair");
+        close(buffered.totals().perp_btc+buffered.totals().spot_btc,0,"Buffered entries preserve equal-BTC hedging");
+        buffered.finish();
+        check(!buffered.pairs()[0].closed && !buffered.pairs()[1].closed,"No replay-end exit is added by the entry band");
+        minutes(buffered,.0007);
+        buffered.on_event(spot(due-61000)); buffered.on_event(book(due-61000));
+        check(!buffered.pairs()[0].closed,"Buffered entry cannot exit before the funding window");
+        buffered.on_event(premium(due-60000,.0007));
+        check(buffered.pairs()[0].closed && !buffered.pairs()[1].closed && !buffered.pairs()[2].closed,
+              "Funding closes only buffered long payers while retaining short receivers, even inside the entry band");
+        for (double offset : {-1.0,10000.0}) {
+            Config invalid; invalid.entry_offset_bps=offset;
+            bool rejected=false;
+            try { Engine bad(invalid); } catch (const std::runtime_error&) { rejected=true; }
+            check(rejected,"Invalid entry offsets cannot create an impossible lower basis threshold");
+        }
+        std::cout << "PASS: -5 bps equilibrium, inclusive -6.5/-3.5 bps entry boundaries, band cancellations, equal-BTC spot hedges,\n"
             << "concurrent pairs, two-sided convergence exits, all four fees, optional recycled cap, legacy no-exit replay,\n"
             << "zero funding, pre-funding cancellations, partial fills, proxy/real spot spreads and realized/unrealized PnL.\n";
         return 0;
