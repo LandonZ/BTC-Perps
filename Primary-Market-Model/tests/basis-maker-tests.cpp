@@ -27,6 +27,36 @@ void mixed(Engine& e) {
 void minutes(Engine& e,double value,int count=478) {
     for (int i=1;i<=count;++i) e.on_event(premium(start+i*60000,value));
 }
+void verify_side_attribution(const Engine& engine) {
+    const auto actual = engine.side_totals();
+    std::array<SideTotals,2> expected;
+    for (const auto& p : engine.pairs()) {
+        auto& side = expected[p.direction > 0 ? 0 : 1];
+        ++side.entries; side.fees += p.fees+p.exit_fees; side.funding_pnl += p.funding_pnl;
+        if (p.closed) { ++side.closed_pairs; side.realized_price_pnl += p.realized_pnl-p.funding_pnl; }
+        else {
+            side.open_btc += p.btc;
+            side.unrealized_pnl += p.direction*p.btc*((engine.final_perp_mid()-p.perp_price)-
+                                                     (engine.final_spot_mid()-p.spot_price))-p.fees;
+        }
+    }
+    for (std::size_t i=0;i<expected.size();++i) {
+        check(actual[i].entries==expected[i].entries && actual[i].closed_pairs==expected[i].closed_pairs,
+              "Direction counts reconcile to individual hedged pairs");
+        close(actual[i].open_btc,expected[i].open_btc,"Direction BTC reconciles to open pairs");
+        close(actual[i].unrealized_pnl,expected[i].unrealized_pnl,"Direction unrealized excludes funding, includes entry fees and both legs");
+        close(actual[i].realized_price_pnl,expected[i].realized_price_pnl,"Direction realized price PnL excludes previously paid funding");
+        close(actual[i].funding_pnl,expected[i].funding_pnl,"Direction funding reconciles to pair cash flows");
+        close(actual[i].fees,expected[i].fees,"Direction fee attribution uses all executed fills");
+    }
+    const auto total = engine.totals();
+    close(actual[0].net()+actual[1].net(),total.net(),"Direction net PnLs sum to portfolio net");
+    for (const auto& point : engine.equity()) {
+        close(point.sides[0].net()+point.sides[1].net(),point.totals.net(),"Sampled direction PnL reconciles at every saved mark");
+        close(point.sides[0].unrealized_pnl+point.sides[1].unrealized_pnl,
+              point.totals.net()-point.totals.realized_pnl,"Sampled unrealized curves sum to portfolio unrealized");
+    }
+}
 }
 int main() {
     try {
@@ -219,7 +249,7 @@ int main() {
         close(high.average_premium_bps(),7,"Weighted premium average uses bps");
         close(high.estimated_funding_bps(),2,"Above +6 bps premium, funding scales linearly as P-5");
         check(high.pairs()[0].closed && !high.pairs()[1].closed,"Positive funding closes long-perp payers and retains short receivers");
-        check(high.pairs()[0].exit_reason=="PRE_FUNDING_LINEAR_REGION","No convergence exit is hidden in the funding-only policy");
+        check(high.pairs()[0].exit_reason=="PRE_FUNDING_PAYER","No convergence exit is hidden in the funding-only policy");
         high.on_event(funding(due,.0002));
         close(high.totals().funding_pnl,.08,"Retained short receives actual settlement funding");
         close(high.totals().realized_pnl,high.pairs()[0].realized_pnl+.08,"Funding receipts are realized immediately while a pair stays open");
@@ -232,14 +262,33 @@ int main() {
         negative.on_event(funding(due,-.0003));
         close(negative.totals().funding_pnl,.12,"Retained long receives negative-rate settlement");
 
-        Engine flat(unbuffered); seed(flat); flat.on_event(trade(start+1,99940,true)); minutes(flat,0);
-        flat.on_event(spot(due-61000)); flat.on_event(book(due-61000)); flat.on_event(premium(due-60000,0));
+        Engine flat(unbuffered); mixed(flat); minutes(flat,0);
+        flat.on_event(spot(due-61000)); flat.on_event(book(due-61000,99970,99980));
+        check(!flat.pairs()[0].closed && !flat.pairs()[1].closed,"Flat-region exits wait until the pre-funding window");
+        flat.on_event(premium(due-60000,0));
         close(flat.estimated_funding_bps(),1,"Binance flat funding region is +1 bp per eight hours, not zero");
-        check(!flat.pairs()[0].closed,"Flat-region positions are held across funding");
+        check(flat.pairs()[0].closed && !flat.pairs()[1].closed,"Flat +1 bp closes long payers and retains short receivers");
+        check(flat.pairs()[0].exit_time==due-60000 && flat.fills().size()==6,"Flat-region exit closes both legs at the start of the funding window");
         flat.on_event(funding(due,.0001));
-        close(flat.totals().funding_pnl,-.04,"Low funding still charges held long positions");
-        close(flat.totals().realized_pnl,-.04,"Held-position funding payments are realized cash, not unrealized price PnL");
-        flat.finish(); check(!flat.pairs()[0].closed,"Replay end leaves held lots open");
+        close(flat.totals().funding_pnl,.04,"Exited long pays no flat funding; retained short receives it");
+        close(flat.side_totals()[0].funding_pnl,0,"No funding cash is charged to the exited long pair");
+        close(flat.totals().realized_pnl,flat.pairs()[0].realized_pnl+.04,"Exit price result and receiving funding remain separate realized components");
+        flat.finish(); check(!flat.pairs()[1].closed,"Replay end leaves funding receivers open");
+
+        Engine neutral(unbuffered); mixed(neutral); minutes(neutral,-.0005);
+        neutral.on_event(spot(due-61000)); neutral.on_event(book(due-61000,99970,99980));
+        neutral.on_event(premium(due-60000,-.0005));
+        close(neutral.estimated_funding_bps(),0,"Exactly -5 bp averaged premium gives zero funding");
+        check(!neutral.pairs()[0].closed && !neutral.pairs()[1].closed,"Zero funding does not close either direction");
+        for (double value : {-.00049999999999,-.00050000000001}) {
+            Engine tiny(unbuffered); mixed(tiny); minutes(tiny,value);
+            tiny.on_event(spot(due-61000)); tiny.on_event(book(due-61000,99970,99980));
+            tiny.on_event(premium(due-60000,value));
+            const bool positive=value>-.0005;
+            check(tiny.pairs()[positive?0:1].closed && !tiny.pairs()[positive?1:0].closed,
+                  "Any nonzero expected funding selects the payer without a minimum-rate exemption");
+            verify_side_attribution(tiny);
+        }
 
         Engine lower(unbuffered); mixed(lower); minutes(lower,-.00045);
         lower.on_event(spot(due-61000)); lower.on_event(book(due-61000,99970,99980));
@@ -298,9 +347,13 @@ int main() {
             try { Engine bad(invalid); } catch (const std::runtime_error&) { rejected=true; }
             check(rejected,"Invalid entry offsets cannot create an impossible lower basis threshold");
         }
+        for (const auto* scenario : {&engine,&convergence,&three_takers,&high,&negative,&flat,&neutral,&lower,&buffered}) verify_side_attribution(*scenario);
+        close(high.side_totals()[0].unrealized_pnl,0,"Closed long-perp side has zero unrealized price PnL");
+        check(high.side_totals()[0].closed_pairs==1 && high.side_totals()[1].closed_pairs==0,
+              "Funding-exited long pair stays in realized attribution while short remains unrealized");
         std::cout << "PASS: -5 bps equilibrium, inclusive -6.5/-3.5 bps entry boundaries, band cancellations, equal-BTC spot hedges,\n"
             << "concurrent pairs, two-sided convergence exits, all four fees, optional recycled cap, legacy no-exit replay,\n"
-            << "zero funding, pre-funding cancellations, partial fills, proxy/real spot spreads and realized/unrealized PnL.\n";
+            << "zero funding, pre-funding cancellations, partial fills, proxy/real spot spreads and per-direction price/funding attribution.\n";
         return 0;
     } catch(const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }
 }

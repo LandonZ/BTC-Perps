@@ -60,6 +60,18 @@ Totals Engine::totals() const {
     t.funding_pnl = funding_pnl_;
     return t;
 }
+std::array<SideTotals,2> Engine::side_totals() const {
+    std::array<SideTotals,2> result;
+    const double spread = final_perp_mid()-final_spot_mid();
+    for (std::size_t i=0;i<result.size();++i) {
+        const auto& a = sides_[i]; auto& t = result[i];
+        t.entries = a.entries; t.closed_pairs = a.closed_pairs;
+        t.open_btc = a.entries == a.closed_pairs ? 0 : (i == 0 ? open_long_btc_ : open_short_btc_);
+        t.unrealized_pnl = a.open_entry_cash+(i == 0 ? 1 : -1)*t.open_btc*spread-a.open_entry_fees;
+        t.realized_price_pnl = a.realized_price_pnl; t.funding_pnl = a.funding_pnl; t.fees = a.fees;
+    }
+    return result;
+}
 double Engine::used_capacity() const {
     return (config_.exit_on_equilibrium || config_.exit_before_funding) ? open_gross_btc_ : gross_btc_;
 }
@@ -119,6 +131,15 @@ void Engine::close_pair(Pair& p, const std::string& reason) {
     p.closed = true; p.exit_time = now_; p.exit_perp_price = perp_price;
     p.exit_spot_price = spot_price; p.exit_fees = perp_fee+spot_fee;
     p.realized_pnl = p.direction*p.btc*((perp_price-p.perp_price)-(spot_price-p.spot_price))-p.fees-p.exit_fees+p.funding_pnl;
+    auto& attribution = sides_[p.direction > 0 ? 0 : 1];
+    ++attribution.closed_pairs;
+    attribution.open_entry_cash -= p.direction*p.btc*(p.spot_price-p.perp_price);
+    attribution.open_entry_fees -= p.fees;
+    attribution.realized_price_pnl += p.realized_pnl-p.funding_pnl;
+    attribution.fees += p.exit_fees;
+    if (attribution.entries == attribution.closed_pairs) {
+        attribution.open_entry_cash = 0; attribution.open_entry_fees = 0;
+    }
     // Funding cash was realized when paid, even while this pair was open.
     realized_pnl_ += p.realized_pnl-p.funding_pnl;
     quote_side_ = 0; remaining_ = 0;
@@ -127,18 +148,16 @@ void Engine::close_before_funding() {
     // Causal estimate from completed official premium-index minutes only.
     if (!config_.exit_before_funding || open_pairs_.empty() || !ready() || next_funding_ < 0 ||
         now_ < next_funding_-config_.funding_cancel_ms || now_ >= next_funding_ || !premium_ready()) return;
-    const double interest = config_.funding_interest_bps, clamp = config_.funding_clamp_bps;
-    const double premium = average_premium_bps();
-    if (premium >= interest-clamp-1e-9 && premium <= interest+clamp+1e-9) return;
     const double rate = estimated_funding_bps();
-    if (std::abs(rate) < 1e-9) return;
+    // Even the flat +1 bp rate is a payment. No minimum-rate exemption.
+    if (rate == 0) return;
     const int payer = rate > 0 ? 1 : -1;
     if (config_.funding_exit_payers_only && (payer > 0 ? open_long_btc_ : open_short_btc_) < 1e-10) return;
     auto keep = open_pairs_.begin();
     for (auto index : open_pairs_) {
         auto& p = pairs_[index];
         if (config_.funding_exit_payers_only && p.direction != payer) { *keep++ = index; continue; }
-        close_pair(p,"PRE_FUNDING_LINEAR_REGION");
+        close_pair(p,"PRE_FUNDING_PAYER");
     }
     open_pairs_.erase(keep,open_pairs_.end());
     if (!config_.funding_exit_payers_only || payer > 0) open_long_btc_ = 0;
@@ -207,6 +226,11 @@ void Engine::trade(const Event& e) {
     if (q*spot_price < config_.spot_min_notional) return; // Do not create a fill whose immediate hedge is too small.
     const double perp_fee = q*perp_price*config_.perp_maker_bps/bps;
     const double spot_fee = q*spot_price*config_.spot_taker_bps/bps;
+    auto& attribution = sides_[direction > 0 ? 0 : 1];
+    ++attribution.entries;
+    attribution.open_entry_cash += direction*q*(spot_price-perp_price);
+    attribution.open_entry_fees += perp_fee+spot_fee;
+    attribution.fees += perp_fee+spot_fee;
     const std::size_t id = pairs_.size()+1;
     // Equal BTC is hedged immediately, including every partial perp fill.
     // Principal notionals differ by q*(perp_price-spot_price), as requested
@@ -262,6 +286,8 @@ void Engine::on_event(const Event& e, bool) {
             if (e.price <= 0) throw std::runtime_error("Funding settlement requires a positive mark");
             const double payment = -perp_btc_*e.price*e.funding_rate;
             funding_pnl_ += payment; realized_pnl_ += payment;
+            sides_[0].funding_pnl -= open_long_btc_*e.price*e.funding_rate;
+            sides_[1].funding_pnl += open_short_btc_*e.price*e.funding_rate;
             for (auto index : open_pairs_) {
                 auto& p = pairs_[index];
                 p.funding_pnl -= p.direction*p.btc*e.price*e.funding_rate;
@@ -281,7 +307,7 @@ void Engine::on_event(const Event& e, bool) {
     const auto t = totals();
     peak_ = std::max(peak_,t.net()); drawdown_ = std::max(drawdown_,peak_-t.net());
     if (ready() && (last_equity_ < 0 || now_/60000 > last_equity_/60000)) {
-        equity_.push_back({now_,t}); last_equity_ = now_;
+        equity_.push_back({now_,t,side_totals()}); last_equity_ = now_;
     }
 }
 void Engine::finish() {
@@ -289,7 +315,7 @@ void Engine::finish() {
     mark_equity(); // No exit or artificial closing fill.
 }
 void Engine::mark_equity() {
-    if (now_ >= 0) equity_.push_back({now_,totals()});
+    if (now_ >= 0) equity_.push_back({now_,totals(),side_totals()});
 }
 void replay(Engine& engine, const std::string& path) {
     replay_files(engine,{path});
@@ -336,10 +362,17 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
     quotes << "time_ms,status,side,perp_mid_basis_bps,price,remaining_btc\n";
     for (const auto& q : engine.decisions()) quotes << q.time << ',' << q.reason << ',' << q.side << ',' << q.perp_mid_basis_bps << ',' << q.price << ',' << q.remaining << '\n';
     }
-    equity << "time_ms,price_pnl,fees,funding_pnl,net_pnl,perp_btc,spot_btc,delta_btc,gross_perp_btc,open_gross_perp_btc,realized_pnl,unrealized_pnl\n";
-    for (const auto& e : engine.equity()) equity << e.time << ',' << e.totals.price_pnl << ',' << e.totals.fees << ',' << e.totals.funding_pnl << ','
+    const std::array<const char*,2> names = {"long_perp_short_spot","short_perp_long_spot"};
+    equity << "time_ms,price_pnl,fees,funding_pnl,net_pnl,perp_btc,spot_btc,delta_btc,gross_perp_btc,open_gross_perp_btc,realized_pnl,unrealized_pnl";
+    for (const auto* name : names) for (const auto* field : {"unrealized_pnl","realized_price_pnl","funding_pnl","fees","net_pnl","open_btc"}) equity << ',' << name << '_' << field;
+    equity << '\n';
+    for (const auto& e : engine.equity()) {
+        equity << e.time << ',' << e.totals.price_pnl << ',' << e.totals.fees << ',' << e.totals.funding_pnl << ','
         << e.totals.net() << ',' << e.totals.perp_btc << ',' << e.totals.spot_btc << ',' << e.totals.perp_btc+e.totals.spot_btc << ',' << e.totals.gross_perp_btc << ',' << e.totals.open_gross_perp_btc
-        << ',' << e.totals.realized_pnl << ',' << e.totals.net()-e.totals.realized_pnl << '\n';
+        << ',' << e.totals.realized_pnl << ',' << e.totals.net()-e.totals.realized_pnl;
+        for (const auto& side : e.sides) equity << ',' << side.unrealized_pnl << ',' << side.realized_price_pnl << ',' << side.funding_pnl << ',' << side.fees << ',' << side.net() << ',' << side.open_btc;
+        equity << '\n';
+    }
     const auto& c = engine.config(); const auto t = engine.totals();
     std::size_t closed = 0, wins = 0, losses = 0, funding_closed = 0, convergence_closed = 0, entry_violations = 0;
     for (const auto& p : engine.pairs()) {
@@ -348,7 +381,7 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
                                            : p.signal_basis_bps < config.equilibrium_bps+config.entry_offset_bps-1e-9;
         if (p.closed) {
             ++closed; wins += p.realized_pnl > 1e-10; losses += p.realized_pnl < -1e-10;
-            funding_closed += p.exit_reason == "PRE_FUNDING_LINEAR_REGION"; convergence_closed += p.exit_reason == "EQUILIBRIUM";
+            funding_closed += p.exit_reason == "PRE_FUNDING_PAYER"; convergence_closed += p.exit_reason == "EQUILIBRIUM";
         }
     }
     const auto& stats = engine.fill_stats();
@@ -361,7 +394,7 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         << "  \"entry_offset_bps\": " << c.entry_offset_bps << ",\n  \"entry_bid_basis_bps\": " << c.equilibrium_bps-c.entry_offset_bps
         << ",\n  \"entry_ask_basis_bps\": " << c.equilibrium_bps+c.entry_offset_bps << ",\n"
         << "  \"entry_signal\": \"10000 * (perp_mid / spot_mid - 1)\",\n  \"entry_band_violations\": " << entry_violations << ",\n"
-        << "  \"exit_execution\": \"" << (c.exit_on_equilibrium ? "Equilibrium crossings and any enabled funding exits" : c.exit_before_funding ? "Funding payers only in linear premium region during final pre-settlement window" : "No exits") << "\",\n"
+        << "  \"exit_execution\": \"" << (c.exit_on_equilibrium ? "Equilibrium crossings and any enabled funding exits" : c.exit_before_funding ? "Any estimated funding payer during final pre-settlement window, including flat funding region" : "No exits") << "\",\n"
         << "  \"capacity_rule\": \"" << (c.max_gross_perp_btc == 0 ? "Unlimited concurrent entry capacity" : (c.exit_on_equilibrium || c.exit_before_funding) ? "Open gross perp BTC; exits release capacity" : "Cumulative gross perp BTC; capacity not recycled") << "\",\n"
         << "  \"funding_assumption\": \"" << (c.funding_cashflows ? "Recorded settlement cash flows on held positions" : "Zero funding cash flows") << "\",\n  \"funding_cancel_seconds\": " << c.funding_cancel_ms/1000.0 << ",\n"
         << "  \"perp_maker_bps\": " << c.perp_maker_bps << ",\n  \"perp_taker_bps\": " << c.perp_taker_bps << ",\n  \"spot_taker_bps\": " << c.spot_taker_bps << ",\n"
@@ -369,6 +402,7 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         << "  \"exit_on_equilibrium\": " << (c.exit_on_equilibrium ? "true" : "false") << ",\n"
         << "  \"exit_before_funding\": " << (c.exit_before_funding ? "true" : "false") << ",\n"
         << "  \"funding_exit_payers_only\": " << (c.funding_exit_payers_only ? "true" : "false") << ",\n"
+        << "  \"funding_exit_flat_region_exempt\": false,\n"
         << "  \"funding_cashflows\": " << (c.funding_cashflows ? "true" : "false") << ",\n"
         << "  \"funding_interest_bps\": " << c.funding_interest_bps << ",\n  \"funding_clamp_bps\": " << c.funding_clamp_bps << ",\n"
         << "  \"funding_exit_pairs\": " << funding_closed << ",\n  \"convergence_exit_pairs\": " << convergence_closed << ",\n"
@@ -388,7 +422,18 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         << "  \"final_perp_mid\": " << engine.final_perp_mid() << ",\n  \"final_spot_mid\": " << engine.final_spot_mid() << ",\n"
         << "  \"delta_btc\": " << t.perp_btc+t.spot_btc << ",\n  \"gross_perp_btc\": " << t.gross_perp_btc << ",\n"
         << "  \"open_gross_perp_btc\": " << t.open_gross_perp_btc << ",\n  \"max_drawdown\": " << engine.max_drawdown() << ",\n"
-        << "  \"limitations\": \"Open positions marked at mids; closed pairs use both executable exit sides and all four leg fees. Spot price-only input uses last-trade proxy with assumed spread. Borrow availability, interest, impact, depth, margin and liquidation are not modeled. No queue reconstruction. Midpoint convergence does not guarantee a positive executable round trip.\"\n}\n";
+        << "  \"limitations\": \"Open positions marked at mids; closed pairs use both executable exit sides and all four leg fees. Spot price-only input uses last-trade proxy with assumed spread. Borrow availability, interest, impact, depth, margin and liquidation are not modeled. No queue reconstruction. Midpoint convergence does not guarantee a positive executable round trip.\",\n"
+        << "  \"basis_sides\": {\n";
+    const auto sides = engine.side_totals();
+    for (std::size_t i=0;i<sides.size();++i) {
+        const auto& side = sides[i];
+        summary << "    \"" << names[i] << "\": {\"entries\": " << side.entries << ", \"closed_pairs\": " << side.closed_pairs
+            << ", \"open_pairs\": " << side.entries-side.closed_pairs << ", \"open_btc\": " << side.open_btc
+            << ", \"unrealized_pnl\": " << side.unrealized_pnl << ", \"realized_price_pnl\": " << side.realized_price_pnl
+            << ", \"funding_pnl\": " << side.funding_pnl << ", \"fees\": " << side.fees << ", \"net_pnl\": " << side.net()
+            << '}' << (i+1<sides.size() ? "," : "") << '\n';
+    }
+    summary << "  }\n}\n";
     if ((details && (!fills || !pairs || !quotes)) || !equity || !summary) throw std::runtime_error("Failed writing paired basis results");
 }
 } // namespace btc::basis_maker

@@ -45,14 +45,15 @@ def continuous_statistics(directory, summary):
         previous = cumulative
         for key in ('perp_maker_bps','perp_taker_bps','spot_taker_bps','equilibrium_bps','entry_bid_basis_bps','entry_ask_basis_bps'):
             increment[key] = summary[key]
+        increment['funding_exit_flat_region_exempt']=summary.get('funding_exit_flat_region_exempt',True)
         trials.append(dict(date=datetime.fromtimestamp(day*86400,timezone.utc).strftime('%Y-%m-%d'),summary=increment))
     if not math.isclose(sum(t['summary']['net_pnl'] for t in trials),summary['net_pnl'],abs_tol=1e-6):
         raise ValueError('Daily equity changes do not reconcile')
     return dict(continuous_inventory=True,
         trial_definition='UTC daily changes in total marked equity from one continuous run; inventory carries across days and months',
         hypothesis='H0: mean daily marked equity change <= 0; H1: mean > 0',
-        interpretation='Previously unused dates with unchanged strategy parameters; dependent daily USD PnL, not returns on fixed capital or proof of live profitability',
-        sample_note='Unchanged rules on additional history. Carried inventory makes daily PnL dependent; confidence tests are diagnostics.',
+        interpretation='Revised funding-exit rule on previously inspected history; dependent daily USD PnL, not fixed-capital returns or proof of live profitability',
+        sample_note='Revised exit rule on previously inspected history. Carried inventory makes daily PnL dependent; tests are in-sample diagnostics.',
         limitations=['Queue, impact, depth, borrowing costs, margin and liquidation omitted; unlimited inventory.',
                      'Spot last-trade midpoint proxy and assumed 1 bp full spread; zero latency.',
                      'Funding exits use causal premium-minute CLOSE proxies.',
@@ -64,12 +65,12 @@ def continuous_statistics(directory, summary):
 def verify_funding(directory, manifests):
     """Independently reconcile each payment using held BTC and the source rate.
 
-    The strategy pauses entries for the final minute; the last pre-settlement
-    equity mark therefore records its held settlement inventory after exits.
+    Exact pre/post-settlement marks retain inventory after any exits that occur
+    later than the first sampled mark in the pre-funding minute.
     """
     with (directory/'equity.csv').open() as handle: points=list(csv.DictReader(handle))
     times=[int(point['time_ms']) for point in points]
-    count=0;maximum_error=0
+    count=0;maximum_error=0;paid=0;received=0;paying=[]
     for manifest in manifests:
         marks={millis(row[0]):float(row[1]) for row in rows(ROOT/manifest['sources']['mark']['path'])}
         for row in rows(ROOT/manifest['sources']['funding']['path']):
@@ -81,8 +82,43 @@ def verify_funding(directory, manifests):
             maximum_error=max(maximum_error,abs(actual-expected))
             if not math.isclose(actual,expected,rel_tol=1e-8,abs_tol=.01):
                 raise ValueError(f'Funding reconciliation failed at {timestamp}: {actual} versus {expected}')
+            for side,sign in (('long_perp_short_spot',1),('short_perp_long_spot',-1)):
+                key=side+'_funding_pnl'
+                side_expected=-sign*float(previous.get(side+'_open_btc',0))*marks[timestamp//60000*60000]*float(row[2])
+                side_actual=float(points[index][key])-float(previous.get(key,0))
+                if not math.isclose(side_actual,side_expected,rel_tol=1e-8,abs_tol=.01):
+                    raise ValueError(f'{side} funding reconciliation failed at {timestamp}')
+                paid+=max(0,-side_actual);received+=max(0,side_actual)
+                if side_actual<-.000001:
+                    paying.append(dict(time_ms=timestamp,side=side,paid_usdt=-side_actual))
             count+=1
-    return dict(funding_settlements=count,max_payment_error_usdt=maximum_error)
+    return dict(funding_settlements=count,max_payment_error_usdt=maximum_error,
+                gross_funding_paid_usdt=paid,gross_funding_received_usdt=received,
+                paying_side_settlements=paying)
+
+
+def verify_sides(directory, summary):
+    """Price, funding and fees must each reconcile independently at every mark."""
+    sides=('long_perp_short_spot','short_perp_long_spot')
+    checks={'unrealized_pnl':lambda r:float(r['unrealized_pnl']),
+            'realized_price_pnl':lambda r:float(r['realized_pnl'])-float(r['funding_pnl']),
+            'funding_pnl':lambda r:float(r['funding_pnl']),
+            'fees':lambda r:float(r['fees']), 'net_pnl':lambda r:float(r['net_pnl']),
+            'open_btc':lambda r:float(r['open_gross_perp_btc'])}
+    errors={key:0 for key in checks}; count=0
+    with (directory/'equity.csv').open() as handle:
+        for row in csv.DictReader(handle):
+            for key,expected in checks.items():
+                actual=sum(float(row[side+'_'+key]) for side in sides)
+                error=abs(actual-expected(row));errors[key]=max(errors[key],error)
+                if not math.isfinite(actual) or error>(1e-6 if key=='open_btc' else .05):
+                    raise ValueError(f'Direction {key} attribution failed at {row["time_ms"]}: {error}')
+            count+=1
+    for side in sides:
+        for key in checks:
+            if not math.isclose(float(row[side+'_'+key]),summary['basis_sides'][side][key],abs_tol=1e-6):
+                raise ValueError(f'Final {side} {key} does not match its summary')
+    return dict(side_attribution_marks=count,max_side_attribution_errors=errors)
 
 
 def main():
@@ -181,6 +217,10 @@ def main():
     expected=sum(summary[leg+'_notional']*summary[leg+'_bps']/10000 for leg in ('perp_maker','perp_taker','spot_taker'))
     if not math.isclose(summary['fees'],expected,rel_tol=1e-9,abs_tol=1e-4): raise ValueError('Fee reconciliation failed')
     validation=verify_funding(args.output,manifests)
+    validation.update(verify_sides(args.output,summary))
+    summary['funding_paid_usdt']=validation['gross_funding_paid_usdt']
+    summary['funding_received_usdt']=validation['gross_funding_received_usdt']
+    (args.output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     (args.output/'validation.json').write_text(json.dumps(validation,indent=2)+'\n')
     provenance=dict(months=months,start_ms=manifests[0]['start_ms'],end_ms=manifests[-1]['end_ms'],
                     engine_sha256=hashlib.sha256((MODEL/'build/archive-replay').read_bytes()).hexdigest(),

@@ -1,6 +1,6 @@
 # BTC basis strategy
 
-Equilibrium is **−5 bps versus spot**, with a **1.5 bp entry offset**. Quote the
+The configured midpoint-basis target is **−5 bps versus spot**, with a **1.5 bp entry offset**. Quote the
 Binance BTCUSDT perp bid at or below **−6.5 bps**, or its ask at or above
 **−3.5 bps**. Quote neither side inside that band. The signal is
 `10000 * (perp_mid / spot_mid - 1)`; boundaries are inclusive and are rechecked
@@ -17,8 +17,11 @@ spreads also cost money, and funding exits may occur before basis convergence.
 ## Funding-only exits
 
 During the final **60 seconds before funding**, close both legs only for pairs
-expected to **pay** funding, and only when the funding calculation is outside its
-flat region. All other pairs remain open, including at the end of the replay.
+expected to **pay any nonzero funding**, including the flat +1 bp rate.
+Close a long-perp pair when estimated funding is positive, or a short-perp pair
+when it is negative. Zero funding does not trigger an exit. Both legs cross the
+spread together and pay their taker fees. All receiving pairs remain open,
+including at the end of the replay.
 Entry quotes pause during that final minute and resume after settlement.
 
 Binance's eight-hour funding calculation is
@@ -29,13 +32,24 @@ estimated funding selects long-perp payers for exit; negative funding selects
 short-perp payers. Receiving pairs stay open. The flat rate is low, but not zero.
 See [Binance's funding explanation](https://www.binance.com/en/support/faq/detail/360033525031).
 
+Under that standard formula, zero funding occurs at **averaged premium P =
+−5 bps**. This does not establish that a current perp/spot midpoint basis of
+−5 bps is funding-neutral or a price equilibrium. The premium uses order-book
+impact prices versus a multi-exchange spot index, averaged over the funding
+window. Our entry midpoint basis uses different prices and no such average.
+The illustrative [funding curve](results/funding-curve.png) shows the formula;
+it is not an empirical fit between our entry signal and realized funding.
+
 The exit signal uses a causal, linearly weighted prefix average of completed
 **official premium-index 1-minute CLOSEs** within the funding period. A candle
 becomes available at `close_time + 1 ms`. This approximates Binance's more
 frequent premium sampling; it is not an exact historical funding forecast.
 It is separate from the instantaneous perp/spot basis used for entries. Missing,
 incomplete or stale premium history cannot trigger a funding exit. The upcoming
-final settlement rate is never used early.
+final settlement rate is never used early. Forecast errors or stale execution
+references can still leave residual payments; the replay audits actual paid
+and received funding separately instead of assuming the exit rule makes all
+payments zero.
 
 Held positions pay or receive the **recorded funding at settlement**. Funding
 cash is realized immediately; open-position unrealized PnL contains price marks
@@ -50,7 +64,8 @@ minute's mark-price OPEN, a proxy for the official funding mark. This window use
 The active window is **December 1, 2023 through February 29, 2024 UTC**: 91 days
 from one flat start. Positions, cash and funding carry across every day and
 month; there is no terminal liquidation. The strategy settings above are fixed
-throughout this run.
+throughout each replay. The exit rule has been revised on this already-inspected
+history, so these are in-sample comparisons rather than another untouched period.
 
 From the repository root:
 
@@ -67,12 +82,26 @@ The profit curve is [results/result.png](results/result.png), also available as
 `build/current/` retains the summary, sampled equity, daily feed coverage and
 input hashes so the charts can be reproduced without another replay.
 
+The PNG separates **long-perp/short-spot** pairs from **short-perp/long-spot**
+pairs. It shows cumulative price PnL (realized plus unrealized) and unrealized
+price PnL on still-open pairs, with funding cash in a separate final table.
+The two direction panels use separate, explicitly labeled vertical scales.
+Both legs and executed fees are included in each direction. An exited pair's
+price result moves from unrealized to realized; it does not disappear when its
+direction becomes flat. These are attributions of the same two-sided replay,
+not separate experiments that disable one entry direction. The HTML also lets
+you switch between unrealized and total price curves. `basis_sides` in
+`summary.json` and the direction columns in `equity.csv` retain this breakdown.
+
 To redraw saved results:
 
 ```bash
 Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_backtest.py --from-results Primary-Market-Model/build/current --png
 Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_trials.py --from-results Primary-Market-Model/results/trials.json
 ```
+
+Add `--funding-curve` to the saved-result command to redraw the standard
+eight-hour funding illustration alongside the report.
 
 ## Archive inputs
 

@@ -164,7 +164,8 @@ def render(report, output):
     fig.text(.08, .914, f"{trials[0]['date']} to {trials[-1]['date']} UTC  |  {inventory_label}  |  {fee_label}",fontsize=9.5,color='#52656e')
     lower=s.get('entry_bid_basis_bps',s['equilibrium_bps'])
     upper=s.get('entry_ask_basis_bps',s['equilibrium_bps'])
-    fig.text(.08,.881,f'Entry basis: bid at/below {lower:g} bps; offer at/above {upper:g} bps. Funding exits retain the outside-flat-region payer rule.',fontsize=9,color='#52656e')
+    funding_rule='Exit any expected funding payer, including flat rates.' if s.get('funding_exit_flat_region_exempt',True) is False else 'Funding exits retain the outside-flat-region payer rule.'
+    fig.text(.08,.881,f'Entry basis: bid at/below {lower:g} bps; offer at/above {upper:g} bps. {funding_rule}',fontsize=9,color='#52656e')
     for x, title, value in [(.08,'MEAN DAILY MARKED PNL',f"{a['mean']:+,.2f} USDT"),
                             (.40,'POSITIVE DAYS' if continuous else 'POSITIVE TRIALS',f"{a['positive']} / {a['n']}"),
                             (.72,'ONE-SIDED T-TEST p',f"{a['t_test']['p_one_sided']:.4g}")]:

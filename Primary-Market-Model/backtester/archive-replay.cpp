@@ -188,7 +188,11 @@ int main(int argc,char** argv) {
             if (event.time < previous_time) throw std::runtime_error("Merged archive clock moved backwards");
             if (previous_time >= first && event.time/86400000 != previous_time/86400000) engine.mark_equity();
             previous_time = event.time; ++count;
+            // Retain exact settlement inventory after any exits that occurred
+            // later than the first sampled mark of the blackout minute.
+            if (event.kind == 'F' && !engine.equity().empty()) engine.mark_equity();
             engine.on_event(event);
+            if (event.kind == 'F') engine.mark_equity();
             if (event.time/86400000 != progress) {
                 progress = event.time/86400000;
                 const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now()-started).count();

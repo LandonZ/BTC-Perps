@@ -57,7 +57,7 @@ class ArchiveReplayTests(unittest.TestCase):
             subprocess.run([str(MODEL/'build/basis-maker'),'--events',str(root/'events.csv'),
                             '--premium-events',str(root/'premium.csv'),'--details','1','--output',str(root/'reference')],
                            check=True,capture_output=True)
-            small=premium+[event(int(row[0]),'F',100000+(int(row[0])-START)//DAY*100,
+            small=[event(START-8*3600000,'R',rate=0,interval=8)]+premium+[event(int(row[0]),'F',100000+(int(row[0])-START)//DAY*100,
                                  rate=row[2],interval=row[1]) for row in data['funding']]
             small.sort(key=lambda r:(int(r[0]),r[1]!='F'))
             write_csv(root/'small.csv',[COLUMNS,*small])
@@ -76,6 +76,7 @@ class ArchiveReplayTests(unittest.TestCase):
             with (root/'streaming/equity.csv').open() as handle: equity=list(csv.DictReader(handle))
             daily={int(row['time_ms'])//DAY:row for row in equity}
             self.assertEqual(len(daily),3)
+            self.assertEqual(min(daily),START//DAY,'Settlement audit must not add the pre-window schedule seed as another equity day')
             self.assertEqual(int(daily[START//DAY]['time_ms']),START+DAY-900)
             self.assertGreater(actual['paired_partial_fills'],0)
             self.assertGreater(actual['funding_exit_pairs'],0)

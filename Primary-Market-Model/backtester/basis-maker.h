@@ -1,5 +1,6 @@
 #pragma once
 #include "events.h"
+#include <array>
 
 namespace btc::basis_maker {
 using events::Event;
@@ -51,7 +52,13 @@ struct Totals {
     double open_gross_perp_btc = 0, realized_pnl = 0;
     double net() const { return price_pnl-fees+funding_pnl; }
 };
-struct Equity { Millis time; Totals totals; };
+// Each side is a complete hedged pair, never an unhedged perp leg.
+struct SideTotals {
+    std::size_t entries = 0, closed_pairs = 0;
+    double open_btc = 0, unrealized_pnl = 0, realized_price_pnl = 0, funding_pnl = 0, fees = 0;
+    double net() const { return unrealized_pnl+realized_price_pnl+funding_pnl; }
+};
+struct Equity { Millis time; Totals totals; std::array<SideTotals,2> sides; };
 struct FillStats {
     std::size_t count = 0,open = 0,max_open = 0;
     double perp_maker_notional = 0,perp_taker_notional = 0,spot_taker_notional = 0;
@@ -64,6 +71,7 @@ public:
     void finish();
     void mark_equity(); // Record a day-end mark without changing resting quotes or inventory.
     Totals totals() const;
+    std::array<SideTotals,2> side_totals() const;
     const Config& config() const { return config_; }
     const std::vector<Fill>& fills() const { return fills_; }
     const FillStats& fill_stats() const { return fill_stats_; }
@@ -107,6 +115,11 @@ private:
     int proxy_events_ = 0, mid_events_ = 0;
     std::vector<Fill> fills_;
     FillStats fill_stats_;
+    struct SideAccounting {
+        std::size_t entries = 0, closed_pairs = 0;
+        double open_entry_cash = 0, open_entry_fees = 0, realized_price_pnl = 0, funding_pnl = 0, fees = 0;
+    };
+    std::array<SideAccounting,2> sides_; // Long perp / short spot, then short perp / long spot.
     std::vector<Pair> pairs_;
     std::vector<std::size_t> open_pairs_;
     std::vector<Decision> decisions_;

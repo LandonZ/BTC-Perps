@@ -15,9 +15,9 @@ coverage checks. Premium-index candle CLOSEs become available at close_time + 1 
 Original funding timestamps, including millisecond offsets, are preserved.
 
 The active strategy quotes the perp only outside a 1.5 bp band around the -5 bp
-basis equilibrium. Maker fees are 0 bps; taker fees are 0.5 bps per fill. It
-cancels entry quotes before funding and exits expected payers only outside the
-flat funding region. Held positions pay or receive recorded funding. Spot
+configured basis target. Maker fees are 0 bps; taker fees are 0.5 bps per fill. It
+cancels entry quotes before funding and exits any expected payer, including in
+the flat funding region. Held positions pay or receive recorded funding. Spot
 references use last trades as a midpoint proxy with an assumed 1 bp full spread.
 
 `make -C Primary-Market-Model run` streams the archives into the backtest without

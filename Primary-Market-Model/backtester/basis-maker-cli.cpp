@@ -23,7 +23,7 @@ int main(int argc,char** argv) {
             const std::string key = argv[i];
             if (key == "--help") {
                 std::cout << "Paired basis entries: equilibrium -5 bps, bid at/below -6.5 / ask at/above -3.5 bps, immediate equal-BTC spot hedge.\n"
-                    << "Hold through convergence; exit only funding payers in the linear premium region before settlement.\n"
+                    << "Hold through convergence; exit any expected funding payer before settlement, including the flat region.\n"
                     << "  --events FILE (repeatable) --events-list FILE --output DIR --details 0|1\n"
                     << "  --equilibrium-bps -5 --entry-offset-bps 1.5 --order-btc 0.01 --max-gross-perp-btc 0 (unlimited)\n"
                     << "  --premium-events FILE (required for pre-funding exits)\n"
