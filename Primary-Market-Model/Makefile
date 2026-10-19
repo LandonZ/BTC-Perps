@@ -37,9 +37,11 @@ month: build/archive-replay
 	build/trial-venv/bin/python tools/run_archive_backtest.py --start-month $(MONTH) --end-month $(MONTH) $(ARGS)
 
 # Shreev's basis strategy on the recorded Coinbase and Binance days; charts in results/pitch/.
+COINBASE_DAY ?= 2026-10-19
+BINANCE_DAY ?= 2026-10-01
 sweep: build/basis-maker
-	python3 tools/coinbase_basis_events.py --date 2026-10-19
-	python3 tools/basis_sweep.py
+	python3 tools/coinbase_basis_events.py --date $(COINBASE_DAY)
+	python3 tools/basis_sweep.py --coinbase-day $(COINBASE_DAY) --binance-day $(BINANCE_DAY)
 
 test: build/basis-maker-tests build/bip-funding-tests build/basis-maker build/archive-replay build/archive-sort
 	./build/basis-maker-tests

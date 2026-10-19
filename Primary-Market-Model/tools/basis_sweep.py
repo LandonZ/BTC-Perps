@@ -17,9 +17,11 @@ It also measures basis markouts (how far the mid basis moves back toward fair va
 after a deviation) on a 1-second grid.
 
 Outputs go to results/pitch/: sweep.csv, markouts.csv, summary.md and PNG charts.
+The Coinbase day is converted with tools/coinbase_basis_events.py first if needed.
 
   make -C Primary-Market-Model build/basis-maker
   python3 Primary-Market-Model/tools/basis_sweep.py
+  python3 Primary-Market-Model/tools/basis_sweep.py --coinbase-day 2026-10-20 --binance-day 2026-11-01
 """
 import argparse
 import json
@@ -28,6 +30,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+from coinbase_basis_events import convert as convert_coinbase
 
 MODEL = Path(__file__).resolve().parents[1]
 ROOT = MODEL.parent
@@ -38,8 +42,7 @@ HORIZONS = [1, 5, 10, 30, 60, 300, 900]
 
 VENUES = {
     "coinbase": {
-        "label": "Coinbase BIP vs BTC-USD (2026-10-19, 10.7 h)",
-        "events": ROOT / "data/live/2026-10-19/basis-events.csv.gz",
+        "name": "Coinbase BIP vs BTC-USD",
         # Fair basis is a 10-minute EMA: BIP has no -5 bp funding kink and trades ~3 bp rich.
         # BIP is 1-contract (0.01 BTC) on a $5 tick; trade sizes are whole contracts, so
         # participation is 100% of a print, but only prints THROUGH our price fill us.
@@ -47,9 +50,7 @@ VENUES = {
                  "--tick", "5", "--quantity-step", "0.01", "--participation", "1", "--fill-at-touch", "0"],
     },
     "binance": {
-        "label": "Binance BTCUSDT perp vs spot (2026-10-01, 24 h)",
-        "events": ROOT / "data/binance/tardis/2026-10-01/events.csv.gz",
-        "premium": ROOT / "data/binance/tardis/2026-10-01/premium-events.csv.gz",
+        "name": "Binance BTCUSDT perp vs spot",
         # Fixed -5 bp equilibrium from Binance's funding formula; Allen's queue approximation.
         "args": ["--equilibrium-bps", "-5", "--participation", "0.1", "--fill-at-touch", "1"],
     },
@@ -60,6 +61,21 @@ COMMON = ["--exit-on-equilibrium", "1", "--close-at-end", "1", "--order-btc", "0
 # Reference palette (dataviz skill): surface, ink and the first categorical slots.
 SURFACE, INK, INK2, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
 SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#6250d6"]
+
+
+def select_days(coinbase_day, binance_day):
+    """Point each venue at its recorded day, converting the Coinbase recording if needed."""
+    live = ROOT / "data/live" / coinbase_day
+    events = live / "basis-events.csv.gz"
+    if not events.exists():
+        convert_coinbase(live, events)
+    VENUES["coinbase"].update(day=coinbase_day, events=events)
+    tardis = ROOT / "data/binance/tardis" / binance_day
+    VENUES["binance"].update(day=binance_day, events=tardis / "events.csv.gz", premium=tardis / "premium-events.csv.gz")
+    for spec in VENUES.values():
+        for key in ("events", "premium"):
+            if key in spec and not spec[key].exists():
+                raise SystemExit(f"Missing {spec[key]}")
 
 
 def run_engine(venue, offset, out):
@@ -109,6 +125,7 @@ def sweep(work):
     for venue in VENUES:
         book = books(venue)
         hours = (book["perp"][0][-1] - book["perp"][0][0]) / 3.6e6
+        VENUES[venue]["label"] = f"{VENUES[venue]['name']} ({VENUES[venue]['day']}, {hours:.1f} h)"
         for offset in OFFSETS:
             out = work / f"{venue}-offset-{offset}"
             summary = run_engine(venue, offset, out)
@@ -276,8 +293,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--output", type=Path, default=MODEL / "results/pitch")
     parser.add_argument("--work", type=Path, default=MODEL / "build/sweep")
+    parser.add_argument("--coinbase-day", default="2026-10-19", help="recording under data/live/")
+    parser.add_argument("--binance-day", default="2026-10-01", help="Tardis day under data/binance/tardis/")
     parser.add_argument("--no-charts", action="store_true")
     args = parser.parse_args()
+    select_days(args.coinbase_day, args.binance_day)
     args.output.mkdir(parents=True, exist_ok=True)
     results = sweep(args.work)
     grids = {venue: basis_grid(venue) for venue in VENUES}

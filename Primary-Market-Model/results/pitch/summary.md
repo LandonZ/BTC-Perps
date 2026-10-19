@@ -1,7 +1,7 @@
 # Basis strategy on recorded data
 
 - **Coinbase BIP vs BTC-USD (2026-10-19, 10.7 h)**: basis mean +2.83 bp, median +3.42, std 1.71 (1-second grid, 33,264 fresh seconds).
-- **Binance BTCUSDT perp vs spot (2026-10-01, 24 h)**: basis mean -4.69 bp, median -4.70, std 0.75 (1-second grid, 57,064 fresh seconds).
+- **Binance BTCUSDT perp vs spot (2026-10-01, 24.0 h)**: basis mean -4.69 bp, median -4.70, std 0.75 (1-second grid, 57,064 fresh seconds).
 
 Net bps per round trip, zero latency (gross = before fees):
 
