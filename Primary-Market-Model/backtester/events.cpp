@@ -1,6 +1,8 @@
 #include "events.h"
 #include <cmath>
+#include <cstdio>
 #include <fstream>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 
@@ -18,15 +20,36 @@ std::vector<std::string> cells(const std::string& line) {
     return out;
 }
 }
+// Gzipped replays (*.gz) stream through `gzip -dc`, so committed recordings need no unpacking.
+class GzipStream {
+public:
+    explicit GzipStream(const std::string& path) : pipe_(popen(("gzip -dc '"+path+"'").c_str(),"r"),pclose) {
+        if (!pipe_) throw std::runtime_error("Cannot run gzip for "+path);
+    }
+    bool getline(std::string& line) {
+        line.clear();
+        for (int ch; (ch = std::fgetc(pipe_.get())) != EOF;) {
+            if (ch == '\n') return true;
+            line += static_cast<char>(ch);
+        }
+        return !line.empty();
+    }
+private:
+    std::unique_ptr<FILE,int(*)(FILE*)> pipe_;
+};
 void read(const std::string& path, const std::function<void(const Event&,bool)>& feed) {
-    std::ifstream file(path);
-    if (!file) throw std::runtime_error("Cannot read events: "+path+"; run tools/download_binance_maker.py first");
+    const bool gz = path.size() > 3 && path.compare(path.size()-3,3,".gz") == 0;
+    std::ifstream file;
+    std::optional<GzipStream> zipped;
+    if (gz) zipped.emplace(path); else file.open(path);
+    if (!gz && !file) throw std::runtime_error("Cannot read events: "+path+"; run tools/download_binance_maker.py first");
+    auto next_line = [&](std::string& out) { return gz ? zipped->getline(out) : static_cast<bool>(std::getline(file,out)); };
     std::string line;
-    std::getline(file,line);
+    next_line(line);
     if (line.find("time_ms,kind,price,quantity,bid,ask,buyer_maker,funding_rate,interval_hours") != 0)
         throw std::runtime_error("Unexpected Binance replay header");
     std::optional<Event> previous;
-    while (std::getline(file,line)) {
+    while (next_line(line)) {
         if (line.empty()) continue;
         const auto c = cells(line);
         if (c.size() != 9 || c[1].size() != 1) throw std::runtime_error("Malformed replay row");
