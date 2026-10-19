@@ -225,3 +225,22 @@ changes `Q` and trades `T` for both products, from the public level2 and
 market_trades channels) and `funding.csv`, a 15-second REST poll of the BIP
 product's `funding_rate`, `funding_time` and `index_price`. Both are gitignored.
 `recv_ms` is the laptop clock; a sleeping laptop leaves gaps.
+
+## Recent Binance days (Tardis.dev)
+
+Binance's public archives no longer publish recent best bid/ask files, and
+binance.com refuses US connections. `tools/download_tardis_binance.py` builds the
+same replay inputs from Tardis.dev recordings; the first day of each month is
+free without an API key.
+
+```bash
+python3 Primary-Market-Model/tools/download_tardis_binance.py --date 2026-10-01
+Primary-Market-Model/build/basis-maker \
+    --events data/binance/tardis/2026-10-01/events.csv \
+    --premium-events data/binance/tardis/2026-10-01/premium-events.csv
+```
+
+It maps perp book_ticker to `Q`, perp trades to `T`, spot book_ticker to `S` (a
+real spot bid/ask, not the last-trade proxy), derivative_ticker settlements to
+`F` with an `R` seed, and Binance's 1-minute premium-index klines to `P`.
+`manifest.json` records source URLs, hashes, row counts and timing repairs.

@@ -12,3 +12,6 @@ Primary-Market-Model/results/*
 !Primary-Market-Model/results/result.png
 !Primary-Market-Model/results/trials.json
 !Primary-Market-Model/results/trials.png
+
+# Tardis.dev raw downloads (re-downloadable; several GB per day)
+data/binance/tardis/**/raw/
