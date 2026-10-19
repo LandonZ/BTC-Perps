@@ -27,6 +27,9 @@ Engine::Engine(Config config) : config_(config) {
         config.max_spot_age_ms < 0 || config.max_perp_age_ms < 0 ||
         quantity(config.max_gross_perp_btc > 0 ? std::min(config.order_btc,config.max_gross_perp_btc) : config.order_btc) < config.quantity_step)
         throw std::runtime_error("Invalid basis equilibrium, cancellation window, age or quantity");
+    if (config.center_halflife_ms < 0 || config.max_hold_ms < 0 ||
+        !std::isfinite(config.funding_exit_min_bps) || config.funding_exit_min_bps < 0)
+        throw std::runtime_error("Center half-life, maximum hold and funding exit minimum must be nonnegative");
 }
 double Engine::quantity(double size) const {
     return std::floor(std::max(0.0,size)/config_.quantity_step+1e-9)*config_.quantity_step;
@@ -42,10 +45,9 @@ int Engine::entry_side(double observed_basis) const {
     // Boundaries are inclusive. A zero offset preserves the old policy of
     // never quoting exactly at equilibrium, where neither side has an edge.
     constexpr double tolerance = 1e-9;
-    if (observed_basis < config_.equilibrium_bps-tolerance &&
-        observed_basis <= config_.equilibrium_bps-config_.entry_offset_bps+tolerance) return 1;
-    if (observed_basis > config_.equilibrium_bps+tolerance &&
-        observed_basis >= config_.equilibrium_bps+config_.entry_offset_bps-tolerance) return -1;
+    const double center = center_bps();
+    if (observed_basis < center-tolerance && observed_basis <= center-config_.entry_offset_bps+tolerance) return 1;
+    if (observed_basis > center+tolerance && observed_basis >= center+config_.entry_offset_bps-tolerance) return -1;
     return 0;
 }
 bool Engine::funding_guard() const {
@@ -92,18 +94,16 @@ void Engine::record_fill(Fill fill) {
 }
 void Engine::close_converged() {
     if (!config_.exit_on_equilibrium || open_pairs_.empty() || !ready()) return;
-    const double observed_basis = basis();
+    const double observed_basis = basis(), center = center_bps();
     // Every live pair has the same direction: crossing the shared equilibrium
     // closes that side before opposite entries become eligible. Avoid scanning
     // all live lots on every tick when no crossing occurred.
     const int direction = pairs_[open_pairs_.front()].direction;
-    if (direction > 0 ? observed_basis < config_.equilibrium_bps-1e-9
-                      : observed_basis > config_.equilibrium_bps+1e-9) return;
+    if (direction > 0 ? observed_basis < center-1e-9 : observed_basis > center+1e-9) return;
     auto keep = open_pairs_.begin();
     for (auto index : open_pairs_) {
         auto& p = pairs_[index];
-        const bool converged = p.direction > 0 ? observed_basis >= config_.equilibrium_bps-1e-9
-                                               : observed_basis <= config_.equilibrium_bps+1e-9;
+        const bool converged = p.direction > 0 ? observed_basis >= center-1e-9 : observed_basis <= center+1e-9;
         if (!converged) { *keep++ = index; continue; }
         close_pair(p,"EQUILIBRIUM");
     }
@@ -112,6 +112,26 @@ void Engine::close_converged() {
     if (std::abs(open_gross_btc_) < 1e-10) open_gross_btc_ = 0;
     if (std::abs(perp_btc_) < 1e-10) perp_btc_ = 0;
     if (std::abs(spot_btc_) < 1e-10) spot_btc_ = 0;
+}
+void Engine::close_expired() {
+    if (config_.max_hold_ms <= 0 || open_pairs_.empty() || !ready()) return;
+    auto keep = open_pairs_.begin();
+    for (auto index : open_pairs_) {
+        auto& p = pairs_[index];
+        if (now_-p.time < config_.max_hold_ms) { *keep++ = index; continue; }
+        close_pair(p,"MAX_HOLD");
+    }
+    open_pairs_.erase(keep,open_pairs_.end());
+    if (std::abs(open_gross_btc_) < 1e-9) open_gross_btc_ = 0;
+}
+void Engine::update_center() {
+    // Time-weighted EMA of the mid basis, using the books in force since the last update.
+    if (config_.center_halflife_ms <= 0 || spot_time_ < 0 || perp_time_ < 0 || spot_bid_ <= 0 || perp_bid_ <= 0) return;
+    const double observed_basis = basis();
+    if (center_time_ < 0) { center_ = observed_basis; center_start_ = center_time_ = now_; return; }
+    const double weight = 1-std::exp(-std::log(2.0)*static_cast<double>(now_-center_time_)/config_.center_halflife_ms);
+    center_ += weight*(observed_basis-center_);
+    center_time_ = now_;
 }
 void Engine::close_pair(Pair& p, const std::string& reason) {
     // Both reduce-only legs cross the current executable side, even in the
@@ -149,8 +169,8 @@ void Engine::close_before_funding() {
     if (!config_.exit_before_funding || open_pairs_.empty() || !ready() || next_funding_ < 0 ||
         now_ < next_funding_-config_.funding_cancel_ms || now_ >= next_funding_ || !premium_ready()) return;
     const double rate = estimated_funding_bps();
-    // Even the flat +1 bp rate is a payment. No minimum-rate exemption.
-    if (rate == 0) return;
+    // Even the flat +1 bp rate is a payment unless funding_exit_min_bps exempts it.
+    if (rate == 0 || std::abs(rate) < config_.funding_exit_min_bps) return;
     const int payer = rate > 0 ? 1 : -1;
     if (config_.funding_exit_payers_only && (payer > 0 ? open_long_btc_ : open_short_btc_) < 1e-10) return;
     auto keep = open_pairs_.begin();
@@ -184,6 +204,8 @@ void Engine::decide() {
     if (ready()) {
         observed_basis = basis();
         if (funding_guard()) reason = "PRE_FUNDING_CANCEL";
+        else if (config_.center_halflife_ms > 0 && (center_start_ < 0 || now_-center_start_ < config_.center_halflife_ms))
+            reason = "CENTER_WARMUP";
         else if (quantity(available_capacity()) < config_.quantity_step)
             reason = (config_.exit_on_equilibrium || config_.exit_before_funding) ? "OPEN_POSITION_CAP" : "GROSS_POSITION_CAP";
         else {
@@ -245,6 +267,7 @@ void Engine::trade(const Event& e) {
     record_fill({now_,id,"SPOT","TAKER",-direction,spot_price,q,q*spot_price,spot_fee});
     pairs_.push_back({id,now_,direction,q,perp_price,spot_price,(perp_price/spot_price-1)*bps,perp_fee+spot_fee});
     pairs_.back().signal_basis_bps = observed_basis;
+    pairs_.back().center_bps = center_bps();
     open_pairs_.push_back(pairs_.size()-1);
 }
 void Engine::on_event(const Event& e, bool) {
@@ -252,6 +275,7 @@ void Engine::on_event(const Event& e, bool) {
     for (double v : {e.price,e.quantity,e.bid,e.ask,e.funding_rate,e.interval_hours})
         if (!std::isfinite(v)) throw std::runtime_error("Basis event values must be finite");
     now_ = e.time;
+    update_center();
     if (next_funding_ < 0) {
         next_funding_ = (now_/default_interval_ms+1)*default_interval_ms;
         premium_period_start_ = next_funding_-default_interval_ms; premium_time_ = premium_period_start_;
@@ -302,6 +326,7 @@ void Engine::on_event(const Event& e, bool) {
         premium_weighted_ = 0; premium_weight_ = 0; premium_complete_ = true;
     } else throw std::runtime_error("Unknown basis event");
     close_converged();
+    close_expired();
     close_before_funding();
     decide(); // Zero latency: references, exits and entry cancellations apply immediately.
     const auto t = totals();
@@ -311,6 +336,12 @@ void Engine::on_event(const Event& e, bool) {
     }
 }
 void Engine::finish() {
+    if (config_.close_at_end && perp_bid_ > 0 && spot_bid_ > 0) {
+        for (auto index : open_pairs_) close_pair(pairs_[index],"END_OF_DATA");
+        open_pairs_.clear(); open_long_btc_ = 0; open_short_btc_ = 0; open_gross_btc_ = 0;
+        if (std::abs(perp_btc_) < 1e-9) perp_btc_ = 0;
+        if (std::abs(spot_btc_) < 1e-9) spot_btc_ = 0;
+    }
     quote_side_ = 0; remaining_ = 0;
     mark_equity(); // No exit or artificial closing fill.
 }
@@ -353,12 +384,12 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
     fills << "time_ms,pair_id,leg,liquidity,side,price,btc,notional,fee,phase\n";
     for (const auto& f : engine.fills()) fills << f.time << ',' << f.pair_id << ',' << f.leg << ',' << f.liquidity << ','
         << (f.side > 0 ? "BUY" : "SELL") << ',' << f.price << ',' << f.btc << ',' << f.notional << ',' << f.fee << ',' << f.phase << '\n';
-    pairs << "pair_id,time_ms,direction,perp_btc,spot_btc,perp_price,spot_price,perp_notional,spot_notional,notional_difference,entry_basis_bps,entry_fees,status,exit_time_ms,exit_perp_price,exit_spot_price,exit_fees,realized_pnl,funding_pnl,exit_reason,signal_basis_bps\n";
+    pairs << "pair_id,time_ms,direction,perp_btc,spot_btc,perp_price,spot_price,perp_notional,spot_notional,notional_difference,entry_basis_bps,entry_fees,status,exit_time_ms,exit_perp_price,exit_spot_price,exit_fees,realized_pnl,funding_pnl,exit_reason,signal_basis_bps,center_bps\n";
     for (const auto& p : engine.pairs()) pairs << p.id << ',' << p.time << ',' << (p.direction > 0 ? "LONG_PERP_SHORT_SPOT" : "SHORT_PERP_LONG_SPOT") << ','
         << p.btc << ',' << p.btc << ',' << p.perp_price << ',' << p.spot_price << ',' << p.btc*p.perp_price << ',' << p.btc*p.spot_price << ','
         << p.btc*(p.perp_price-p.spot_price) << ',' << p.entry_basis_bps << ',' << p.fees << ','
         << (p.closed ? "CLOSED" : "OPEN") << ',' << p.exit_time << ',' << p.exit_perp_price << ',' << p.exit_spot_price
-        << ',' << p.exit_fees << ',' << p.realized_pnl << ',' << p.funding_pnl << ',' << p.exit_reason << ',' << p.signal_basis_bps << '\n';
+        << ',' << p.exit_fees << ',' << p.realized_pnl << ',' << p.funding_pnl << ',' << p.exit_reason << ',' << p.signal_basis_bps << ',' << p.center_bps << '\n';
     quotes << "time_ms,status,side,perp_mid_basis_bps,price,remaining_btc\n";
     for (const auto& q : engine.decisions()) quotes << q.time << ',' << q.reason << ',' << q.side << ',' << q.perp_mid_basis_bps << ',' << q.price << ',' << q.remaining << '\n';
     }
@@ -375,13 +406,17 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
     }
     const auto& c = engine.config(); const auto t = engine.totals();
     std::size_t closed = 0, wins = 0, losses = 0, funding_closed = 0, convergence_closed = 0, entry_violations = 0;
+    std::size_t hold_closed = 0, end_closed = 0;
+    double closed_bps = 0, closed_hold_ms = 0;
     for (const auto& p : engine.pairs()) {
         const auto& config = engine.config();
-        entry_violations += p.direction > 0 ? p.signal_basis_bps > config.equilibrium_bps-config.entry_offset_bps+1e-9
-                                           : p.signal_basis_bps < config.equilibrium_bps+config.entry_offset_bps-1e-9;
+        entry_violations += p.direction > 0 ? p.signal_basis_bps > p.center_bps-config.entry_offset_bps+1e-9
+                                           : p.signal_basis_bps < p.center_bps+config.entry_offset_bps-1e-9;
         if (p.closed) {
             ++closed; wins += p.realized_pnl > 1e-10; losses += p.realized_pnl < -1e-10;
             funding_closed += p.exit_reason == "PRE_FUNDING_PAYER"; convergence_closed += p.exit_reason == "EQUILIBRIUM";
+            hold_closed += p.exit_reason == "MAX_HOLD"; end_closed += p.exit_reason == "END_OF_DATA";
+            closed_bps += p.realized_pnl/(p.btc*p.spot_price)*bps; closed_hold_ms += p.exit_time-p.time;
         }
     }
     const auto& stats = engine.fill_stats();
@@ -406,6 +441,11 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         << "  \"funding_cashflows\": " << (c.funding_cashflows ? "true" : "false") << ",\n"
         << "  \"funding_interest_bps\": " << c.funding_interest_bps << ",\n  \"funding_clamp_bps\": " << c.funding_clamp_bps << ",\n"
         << "  \"funding_exit_pairs\": " << funding_closed << ",\n  \"convergence_exit_pairs\": " << convergence_closed << ",\n"
+        << "  \"max_hold_exit_pairs\": " << hold_closed << ",\n  \"end_of_data_exit_pairs\": " << end_closed << ",\n"
+        << "  \"closed_pair_mean_net_bps\": " << (closed ? closed_bps/closed : 0) << ",\n"
+        << "  \"closed_pair_mean_hold_seconds\": " << (closed ? closed_hold_ms/closed/1000 : 0) << ",\n"
+        << "  \"center_halflife_seconds\": " << c.center_halflife_ms/1000.0 << ",\n  \"max_hold_seconds\": " << c.max_hold_ms/1000.0 << ",\n"
+        << "  \"close_at_end\": " << (c.close_at_end ? "true" : "false") << ",\n  \"funding_exit_min_bps\": " << c.funding_exit_min_bps << ",\n"
         << "  \"funding_signal\": \"Causal weighted average of completed 1m premium-index CLOSE proxies; not exact exchange forecast\",\n"
         << "  \"order_btc\": " << c.order_btc << ",\n  \"max_gross_perp_btc\": " << c.max_gross_perp_btc << ",\n"
         << "  \"participation\": " << c.participation << ",\n  \"fill_at_touch\": " << (c.fill_at_touch ? "true" : "false") << ",\n"

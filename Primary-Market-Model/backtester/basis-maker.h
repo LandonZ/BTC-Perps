@@ -19,6 +19,12 @@ struct Config {
     bool retain_fills = true; // Aggregate accounting remains exact without the optional fill ledger.
     bool exit_before_funding = true, funding_exit_payers_only = true, funding_cashflows = true;
     double funding_interest_bps = 1, funding_clamp_bps = 5;
+    double funding_exit_min_bps = 0; // Exit payers only when |estimated rate| reaches this; 0 = any nonzero rate.
+    // Fair basis: 0 = fixed equilibrium_bps; >0 = time-weighted EMA of the mid basis with this half-life.
+    // No entries until one half-life of data has been seen.
+    Millis center_halflife_ms = 0;
+    Millis max_hold_ms = 0;          // >0: close a pair after this long, whatever the basis.
+    bool close_at_end = false;       // Close open pairs at the last book with taker fills, so PnL is realized.
 };
 struct Fill {
     Millis time;
@@ -39,6 +45,7 @@ struct Pair {
     double funding_pnl = 0;
     std::string exit_reason = "";
     double signal_basis_bps = 0; // Midpoint basis used to allow the entry, before executable spot spread.
+    double center_bps = 0;       // Fair basis when the pair was entered.
 };
 struct Decision {
     Millis time;
@@ -86,12 +93,15 @@ public:
     bool premium_ready() const;
     double average_premium_bps() const;
     double estimated_funding_bps() const;
+    double center_bps() const { return config_.center_halflife_ms > 0 ? center_ : config_.equilibrium_bps; }
 private:
     bool ready() const;
     bool funding_guard() const;
     void decide();
     void trade(const Event& event);
     void close_converged();
+    void close_expired();
+    void update_center();
     void close_before_funding();
     void close_pair(Pair& pair, const std::string& reason);
     void record_fill(Fill fill);
@@ -113,6 +123,8 @@ private:
     double premium_weighted_ = 0, premium_weight_ = 0;
     bool premium_complete_ = true;
     int proxy_events_ = 0, mid_events_ = 0;
+    double center_ = 0;
+    Millis center_time_ = -1, center_start_ = -1;
     std::vector<Fill> fills_;
     FillStats fill_stats_;
     struct SideAccounting {

@@ -351,9 +351,42 @@ int main() {
         close(high.side_totals()[0].unrealized_pnl,0,"Closed long-perp side has zero unrealized price PnL");
         check(high.side_totals()[0].closed_pairs==1 && high.side_totals()[1].closed_pairs==0,
               "Funding-exited long pair stays in realized attribution while short remains unrealized");
+        Config exempt=unbuffered; exempt.funding_exit_min_bps=1.5;
+        Engine cheap(exempt); mixed(cheap); minutes(cheap,0);
+        cheap.on_event(spot(due-61000)); cheap.on_event(book(due-61000,99970,99980)); cheap.on_event(premium(due-60000,0));
+        check(!cheap.pairs()[0].closed && !cheap.pairs()[1].closed,"Funding below the exit minimum is not worth an exit");
+
+        Config hold=unbuffered; hold.exit_before_funding=false; hold.max_hold_ms=5000;
+        Engine expiring(hold); seed(expiring); expiring.on_event(trade(start+1,99940,true));
+        check(expiring.pairs().size()==1 && !expiring.pairs()[0].closed,"Pair opens on the perp fill");
+        expiring.on_event(book(start+4000,99930,99940));
+        check(!expiring.pairs()[0].closed,"Pair is kept before the maximum hold");
+        expiring.on_event(book(start+5001,99930,99940));
+        check(expiring.pairs()[0].closed && expiring.pairs()[0].exit_reason=="MAX_HOLD","Pair closes at the maximum hold");
+        close(expiring.totals().perp_btc,0,"Maximum-hold exit flattens the perp");
+
+        Config end=unbuffered; end.exit_before_funding=false; end.close_at_end=true;
+        Engine ending(end); seed(ending); ending.on_event(trade(start+1,99940,true)); ending.finish();
+        check(ending.pairs()[0].closed && ending.pairs()[0].exit_reason=="END_OF_DATA","Open pairs close at the end of the data");
+        close(ending.totals().perp_btc+ending.totals().spot_btc,0,"End-of-data exit leaves no position");
+        close(ending.totals().net(),ending.totals().realized_pnl,"End-of-data exit realizes all PnL");
+
+        Config moving=unbuffered; moving.exit_before_funding=false; moving.center_halflife_ms=60000;
+        Engine ema(moving); seed(ema); ema.on_event(spot(start+1000));
+        ema.on_event(book(start+30000));
+        check(ema.decisions().back().reason=="CENTER_WARMUP","No quotes until one half-life of basis history");
+        ema.on_event(book(start+62000));
+        close(ema.center_bps(),-5.5,"A constant basis is its own fair value");
+        check(ema.decisions().back().side==0,"Basis at its own fair value quotes neither side");
+        ema.on_event(book(start+62001,99900,99910));
+        check(ema.decisions().back().side==1,"Basis below the moving fair value joins the perp bid");
+        for (Millis t=start+70000;t<=start+122001;t+=8000) { ema.on_event(spot(t)); ema.on_event(book(t,99900,99910)); }
+        check(ema.center_bps() < -5.5-1.9 && ema.center_bps() > -9.5,"Fair value moves halfway toward the new basis in one half-life");
+
         std::cout << "PASS: -5 bps equilibrium, inclusive -6.5/-3.5 bps entry boundaries, band cancellations, equal-BTC spot hedges,\n"
             << "concurrent pairs, two-sided convergence exits, all four fees, optional recycled cap, legacy no-exit replay,\n"
-            << "zero funding, pre-funding cancellations, partial fills, proxy/real spot spreads and per-direction price/funding attribution.\n";
+            << "zero funding, pre-funding cancellations, partial fills, proxy/real spot spreads and per-direction price/funding attribution;\n"
+            << "funding exit minimum, maximum hold, end-of-data exit and EMA fair basis.\n";
         return 0;
     } catch(const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }
 }
