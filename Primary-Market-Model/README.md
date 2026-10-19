@@ -244,3 +244,16 @@ It maps perp book_ticker to `Q`, perp trades to `T`, spot book_ticker to `S` (a
 real spot bid/ask, not the last-trade proxy), derivative_ticker settlements to
 `F` with an `R` seed, and Binance's 1-minute premium-index klines to `P`.
 `manifest.json` records source URLs, hashes, row counts and timing repairs.
+
+### Historical BIP funding estimate
+
+Coinbase publishes no BIP funding history, so
+`data/coinbase/BIP-20DEC30-CDE_funding_1h_reconstructed.csv` applies the rule
+above to minute candles (2026-06-03 to 2026-10-15: mean +0.078 bp/h, range
+-1.12 to +0.37 bp/h). Candles are coarser than the real 3-minute marks, so treat
+it as an estimate. To regenerate:
+
+```bash
+python3 Primary-Market-Model/tools/download_basis_data.py --perp BIP-20DEC30-CDE --start 2026-06-03 --end 2026-10-16
+python3 Primary-Market-Model/tools/reconstruct_bip_funding.py
+```
