@@ -1,0 +1,81 @@
+== Downloading minute candles (cached rows are reused)
+BTC-USD: downloading historical minute candles
+BTC-PERP-INTX: downloading historical minute candles
+BTC-USD: 29,993 candles
+BTC-PERP-INTX: 29,992 candles
+BTC-USD: 59,988 candles
+BTC-PERP-INTX: 59,982 candles
+BTC-USD: 89,988 candles
+BTC-PERP-INTX: 89,839 candles
+BTC-USD: 119,988 candles
+BTC-PERP-INTX: 119,405 candles
+BTC-USD: 149,988 candles
+BTC-PERP-INTX: 149,326 candles
+BTC-USD: wrote 172,788 rows to /mnt/c/workspace/ucf/btc_perps_futures_20261020/BTC-Perps/data/coinbase/BTC-USD_spot_1m.csv
+BTC-PERP-INTX: wrote 172,072 rows to /mnt/c/workspace/ucf/btc_perps_futures_20261020/BTC-Perps/data/coinbase/BTC-PERP-INTX_1m.csv
+BIP-20DEC30-CDE: downloading historical minute candles
+BTC-USD: downloading historical minute candles
+BTC-USD: 179,987 candles
+BTC-USD: wrote 194,387 rows to /mnt/c/workspace/ucf/btc_perps_futures_20261020/BTC-Perps/data/coinbase/BTC-USD_spot_1m.csv
+BIP-20DEC30-CDE: 27,575 candles
+BIP-20DEC30-CDE: 53,888 candles
+BIP-20DEC30-CDE: 78,834 candles
+BIP-20DEC30-CDE: 104,509 candles
+BIP-20DEC30-CDE: 130,364 candles
+BIP-20DEC30-CDE: 157,381 candles
+BIP-20DEC30-CDE: wrote 170,363 rows to /mnt/c/workspace/ucf/btc_perps_futures_20261020/BTC-Perps/data/coinbase/BIP-20DEC30-CDE_1m.csv
+wrote 3,239 hourly rates to /mnt/c/workspace/ucf/btc_perps_futures_20261020/BTC-Perps/data/coinbase/BIP-20DEC30-CDE_funding_1h_reconstructed.csv (2026-06-03T01:00:00Z .. 2026-10-15T23:00:00Z); mean +0.078 bp/h, min -1.119, max +0.367; 0 empty hours carried
+== Building
+== 1. Allen's backtest: BTC-USD vs INTX perp, recorded INTX funding, zero cost
+HISTORICAL ZERO-COST BASIS BACKTEST
+UTC period: 2026-06-03T00:00:00Z through 2026-09-30T23:54:00Z
+Strategy: both_basis_threshold
+Maximum hold: 5 minutes; size: 0.010000 BTC per leg
+Trades: 1558 (long basis 30, short basis 1528)
+BASIS PRICE PnL: 78.794200
+REALIZED FUNDING PnL: 0.921826
+TOTAL PnL: 79.716026
+Mean trade PnL: 0.682458 bps of entry spot notional
+Win rate: 87.869063%
+Maximum mark-to-market drawdown: 0.695100
+Missing matched minutes: 735; skipped feature checks: 159; delayed exits: 0; missing-deadline trades excluded: 0
+Results: results/basis-both-5m/{summary.json,trades.csv,equity.csv}
+Prices are idealized minute opens; TWAP uses trailing minute closes; USD/USDC assumed at parity.
+The last open pair is liquidated at data end. This does not simulate resting-order fills or liquidations.
+== 2. Same backtester on BTC-USD vs BIP-20DEC30-CDE, reconstructed BIP funding, zero cost
+HISTORICAL ZERO-COST BASIS BACKTEST
+UTC period: 2026-06-03T01:00:00Z through 2026-10-15T23:00:00Z
+Strategy: both_basis_threshold
+Maximum hold: 5 minutes; size: 0.010000 BTC per leg
+Trades: 5590 (long basis 529, short basis 5061)
+BASIS PRICE PnL: 1447.500000
+REALIZED FUNDING PnL: 1.091226
+TOTAL PnL: 1448.591226
+Mean trade PnL: 3.741639 bps of entry spot notional
+Win rate: 99.212880%
+Maximum mark-to-market drawdown: 4.813800
+Missing matched minutes: 24047; skipped feature checks: 13911; delayed exits: 0; missing-deadline trades excluded: 4
+Results: results/bip-basis-both-5m/{summary.json,trades.csv,equity.csv}
+Prices are idealized minute opens; TWAP uses trailing minute closes; USD/USDC assumed at parity.
+The last open pair is liquidated at data end. This does not simulate resting-order fills or liquidations.
+== 3. Paper-trader engine on the same candles (taker rule, latency 0, minute opens)
+-- intx, zero fees
+latency_ms  trades   win%     net_usd    fees_usd  funding_usd  mean_bps  entry_slip_bps    max_dd  position
+         0    1610   87.4     81.8233      0.0000       0.9809    0.6802          0.0000    3.2120         0
+WARNING: all fees are zero. Results are not net of trading costs.
+Results in results/candles-intx
+-- intx, fees: --perp-fee-usd 0.15 --spot-taker-bps 6
+latency_ms  trades   win%     net_usd    fees_usd  funding_usd  mean_bps  entry_slip_bps    max_dd  position
+         0    1090    0.2  -1308.6775   1370.3435       0.8207  -15.0136          0.0000 1309.3544         0
+Results in results/candles-intx-fees
+-- bip, zero fees
+latency_ms  trades   win%     net_usd    fees_usd  funding_usd  mean_bps  entry_slip_bps    max_dd  position
+         0   15472   99.2   3943.5112      0.0000       3.0938    3.7232          0.0000    4.8138         0
+WARNING: all fees are zero. Results are not net of trading costs.
+Results in results/candles-bip
+-- bip, fees: --perp-fee-usd 0.15 --spot-taker-bps 6
+latency_ms  trades   win%     net_usd    fees_usd  funding_usd  mean_bps  entry_slip_bps    max_dd  position
+         0   14402    0.5 -12159.8995  16305.0261       3.8248  -12.1846          0.000012159.8995         0
+Results in results/candles-bip-fees
+(matplotlib not installed: skipping plots; sudo apt install python3-matplotlib)
+Done. Compare results/basis-both-5m, results/bip-basis-both-5m and results/candles-*/summary.json

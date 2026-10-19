@@ -10,7 +10,7 @@
   "minimum_edge_bps": 0.0000000000,
   "exit_basis_forecast": "symmetric_threshold_targets",
   "funding_pnl_source": "recorded_hourly_rates_and_marks",
-  "spot_rows": 172788,
+  "spot_rows": 194387,
   "perp_rows": 172072,
   "matched_rows": 172060,
   "missing_matched_minutes": 735,

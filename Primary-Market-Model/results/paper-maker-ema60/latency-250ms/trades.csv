@@ -1,0 +1,1 @@
+entry_ts,exit_ts,entry_ms,exit_ms,entry_utc,exit_utc,side,quantity_btc,entry_spot,entry_perp,exit_spot,exit_perp,signal_basis_bps,entry_basis_bps,exit_basis_bps,price_pnl,funding_pnl,fees,net_pnl,net_bps,funding_payments,forced_end,exit_reason
