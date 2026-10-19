@@ -7,3 +7,6 @@ __pycache__/
 # Local builds and paper-trading output
 Primary-Market-Model/build/
 Primary-Market-Model/results/paper/
+
+# Tardis.dev raw downloads (re-downloadable; can be several GB per day)
+data/binance/tardis/**/raw/
