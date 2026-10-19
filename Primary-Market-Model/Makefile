@@ -17,6 +17,9 @@ build/basis-maker: $(SOURCES) $(HEADERS) backtester/basis-maker-cli.cpp | build
 build/basis-maker-tests: $(SOURCES) $(HEADERS) tests/basis-maker-tests.cpp | build
 	$(CXX) $(CXXFLAGS) $(SOURCES) tests/basis-maker-tests.cpp -o $@
 
+build/bip-funding-tests: model/bip-funding.cpp model/bip-funding.h tests/bip-funding-tests.cpp | build
+	$(CXX) $(CXXFLAGS) model/bip-funding.cpp tests/bip-funding-tests.cpp -o $@
+
 build/archive-replay: $(SOURCES) $(HEADERS) backtester/archive-format.h backtester/archive-replay.cpp | build
 	$(CXX) $(CXXFLAGS) $(SOURCES) backtester/archive-replay.cpp -o $@
 
@@ -33,8 +36,9 @@ month: build/archive-replay
 	python3 tools/prepare_binance_basis_month.py --month $(MONTH) --archives-only
 	build/trial-venv/bin/python tools/run_archive_backtest.py --start-month $(MONTH) --end-month $(MONTH) $(ARGS)
 
-test: build/basis-maker-tests build/basis-maker build/archive-replay build/archive-sort
+test: build/basis-maker-tests build/bip-funding-tests build/basis-maker build/archive-replay build/archive-sort
 	./build/basis-maker-tests
+	./build/bip-funding-tests
 	python3 tests/binance-data-tests.py
 	python3 tests/archive-replay-tests.py
 

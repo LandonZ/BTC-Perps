@@ -184,3 +184,29 @@ correlated and nonstationary. HAC and bootstrap are diagnostics, not guarantees
 of valid inference or realistic execution. The three-month replay should be
 judged alongside drawdown, exposure, costs and performance in other unused
 periods. Statistical tests live in `tests/trial-analysis-tests.py`.
+
+## Coinbase: BIP perp vs BTC-USD spot
+
+INTX BTC-PERP has been paused since 2026-10-01, so the Coinbase leg uses the
+Coinbase Derivatives nano BTC perp-style future `BIP-20DEC30-CDE` (0.01 BTC per
+contract, $5 tick, hourly funding) against `BTC-USD` spot.
+`model/bip-funding.{h,cpp}` implements Coinbase's published funding rule:
+
+```text
+futures mark = 3m VWAP | else 3m TWAP of mid | else spot mark + previous gap
+spot mark    = 3m VWAP | else 3m TWAP of mid | else futures mark + previous gap
+Premium      = mean over the hour's 20 samples of (futures mark - spot mark) / spot mark / 24
+Rate         = 0.75 * Premium + 0.25 * Previous rate     (no published cap)
+Long pays    = contracts * 0.01 * mark * Rate            (negative rate: long receives)
+```
+
+Unlike Binance there is no interest term or clamp, so the formula's
+funding-neutral basis is **0 bps**, not -5. Hourly funding is about the basis
+divided by 24, a fraction of a basis point. `FundingEstimator` builds the marks and
+the projected rate from streamed trades and quotes; it publishes no rate for an
+hour with no futures data or for a partial first hour.
+
+Funding accrues hourly and is cash-settled at the midday and end-of-day margin
+runs. Open questions: whether "spot" means Coinbase BTC-USD or the product API's
+`index_price`, and whether a position flat at the hour boundary avoids that
+hour's accrual.
