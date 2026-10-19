@@ -1,0 +1,5 @@
+# Store text with LF line endings, including commits made from Windows checkouts.
+* text=auto eol=lf
+*.png binary
+*.zip binary
+*.gz binary
