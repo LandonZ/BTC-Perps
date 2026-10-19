@@ -257,3 +257,52 @@ it as an estimate. To regenerate:
 python3 Primary-Market-Model/tools/download_basis_data.py --perp BIP-20DEC30-CDE --start 2026-06-03 --end 2026-10-16
 python3 Primary-Market-Model/tools/reconstruct_bip_funding.py
 ```
+
+## Shreev's version on recorded data (`make sweep`)
+
+The rules from the meeting: rest a perp bid when the basis is below fair value by
+the entry offset (or an offer when above), hedge each fill immediately with an
+equal-BTC spot taker order, and **close the pair when the basis returns to fair
+value**, so positions turn over in seconds and never sit through funding. The
+engine options this needs (all off by default, so the runs above are unchanged):
+
+- `--exit-on-equilibrium 1`: close at fair value (Allen's runs hold to funding).
+- `--center-halflife-seconds 600`: fair value is a 10-minute EMA of the mid basis.
+  Used on Coinbase, where BIP has no -5 bp kink and its level drifts.
+- `--close-at-end 1`: close what is left at the last book so all PnL is realized.
+- `--max-hold-seconds N` and `--funding-exit-min-bps X` (exit a payer only when the
+  estimated rate is at least X; the exit costs two taker fills).
+- `--events` also reads `.gz` files directly.
+
+`tools/coinbase_basis_events.py` turns a Coinbase recording into the same event
+format (BIP book `Q`, BIP trades `T` in BTC, BTC-USD book `S`, hourly `F` at the
+published rate). Coinbase's trade `side` is the maker's side, so a BUY print hits
+the bid. `tools/basis_sweep.py` runs both venues at entry offsets of 0.5-2 bp and
+writes `results/pitch/`: `summary.md`, `sweep.csv`, `markouts.csv` and charts.
+
+```bash
+make -C Primary-Market-Model sweep
+```
+
+What the recorded days show (0.01 BTC lots, at most 0.1 BTC open):
+
+- **The basis mean-reverts.** Binance BTCUSDT averaged **-4.69 bp** to spot on
+  2026-10-01 (std 0.75), right at the -5 bp funding equilibrium. Coinbase BIP
+  traded **+2.8 bp rich** on 2026-10-19 and drifted, so its fair value is an EMA.
+  A 1-1.5 bp deviation moves about 0.5-0.8 bp back within a minute on both venues
+  (`markouts.png`).
+- **Gross edge is real but small**: +1.0 to +2.8 bp per round trip, rising with the
+  entry offset while the number of trips falls. Holds average 3-30 seconds and no
+  funding was paid.
+- **Fees decide it.** At a Virtu-tier ~2 bp per cycle, only a ±2 bp entry stays
+  positive (about +0.7 bp per trip on both venues). Retail fees (10+ bp) lose on
+  every setting (`fees.png`).
+- **Speed matters as much.** Hedging and exiting 50 ms late costs 0.1-0.9 bp per
+  trip and turns every setting negative at 2 bp fees (`latency.png`).
+
+Limits: one Binance day and 10.7 hours of Coinbase, so these are illustrations,
+not significance tests. The replay has zero latency; the latency rows only reprice
+the hedge and exit legs later and do not change decisions. Maker fills assume
+we were at the front of the queue (Binance: 10% of each print at our price;
+Coinbase: whole prints through our price only). Spot shorting assumes BTC is held
+or borrowed. Fee levels are swept rather than taken from a specific account tier.

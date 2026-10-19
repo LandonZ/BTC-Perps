@@ -12,6 +12,10 @@ Primary-Market-Model/results/*
 !Primary-Market-Model/results/result.png
 !Primary-Market-Model/results/trials.json
 !Primary-Market-Model/results/trials.png
+!Primary-Market-Model/results/pitch/
 
 # Tardis.dev raw downloads (re-downloadable; several GB per day)
 data/binance/tardis/**/raw/
+
+# Converted Coinbase replays (regenerate with tools/coinbase_basis_events.py)
+data/live/**/basis-events.csv.gz

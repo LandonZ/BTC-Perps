@@ -5,7 +5,7 @@ HEADERS = backtester/events.h backtester/basis-maker.h
 ARGS ?=
 MONTH ?= 2024-02
 
-.PHONY: all run backtest basis-maker month test clean
+.PHONY: all run backtest basis-maker month sweep test clean
 all: build/basis-maker
 
 build:
@@ -36,11 +36,17 @@ month: build/archive-replay
 	python3 tools/prepare_binance_basis_month.py --month $(MONTH) --archives-only
 	build/trial-venv/bin/python tools/run_archive_backtest.py --start-month $(MONTH) --end-month $(MONTH) $(ARGS)
 
+# Shreev's basis strategy on the recorded Coinbase and Binance days; charts in results/pitch/.
+sweep: build/basis-maker
+	python3 tools/coinbase_basis_events.py --date 2026-10-19
+	python3 tools/basis_sweep.py
+
 test: build/basis-maker-tests build/bip-funding-tests build/basis-maker build/archive-replay build/archive-sort
 	./build/basis-maker-tests
 	./build/bip-funding-tests
 	python3 tests/binance-data-tests.py
 	python3 tests/archive-replay-tests.py
+	python3 tests/coinbase-events-tests.py
 
 clean:
 	rm -rf build
