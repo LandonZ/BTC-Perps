@@ -210,3 +210,18 @@ Funding accrues hourly and is cash-settled at the midday and end-of-day margin
 runs. Open questions: whether "spot" means Coinbase BTC-USD or the product API's
 `index_price`, and whether a position flat at the hour boundary avoids that
 hour's accrual.
+
+### Recording Coinbase ticks
+
+Run on a laptop (needs `pip install websockets`; no API key):
+
+```bash
+python3 Primary-Market-Model/tools/record_coinbase.py      # Ctrl-C to stop
+```
+
+It writes `data/live/YYYY-MM-DD/events.csv`
+(`recv_ms,exch_ms,kind,product,bid,bid_qty,ask,ask_qty,price,size,side`: top-of-book
+changes `Q` and trades `T` for both products, from the public level2 and
+market_trades channels) and `funding.csv`, a 15-second REST poll of the BIP
+product's `funding_rate`, `funding_time` and `index_price`. Both are gitignored.
+`recv_ms` is the laptop clock; a sleeping laptop leaves gaps.
