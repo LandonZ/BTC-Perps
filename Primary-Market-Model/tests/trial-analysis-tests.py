@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Check the statistical test direction, serial dependence and resampling."""
 import math
+import csv
+import json
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'tools'))
 from run_trials import analyze, make_report
+from run_archive_backtest import continuous_statistics
 
 
 class TrialAnalysisTests(unittest.TestCase):
@@ -62,6 +66,26 @@ class TrialAnalysisTests(unittest.TestCase):
                                    key,'0.5'],capture_output=True,text=True)
             self.assertEqual(result.returncode,2)
             self.assertIn('require a replay',result.stderr)
+
+    def test_continuous_daily_changes_reconcile_without_inventory_resets(self):
+        with tempfile.TemporaryDirectory(prefix='continuous-stat-test-') as temporary:
+            directory=Path(temporary)
+            with (directory/'equity.csv').open('w',newline='') as handle:
+                writer=csv.writer(handle)
+                writer.writerow(['time_ms','net_pnl','price_pnl','fees','funding_pnl'])
+                writer.writerows([[1701475199999,10,12,2,0],[1701561599999,25,27,3,1],[1701647999999,5,7,4,2]])
+            summary=dict(net_pnl=5,perp_maker_bps=0,perp_taker_bps=.5,spot_taker_bps=.5,
+                         equilibrium_bps=-5,entry_bid_basis_bps=-6.5,entry_ask_basis_bps=-3.5)
+            result=continuous_statistics(directory,summary)
+            self.assertTrue(result['continuous_inventory'])
+            self.assertEqual([t['summary']['net_pnl'] for t in result['trials']],[10,15,-20])
+            self.assertEqual(result['statistics']['total'],5)
+            saved=directory/'saved.json'
+            saved.write_text(json.dumps(result))
+            output=directory/'redrawn.json'
+            subprocess.run([sys.executable,str(Path(__file__).resolve().parents[1]/'tools/run_trials.py'),
+                            '--from-results',str(saved),'--output',str(output)],check=True,capture_output=True)
+            self.assertTrue(json.loads(output.read_text())['continuous_inventory'])
 
 
 if __name__ == '__main__':

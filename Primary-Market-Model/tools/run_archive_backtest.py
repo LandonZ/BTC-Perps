@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""Continuously replay monthly source ZIPs without retaining expanded tick CSVs."""
+import argparse
+import bisect
+import csv
+import hashlib
+import json
+import math
+import os
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+from download_binance_maker import ROOT, COLUMNS, event, rows, millis
+from run_backtest import MODEL, render_report, render_png
+from run_trials import analyze, render as render_trials
+
+
+def months_between(start, end):
+    first = datetime.strptime(start, '%Y-%m')
+    last = datetime.strptime(end, '%Y-%m')
+    if last < first: raise ValueError('End month precedes start month')
+    result = []
+    while first <= last:
+        result.append(first.strftime('%Y-%m'))
+        first = first.replace(year=first.year+(first.month==12),month=first.month%12+1)
+    return result
+
+
+def continuous_statistics(directory, summary):
+    daily = {}
+    with (directory/'equity.csv').open() as handle:
+        for row in csv.DictReader(handle): daily[int(row['time_ms'])//86400000] = row
+    keys = sorted(daily)
+    if any(b!=a+1 for a,b in zip(keys,keys[1:])): raise ValueError('Missing UTC equity day')
+    previous = dict(net_pnl=0,price_pnl=0,fees=0,funding_pnl=0)
+    trials = []
+    for day in keys:
+        cumulative = {key:float(daily[day][key]) for key in previous}
+        increment = {key:cumulative[key]-previous[key] for key in previous}
+        previous = cumulative
+        for key in ('perp_maker_bps','perp_taker_bps','spot_taker_bps','equilibrium_bps','entry_bid_basis_bps','entry_ask_basis_bps'):
+            increment[key] = summary[key]
+        trials.append(dict(date=datetime.fromtimestamp(day*86400,timezone.utc).strftime('%Y-%m-%d'),summary=increment))
+    if not math.isclose(sum(t['summary']['net_pnl'] for t in trials),summary['net_pnl'],abs_tol=1e-6):
+        raise ValueError('Daily equity changes do not reconcile')
+    return dict(continuous_inventory=True,
+        trial_definition='UTC daily changes in total marked equity from one continuous run; inventory carries across days and months',
+        hypothesis='H0: mean daily marked equity change <= 0; H1: mean > 0',
+        interpretation='Previously unused dates with unchanged strategy parameters; dependent daily USD PnL, not returns on fixed capital or proof of live profitability',
+        sample_note='Unchanged rules on additional history. Carried inventory makes daily PnL dependent; confidence tests are diagnostics.',
+        limitations=['Queue, impact, depth, borrowing costs, margin and liquidation omitted; unlimited inventory.',
+                     'Spot last-trade midpoint proxy and assumed 1 bp full spread; zero latency.',
+                     'Funding exits use causal premium-minute CLOSE proxies.',
+                     'HAC and block bootstrap address some serial dependence but not structural change or fill-model error.'],
+        statistics=analyze([t['summary']['net_pnl'] for t in trials]),
+        price_only_statistics=analyze([t['summary']['price_pnl']-t['summary']['fees'] for t in trials]),trials=trials)
+
+
+def verify_funding(directory, manifests):
+    """Independently reconcile each payment using held BTC and the source rate.
+
+    The strategy pauses entries for the final minute; the last pre-settlement
+    equity mark therefore records its held settlement inventory after exits.
+    """
+    with (directory/'equity.csv').open() as handle: points=list(csv.DictReader(handle))
+    times=[int(point['time_ms']) for point in points]
+    count=0;maximum_error=0
+    for manifest in manifests:
+        marks={millis(row[0]):float(row[1]) for row in rows(ROOT/manifest['sources']['mark']['path'])}
+        for row in rows(ROOT/manifest['sources']['funding']['path']):
+            timestamp=millis(row[0]);index=bisect.bisect_left(times,timestamp)
+            if index==len(points):raise ValueError('No equity observation after funding settlement')
+            previous=points[index-1] if index else {}
+            expected=-float(previous.get('perp_btc',0))*marks[timestamp//60000*60000]*float(row[2])
+            actual=float(points[index]['funding_pnl'])-float(previous.get('funding_pnl',0))
+            maximum_error=max(maximum_error,abs(actual-expected))
+            if not math.isclose(actual,expected,rel_tol=1e-8,abs_tol=.01):
+                raise ValueError(f'Funding reconciliation failed at {timestamp}: {actual} versus {expected}')
+            count+=1
+    return dict(funding_settlements=count,max_payment_error_usdt=maximum_error)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--start-month', default='2023-12')
+    parser.add_argument('--end-month', default='2024-02')
+    parser.add_argument('--output', type=Path, default=MODEL/'build/current')
+    parser.add_argument('--wait-for-inputs', action='store_true',help='Allow verified monthly downloads to finish while earlier months replay')
+    parser.add_argument('--stream-source', nargs=3,help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    if args.stream_source:
+        month,key,work=args.stream_source
+        deadline=time.monotonic()+7200
+        while True:
+            manifest=ROOT/'data/binance/maker'/month/'month-inputs.manifest.json'
+            m=json.loads(manifest.read_text())
+            if key in m['sources']:
+                source=m['sources'][key];path=ROOT/source['path']
+                with path.open('rb') as handle: digest=hashlib.file_digest(handle,'sha256').hexdigest()
+                if digest!=source['sha256']:raise ValueError('Stream source checksum mismatch')
+                kind={'book':'Q','trades':'T','spot_trades':'S'}[key]
+                unzip=subprocess.Popen(['unzip','-p',str(path)],stdout=subprocess.PIPE)
+                try:
+                    subprocess.run([str(MODEL/'build/archive-sort'),kind,str(Path(work)/(month+'-'+key)),work],stdin=unzip.stdout,check=True)
+                    unzip.stdout.close()
+                    if unzip.wait()!=0:raise RuntimeError('Archive decompression failed')
+                finally:
+                    if not unzip.stdout.closed:unzip.stdout.close()
+                    if unzip.poll() is None:unzip.terminate()
+                    unzip.wait()
+                return
+            if time.monotonic()>deadline:raise TimeoutError('Source download did not finish within two hours')
+            time.sleep(2)
+    months = months_between(args.start_month,args.end_month)
+    manifests = []
+    for month in months:
+        path = ROOT/'data/binance/maker'/month/'month-inputs.manifest.json'
+        m = json.loads(path.read_text())
+        required={'mark','funding','premium'} if args.wait_for_inputs else {'book','trades','spot_trades','mark','funding','premium'}
+        if not required.issubset(m['sources']) or (not args.wait_for_inputs and m['status']!='checksum_verified'):
+            raise ValueError(f'{month}: incomplete archive manifest')
+        for name,source in m['sources'].items():
+            file = ROOT/source['path']
+            with file.open('rb') as handle: actual = hashlib.file_digest(handle,'sha256').hexdigest()
+            if actual != source['sha256']: raise ValueError(f'{month} {name}: checksum mismatch')
+        manifests.append(m)
+        print(f'Available input hashes verified: {month}',flush=True)
+    subprocess.run(['make','-C',str(MODEL),'build/archive-replay','build/archive-sort'],check=True)
+    args.output.mkdir(parents=True,exist_ok=True)
+    # Seed the known eight-hour schedule before the first UTC midnight. This
+    # cancels entries during any millisecond delay in its recorded settlement;
+    # it never uses the upcoming funding rate as an exit signal or cash flow.
+    small = [event(manifests[0]['start_ms']-8*3600000,'R',rate=0,interval=8)]
+    for m in manifests:
+        marks = {millis(row[0]):row[1] for row in rows(ROOT/m['sources']['mark']['path'])}
+        for row in rows(ROOT/m['sources']['funding']['path']):
+            t = millis(row[0])
+            small.append(event(t,'F',marks[t//60000*60000],rate=row[2],interval=row[1]))
+        for row in rows(ROOT/m['sources']['premium']['path']): small.append(event(millis(row[6])+1,'P',row[4]))
+    small.sort(key=lambda row:(int(row[0]),0 if row[1]=='F' else 1))
+    streams = []
+    with tempfile.TemporaryDirectory(prefix='archive-replay-',dir=MODEL/'build') as temporary:
+        folder = Path(temporary)
+        with (folder/'small.csv').open('w',newline='') as handle:
+            writer=csv.writer(handle); writer.writerow(COLUMNS); writer.writerows(small)
+        try:
+            with (folder/'sources.tsv').open('w') as handle:
+                for m in manifests:
+                    for kind,name in [('Q','book'),('T','trades'),('S','spot_trades')]:
+                        process=subprocess.Popen([sys.executable,str(Path(__file__).resolve()),'--stream-source',m['month'],name,str(folder)],stdout=subprocess.PIPE,start_new_session=True)
+                        streams.append(process)
+                        handle.write(f'{kind} {m["start_ms"]} {m["end_ms"]} /dev/fd/{process.stdout.fileno()} BINARY\n')
+            subprocess.run([str(MODEL/'build/archive-replay'),str(folder/'sources.tsv'),str(folder/'small.csv'),
+                            str(args.output)],check=True,
+                           pass_fds=tuple(p.stdout.fileno() for p in streams))
+            for process in streams:
+                process.stdout.close()
+                if process.wait()!=0: raise RuntimeError('Archive decompression failed')
+        finally:
+            for process in streams:
+                if not process.stdout.closed: process.stdout.close()
+                if process.poll() is None: os.killpg(process.pid,signal.SIGTERM)
+                process.wait()
+    manifests=[json.loads((ROOT/'data/binance/maker'/month/'month-inputs.manifest.json').read_text()) for month in months]
+    if any(m['status']!='checksum_verified' for m in manifests):raise ValueError('Monthly download did not complete validation')
+    summary=json.loads((args.output/'summary.json').read_text())
+    with (args.output/'coverage.csv').open() as handle:
+        quote_coverage=[row for row in csv.DictReader(handle) if row['kind']=='Q']
+    summary['max_quote_gap_ms']=max(int(row['max_gap_ms']) for row in quote_coverage)
+    summary['quote_gap_days']=[dict(date=datetime.fromtimestamp(int(row['utc_day'])*86400,timezone.utc).strftime('%Y-%m-%d'),
+                                    max_gap_ms=int(row['max_gap_ms'])) for row in quote_coverage if int(row['max_gap_ms'])>10000]
+    summary['final_spot_notional']=summary['spot_btc']*summary['final_spot_mid']
+    (args.output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+    if summary['entry_band_violations'] or summary['convergence_exit_pairs'] or abs(summary['delta_btc'])>1e-8:
+        raise ValueError('Strategy or hedge invariant failed')
+    expected=sum(summary[leg+'_notional']*summary[leg+'_bps']/10000 for leg in ('perp_maker','perp_taker','spot_taker'))
+    if not math.isclose(summary['fees'],expected,rel_tol=1e-9,abs_tol=1e-4): raise ValueError('Fee reconciliation failed')
+    validation=verify_funding(args.output,manifests)
+    (args.output/'validation.json').write_text(json.dumps(validation,indent=2)+'\n')
+    provenance=dict(months=months,start_ms=manifests[0]['start_ms'],end_ms=manifests[-1]['end_ms'],
+                    engine_sha256=hashlib.sha256((MODEL/'build/archive-replay').read_bytes()).hexdigest(),
+                    archive_sort_sha256=hashlib.sha256((MODEL/'build/archive-sort').read_bytes()).hexdigest(),
+                    sorting='Exact stable external sort; all source rows retained',sources=manifests)
+    (args.output/'inputs.json').write_text(json.dumps(provenance,indent=2)+'\n')
+    statistics=continuous_statistics(args.output,summary)
+    statistics['data_quality']=dict(max_quote_gap_ms=summary['max_quote_gap_ms'],quote_gap_days=summary['quote_gap_days'])
+    statistics['limitations'].append(f'Quote gaps reach {summary["max_quote_gap_ms"]/60000:.1f} minutes; stale books pause entries, while held positions remain marked at last observed prices.')
+    render_report(args.output,MODEL/'results/result.html')
+    render_png(args.output,MODEL/'results/result.png')
+    (MODEL/'results/trials.json').write_text(json.dumps(statistics,indent=2)+'\n')
+    render_trials(statistics,MODEL/'results/trials.png')
+    print(f'Continuous profit: {summary["net_pnl"]:+,.2f} USDT over {len(statistics["trials"])} days',flush=True)
+
+
+if __name__=='__main__': main()

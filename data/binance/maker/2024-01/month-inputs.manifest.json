@@ -1,0 +1,59 @@
+{
+  "symbol": "BTCUSDT",
+  "month": "2024-01",
+  "start_ms": 1704067200000,
+  "end_ms": 1706745600000,
+  "sources": {
+    "trades": {
+      "url": "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-01.zip",
+      "path": "data/binance/maker/2024-01/archives/trades/BTCUSDT-aggTrades-2024-01.zip",
+      "sha256": "d752f50932091dd209803187ca2354a9eadbfe8e4b9c481c3581a1bbb1bd8282",
+      "bytes": 522743749
+    },
+    "mark": {
+      "url": "https://data.binance.vision/data/futures/um/monthly/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2024-01.zip",
+      "path": "data/binance/maker/2024-01/archives/mark/BTCUSDT-1m-2024-01.zip",
+      "sha256": "1607b1522928d2a698592019fef7c3fcc9bee2cd01674c72a27e7fc028fd66ca",
+      "bytes": 1153812
+    },
+    "funding": {
+      "url": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2024-01.zip",
+      "path": "data/binance/maker/2024-01/archives/funding/BTCUSDT-fundingRate-2024-01.zip",
+      "sha256": "3e0d30870672aa8f0f937881056e3cfd55913ae5c780cd50b33f2763aa0ba58e",
+      "bytes": 696
+    },
+    "premium": {
+      "url": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2024-01.zip",
+      "path": "data/binance/maker/2024-01/archives/premium/BTCUSDT-1m-2024-01.zip",
+      "sha256": "e799edfbb6c25ef363613e9f70555c75514fbc01c90afc9546dc17419d9eba9a",
+      "bytes": 880055
+    },
+    "spot_trades": {
+      "url": "https://data.binance.vision/data/spot/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-01.zip",
+      "path": "data/binance/maker/2024-01/archives/spot_trades/BTCUSDT-aggTrades-2024-01.zip",
+      "sha256": "6713db84b8836aec43bb52471735b2e057ed2cd8b571d7bdc81672826d8c8a19",
+      "bytes": 566954365
+    },
+    "book": {
+      "url": "https://data.binance.vision/data/futures/um/monthly/bookTicker/BTCUSDT/BTCUSDT-bookTicker-2024-01.zip",
+      "path": "data/binance/maker/2024-01/archives/book/BTCUSDT-bookTicker-2024-01.zip",
+      "sha256": "05ab114597172885508f8ab78ecd9999d95a99803993549ba46eaeefd0587b95",
+      "bytes": 6952660870
+    }
+  },
+  "status": "checksum_verified",
+  "usage": "Monthly source ZIPs for continuous archive replay or reference CSV conversion. Spot trades remain a midpoint proxy.",
+  "coverage_checks": {
+    "mark_minutes": 44640,
+    "funding_settlements": 93,
+    "premium_minutes": 44640,
+    "tick_coverage": "Every UTC day present; sorted source counts and maximum gaps checked in build/current/coverage.csv",
+    "source_rows": {
+      "Q": 725011366,
+      "S": 41962464,
+      "T": 40294620
+    },
+    "max_quote_gap_ms": 826416
+  },
+  "downloaded_bytes": 8044393547
+}

@@ -41,105 +41,117 @@ Held positions pay or receive the **recorded funding at settlement**. Funding
 cash is realized immediately; open-position unrealized PnL contains price marks
 and paid entry fees. Closed-pair lifetime PnL also attributes that pair's funding
 without counting it twice in the portfolio. The funding mark is the settlement
-minute's mark-price OPEN, a proxy for the official funding mark. July 2023 uses
+minute's mark-price OPEN, a proxy for the official funding mark. This window uses
 00:00, 08:00 and 16:00 UTC; the engine follows archived interval updates.
 
+
 ## Run
+
+The active window is **December 1, 2023 through February 29, 2024 UTC**: 91 days
+from one flat start. Positions, cash and funding carry across every day and
+month; there is no terminal liquidation. The strategy settings above are fixed
+throughout this run.
 
 From the repository root:
 
 ```bash
+python3 -m venv Primary-Market-Model/build/trial-venv
+Primary-Market-Model/build/trial-venv/bin/python -m pip install scipy matplotlib
 make -C Primary-Market-Model test
 make -C Primary-Market-Model run
 ```
 
-The default run uses the July 20, 2023 first-hour sample. Prepare missing data
-with `make -C Primary-Market-Model sample`. The report runner downloads and
-caches the month's premium-index feed when needed.
+The profit curve is [results/result.png](results/result.png), also available as
+[results/result.html](results/result.html). Daily statistics are exported as
+[results/trials.png](results/trials.png) and [results/trials.json](results/trials.json).
+`build/current/` retains the summary, sampled equity, daily feed coverage and
+input hashes so the charts can be reproduced without another replay.
 
-For a continuous month:
+To redraw saved results:
 
 ```bash
-make -C Primary-Market-Model month MONTH=2023-07
+Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_backtest.py --from-results Primary-Market-Model/build/current --png
+Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_trials.py --from-results Primary-Market-Model/results/trials.json
 ```
 
-The compact report is [results/result.html](results/result.html), with the
-current July profit curve also exported as [results/result.png](results/result.png).
-The HTML contains its own chart data. Temporary intermediate outputs are removed
-by the report runner. A new run replaces the HTML; use
-`ARGS="--output results/sample.html"` to retain another run.
-Pass `--png` to `tools/run_backtest.py` to regenerate its sibling PNG as well;
-use the analysis environment below, which includes matplotlib.
+## Archive inputs
 
-Options include `--entry-offset-bps 1.5`, `--funding-cancel-seconds 60`, `--funding-interest-bps 1`,
-`--funding-clamp-bps 5`, `--perp-maker-bps 0`, `--perp-taker-bps 0.5`,
-`--spot-taker-bps 0.5`, `--funding-cashflows 1`, and
-`--max-gross-perp-btc 0`. Per-leg fee overrides remain available for comparisons.
-The convergence rule can be enabled explicitly with `--exit-on-equilibrium 1`;
-it is disabled in the active strategy. `--premium-events FILE` supplies a custom
-causal P-event feed. See the C++ runner's `--help` for all parameters.
+Each month has six checksum-verified Binance source ZIPs: perp best-bid/ask
+updates, perp aggregate trades, spot aggregate trades, mark-price minutes,
+funding records and premium-index minutes. They remain under
+`data/binance/maker/YYYY-MM/archives/`. Each `month-inputs.manifest.json` records
+source URLs, SHA-256 hashes, byte sizes and minute/funding coverage checks.
+
+Download or verify a month without retaining expanded tick CSVs:
+
+```bash
+python3 Primary-Market-Model/tools/prepare_binance_basis_month.py --month 2023-12 --archives-only
+python3 Primary-Market-Model/tools/prepare_binance_basis_month.py --month 2024-01 --archives-only
+python3 Primary-Market-Model/tools/prepare_binance_basis_month.py --month 2024-02 --archives-only
+```
+
+`tools/run_archive_backtest.py` verifies the hashes, streams ZIP contents through
+`unzip`, stably sorts every source using bounded-memory chunks and disk-backed
+merge passes, then merges funding, premium, spot, quotes and trades into the
+existing C++ strategy engine. Monthly quote files can be substantially out of
+order; the complete sort preserves equal-timestamp input order without assuming
+a maximum delay. No ticks are sampled or fabricated. Transaction timestamps
+remain the clock for zero-latency replay. Every requested UTC day
+must contain quotes, spot trades and perp trades before results are published.
+`coverage.csv` reports counts, observed start/end times and maximum within-day
+gaps; a complete archive checksum alone does not prove gap-free market data.
+The retained files have quote gaps on December 7, January 3 and February 28,
+with the longest lasting 43.1 minutes. Stale books pause new entries, while held
+inventory remains marked at last observed prices; interim equity and drawdown
+can therefore be distorted during gaps. The report retains these observations
+and discloses the gap instead of inventing replacement quotes.
+
+The full quote CSVs expand to hundreds of gigabytes. Compact temporary 32-byte
+sort records avoid retaining the expanded CSVs and are deleted after replay.
+Two sorting jobs run at a time, with at most 64 files per merge pass.
+Fill totals and quote state are retained without
+optional per-fill/quote logs; pairs and all accounting remain in the engine.
+Tests compare the streaming path against the original normalized CSV path.
+The CSV runner remains available for explicit custom inputs and fee comparisons.
+
+Binance's public quote archives cover these historical months. They do not
+provide the newer quote observations needed for the same maker-fill test; see
+[the public-data discussion](https://github.com/binance/binance-public-data/issues/334).
+These additional dates were not used to tune the entry band, but they remain
+historical simulations, not current-market evidence.
 
 ## Execution assumptions
 
-Spot uses the latest trade as a midpoint proxy with an assumed **1 bp full
-spread**. Every market exit crosses the applicable bid/ask. Execution fees are
-additional to crossed spreads. Maker entries allow touch prints, at most 10% of each
-observed aggressor print, rounded down to 0.001 BTC; a quote cannot fill at its
-creation timestamp. Depth, impact, queue priority, borrow costs, margin and
-liquidation are not modeled. Equal BTC removes common dollar price moves;
-basis risk remains. Unrealized PnL can be positive or negative.
+Spot uses the latest observed trade as a midpoint proxy with an assumed **1 bp
+full spread**. Every taker fill crosses the applicable bid/ask and pays the
+configured fee. Maker entries allow touch prints, at most 10% of observed
+aggressor quantity, rounded down to 0.001 BTC. A quote cannot fill at its creation
+timestamp. Queue priority, depth, impact, borrowing costs, capital, margin and
+liquidation are not modeled. Equal BTC removes common price moves; basis risk
+remains. Profits are USD amounts under unlimited inventory, not returns on a
+fixed capital allocation.
 
-The graph samples minute equity; maximum drawdown uses every replay event.
-Positions, cash and funding carry across day boundaries. Cached Binance archives
-remain under `data/binance/maker/`. `backtester/` contains the active strategy and
-CSV reader, `tools/` the data/report helpers, and `tests/` the strategy/data checks.
-The low-level runner's optional `--details 1` exports full ledgers for debugging.
+The graph samples minute equity and exact observed day-end marks. Maximum
+drawdown uses every replay event. Open positions are marked at mids; this omits
+future liquidation costs and does not turn unrealized gains into locked profits.
 
-## Repeated trials and significance
+## Daily significance checks
 
-`tools/run_trials.py` replays each UTC day separately from flat, using the same
-funding-only strategy, 0 bps maker / 0.5 bps taker fees, and uncapped 0.01 BTC entry quotes. Open inventory
-is marked at the final mid; it is not liquidated. This estimates **24-hour marked
-PnL from a flat start**, which differs from continuously holding positions for a
-month. Repeating the same deterministic replay does not create new observations.
+The active daily observations are **changes in marked portfolio equity** from
+the continuous run. They sum to its total profit. Each day's change includes
+that day's funding and executed fees while retaining existing inventory. This
+replaces the earlier July experiment that restarted flat every day; those are
+different horizons and should not be combined as identical trials.
 
-From the repository root, create an isolated analysis environment and run:
+The report includes a one-sided t-test of mean daily PnL <= 0 versus > 0, a
+95% two-sided t interval, Bartlett/Newey-West HAC checks at 3 and 7 daily lags,
+and centered circular block bootstrap checks with 3- and 7-day blocks, 20,000
+resamples and a fixed seed. The price-only decomposition removes funding cash
+from the same trade path; it is not another strategy or another independent
+experiment. Resampling does not create additional market history.
 
-```bash
-python3 -m venv Primary-Market-Model/build/trial-venv
-Primary-Market-Model/build/trial-venv/bin/python -m pip install scipy matplotlib
-Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tests/trial-analysis-tests.py
-Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_trials.py --workers 4
-```
-
-The default is July 1–31, 2023; `--start` and `--end` choose other complete cached
-days. Daily full-day manifests, source archives and monthly premium events must
-already be prepared. The runner verifies archive hashes, regenerates and deletes
-temporary tick CSVs, and safely reuses saved daily summaries in `build/` only when
-binary, premium data, source hashes and settings agree. It writes
-[results/trials.png](results/trials.png) and [results/trials.json](results/trials.json).
-Use `--from-results results/trials.json` to redraw an existing analysis.
-Per-leg overrides use `--perp-maker-bps`, `--perp-taker-bps` and
-`--spot-taker-bps`; they default to 0, 0.5 and 0.5 bps respectively. Fees are
-part of the daily-summary cache signature.
-`--entry-offset-bps` defaults to 1.5 around the fixed −5 bp equilibrium and is
-also included in the cache signature. Every replay summary reports the entry
-thresholds and checks every partial-fill lot for entry-band violations.
-`--continuous-output Primary-Market-Model/build/month`
-also replays the same input dates without daily resets, using identical fees.
-That option temporarily retains the normalized ticks for the continuous replay
-and deletes them when the run finishes; choose dates within one calendar month.
-
-The primary test is a one-sided one-sample t-test: mean daily PnL <= 0 versus > 0
-at 5%. The report includes a two-sided 95% t interval, Newey-West/Bartlett HAC
-standard errors at 3 and 7 daily lags (asymptotic normal reference), and centered
-circular block bootstrap diagnostics with 3- and 7-day blocks, 20,000 resamples
-and a fixed seed. Bootstrap repetitions reuse observed history; they are not
-additional market trials. These checks cannot establish independence,
-stationarity or validity of the execution model.
-
-July was already used to develop this strategy, so these are **in-sample
-diagnostics**. USD profits are not returns on fixed capital. Assumed fee rates,
-unlimited capital/borrow, mid marks and omitted impact/borrow costs limit any
-claim about live profitability. Unseen months and realistic costs are needed
-before treating a significant test as evidence of a tradable edge.
+Carried inventory, market regimes and changing exposure can make daily PnL
+correlated and nonstationary. HAC and bootstrap are diagnostics, not guarantees
+of valid inference or realistic execution. The three-month replay should be
+judged alongside drawdown, exposure, costs and performance in other unused
+periods. Statistical tests live in `tests/trial-analysis-tests.py`.

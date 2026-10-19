@@ -155,16 +155,18 @@ def render(report, output):
     fig, axes = plt.subplots(2, 1, figsize=(12, 8.5), dpi=170,
                              gridspec_kw={'height_ratios':[2.1, 1]})
     fig.subplots_adjust(top=.72, bottom=.16, left=.105, right=.97, hspace=.5)
-    fig.suptitle('BTC basis strategy · repeated daily trials', x=.08, y=.965,
+    continuous = report.get('continuous_inventory',False)
+    fig.suptitle('BTC basis strategy · daily equity changes' if continuous else 'BTC basis strategy · repeated daily trials', x=.08, y=.965,
                  ha='left', fontsize=23, fontweight='bold')
     s = trials[0]['summary']
     fee_label = f"Maker {s['perp_maker_bps']:g} / perp taker {s['perp_taker_bps']:g} / spot taker {s['spot_taker_bps']:g} bps"
-    fig.text(.08, .914, f"{trials[0]['date']} to {trials[-1]['date']} UTC  |  Flat daily start  |  {fee_label}",fontsize=9.5,color='#52656e')
+    inventory_label = 'Carried inventory' if continuous else 'Flat daily start'
+    fig.text(.08, .914, f"{trials[0]['date']} to {trials[-1]['date']} UTC  |  {inventory_label}  |  {fee_label}",fontsize=9.5,color='#52656e')
     lower=s.get('entry_bid_basis_bps',s['equilibrium_bps'])
     upper=s.get('entry_ask_basis_bps',s['equilibrium_bps'])
     fig.text(.08,.881,f'Entry basis: bid at/below {lower:g} bps; offer at/above {upper:g} bps. Funding exits retain the outside-flat-region payer rule.',fontsize=9,color='#52656e')
     for x, title, value in [(.08,'MEAN DAILY MARKED PNL',f"{a['mean']:+,.2f} USDT"),
-                            (.40,'POSITIVE TRIALS',f"{a['positive']} / {a['n']}"),
+                            (.40,'POSITIVE DAYS' if continuous else 'POSITIVE TRIALS',f"{a['positive']} / {a['n']}"),
                             (.72,'ONE-SIDED T-TEST p',f"{a['t_test']['p_one_sided']:.4g}")]:
         fig.text(x,.845,title,fontsize=9,color='#52656e')
         fig.text(x,.794,value,fontsize=20,fontweight='bold')
@@ -172,8 +174,8 @@ def render(report, output):
     axes[0].bar(days,pnl,color=['#08765f' if p>=0 else '#b33b4c' for p in pnl], label='Total marked PnL')
     axes[0].plot(days,price,'o',ms=3,color='#243d65', label='PnL excluding funding, after fees')
     axes[0].axhline(0,color='#9ba9b0',lw=.8)
-    axes[0].set_ylabel('USDT per 24-hour trial')
-    axes[0].set_xlabel('Chronological trial number')
+    axes[0].set_ylabel('Daily equity change · USDT' if continuous else 'USDT per 24-hour trial')
+    axes[0].set_xlabel('Chronological UTC day' if continuous else 'Chronological trial number')
     axes[0].yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
     axes[0].legend(frameon=False,fontsize=9)
     labels, intervals = ['Ordinary t interval'], [ci]
@@ -194,8 +196,11 @@ def render(report, output):
     axes[1].xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
     axes[1].tick_params(axis='y',length=0)
     axes[1].set_position([.32,.16,.65,.145])
-    fig.text(.08,.075,'In-sample diagnostics: July was used to develop the strategy. Daily observations may remain dependent; only one month.',fontsize=9,color='#52656e')
-    fig.text(.08,.047,'Open positions marked at mids; no end-of-day liquidation. Unlimited inventory. Borrow, impact, depth and margin omitted.',fontsize=9,color='#52656e')
+    fig.text(.08,.075,report.get('sample_note','In-sample diagnostics: July was used to develop the strategy. Daily observations may remain dependent; only one month.'),fontsize=9,color='#52656e')
+    assumptions='Open positions marked at mids; no end-of-day liquidation. Unlimited inventory. Borrow, impact, depth and margin omitted.'
+    gap=report.get('data_quality',{}).get('max_quote_gap_ms',0)
+    if gap>10000: assumptions=f'Quote gaps up to {gap/60000:.1f} min. Unlimited inventory; mid marks; no terminal liquidation. Borrow, impact, depth and margin omitted.'
+    fig.text(.08,.047,assumptions,fontsize=9,color='#52656e')
     fig.savefig(output, facecolor='#fafbfc')
     plt.close(fig)
 
@@ -223,8 +228,8 @@ def make_report(trials):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--start', default='2023-07-01')
-    parser.add_argument('--end', default='2023-07-31')
+    parser.add_argument('--start',help='Explicit UTC start date for separate flat-start experiments')
+    parser.add_argument('--end',help='Explicit UTC end date for separate flat-start experiments')
     parser.add_argument('--workers', type=int, default=2)
     parser.add_argument('--output', type=Path, default=MODEL/'results/trials.json')
     parser.add_argument('--from-results', type=Path)
@@ -237,8 +242,16 @@ def main():
     if args.from_results:
         if args.continuous_output or any(v is not None for v in (args.perp_maker_bps,args.perp_taker_bps,args.spot_taker_bps,args.entry_offset_bps)):
             parser.error('--from-results only analyzes saved fills; fee changes require a replay, as do entry-rule changes')
-        report = make_report(json.loads(args.from_results.read_text())['trials'])
+        saved = json.loads(args.from_results.read_text())
+        if saved.get('continuous_inventory'):
+            report = dict(saved)
+            report['statistics'] = analyze([r['summary']['net_pnl'] for r in saved['trials']])
+            report['price_only_statistics'] = analyze([r['summary']['price_pnl']-r['summary']['fees'] for r in saved['trials']])
+        else:
+            report = make_report(saved['trials'])
     else:
+        if not args.start or not args.end:
+            parser.error('Specify --start and --end for flat-start experiments, or --from-results to redraw the current continuous analysis')
         args.perp_maker_bps = 0 if args.perp_maker_bps is None else args.perp_maker_bps
         args.perp_taker_bps = .5 if args.perp_taker_bps is None else args.perp_taker_bps
         args.spot_taker_bps = .5 if args.spot_taker_bps is None else args.spot_taker_bps

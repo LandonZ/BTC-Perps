@@ -72,7 +72,8 @@ def render_png(directory, output):
     fee_text = f"Maker {s['perp_maker_bps']:g} / perp taker {s['perp_taker_bps']:g} / spot taker {s['spot_taker_bps']:g} bps per fill"
     lower=s.get('entry_bid_basis_bps',s['equilibrium_bps'])
     upper=s.get('entry_ask_basis_bps',s['equilibrium_bps'])
-    fig.text(.09,.895,f"Binance BTCUSDT | {times[0]:%Y-%m-%d} to {times[-1]:%Y-%m-%d} UTC | Zero latency",fontsize=10,color='#52656e')
+    period=f'{times[0]:%Y-%m-%d} to {times[-1]:%Y-%m-%d} UTC'
+    fig.text(.09,.895,f"Binance BTCUSDT | {period} | Zero latency",fontsize=9.5,color='#52656e')
     fig.text(.09,.866,fee_text,fontsize=10,color='#52656e')
     fig.text(.09,.838,f'Entry basis: bid at/below {lower:g} bps; offer at/above {upper:g} bps. Equilibrium: {s["equilibrium_bps"]:g} bps.',fontsize=9,color='#52656e')
     for xpos,label,value in [(.09,'NET PNL',s['net_pnl']),(.405,'EXECUTION FEES',s['fees']),(.72,'REALIZED, INCLUDING FUNDING',s['realized_pnl'])]:
@@ -83,16 +84,22 @@ def render_png(directory, output):
     ax.axhline(0,color='#aab8bf',lw=.7)
     ax.grid(axis='y',color='#dce4e8',lw=.7)
     ax.set_ylabel('Cumulative profit · USDT',labelpad=12)
-    ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
+    ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}' if max(abs(v) for v in total+realized)<10 else '{x:,.0f}'))
     ax.xaxis.set_major_locator(dates.AutoDateLocator(minticks=4,maxticks=6))
     ax.xaxis.set_major_formatter(dates.DateFormatter('%b %d',tz=timezone.utc))
     ax.tick_params(axis='both',length=0,pad=10)
-    ax.set_xlim(times[0],times[-1]); ax.margins(y=.1)
+    if times[0]==times[-1]:
+        from datetime import timedelta
+        ax.set_xlim(times[0]-timedelta(seconds=1),times[-1]+timedelta(seconds=1))
+    else:
+        ax.set_xlim(times[0],times[-1])
+    ax.margins(y=.1)
     ax.legend(loc='upper left',frameon=False,ncol=2,fontsize=10)
     fig.text(.09,.127,f"Funding cash: {s['funding_pnl']:+,.2f} USDT | Unrealized PnL: {s['unrealized_pnl']:+,.2f} USDT | Max drawdown: {s['max_drawdown']:,.2f} USDT",fontsize=9,color='#52656e')
-    fig.text(.09,.093,f"Peak open BTC per leg: {s['max_open_gross_perp_btc']:,.3f} | Minute equity shown; drawdown measured on every event.",fontsize=9,color='#52656e')
+    fig.text(.09,.093,f"Peak open BTC per leg: {s['max_open_gross_perp_btc']:,.3f} | Sampled equity shown; drawdown measured on every event.",fontsize=9,color='#52656e')
     fig.text(.09,.055,'Funding-only exits; causal premium-minute signal. Unlimited positions. No terminal liquidation; open positions marked at mids.',fontsize=9,color='#52656e')
-    fig.text(.09,.031,'Spot trade-price proxy, assumed 1 bp full spread. Recorded funding. Borrow, impact, depth, margin and liquidation omitted.',fontsize=9,color='#52656e')
+    gap=f' Quote gaps up to {s["max_quote_gap_ms"]/60000:.1f} min.' if s.get('max_quote_gap_ms',0)>10000 else ''
+    fig.text(.09,.031,f'Spot trade-price proxy; 1 bp full spread.{gap} Queue, borrow, impact, depth, margin and liquidation omitted.',fontsize=9,color='#52656e')
     fig.savefig(output,facecolor=fig.get_facecolor())
     plt.close(fig)
 
@@ -120,13 +127,10 @@ def main():
         if args.events_list:
             inputs.extend(['--events-list',str(args.events_list.resolve())])
         if not inputs:
-            sample = ROOT/'data/binance/maker/2023-07-20/events-spot-trades.csv'
-            if not sample.exists():
-                parser.error('Prepare data first: python3 tools/download_binance_maker.py (from Primary-Market-Model)')
-            inputs = ['--events',str(sample)]
+            parser.error('Supply --events or --events-list for CSV replay; use make run for the current archive backtest')
         premium = args.premium_events
         if premium is None:
-            example = str(args.events[0]) if args.events else (args.events_list.read_text().splitlines()[0] if args.events_list else str(sample))
+            example = str(args.events[0]) if args.events else args.events_list.read_text().splitlines()[0]
             match = re.search(r'20\d{2}-\d{2}',example)
             if not match: parser.error('Supply --premium-events when the input path does not identify a month')
             month = match.group(0)

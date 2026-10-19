@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Download checksum-verified Binance archives and prepare a causal maker replay.
 
-Default: one hour on 2023-07-20, a date with archived BTCUSDT bookTicker data.
+Default: one hour on 2023-12-01, within the active retained archive window.
 The entire daily ZIPs are retained; --hours controls the prepared replay window.
 Default spot reference is the most recent spot trade, explicitly a midpoint proxy.
 The older completed-minute-close reference remains available as a comparison.
@@ -17,7 +17,10 @@ import os
 import urllib.request
 import zipfile
 import tempfile
+import time
+import urllib.error
 from contextlib import ExitStack
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -26,7 +29,7 @@ BASE = 'https://data.binance.vision/data/'
 COLUMNS = ['time_ms', 'kind', 'price', 'quantity', 'bid', 'ask', 'buyer_maker', 'funding_rate', 'interval_hours']
 
 
-def download(relative, directory):
+def download(relative, directory, range_workers=1):
     path = directory / Path(relative).name
     directory.mkdir(parents=True, exist_ok=True)
     url = BASE + relative
@@ -40,9 +43,50 @@ def download(relative, directory):
         temporary = path.with_suffix('.zip.tmp')
         try:
             print(f'Downloading {url}', flush=True)
-            with urllib.request.urlopen(url, timeout=60) as response, temporary.open('wb') as output:
-                while chunk := response.read(1024 * 1024):
-                    output.write(chunk)
+            size = 0
+            if range_workers > 1:
+                request = urllib.request.Request(url, headers={'Range': 'bytes=0-0'})
+                with urllib.request.urlopen(request, timeout=30) as response:
+                    if response.status == 206:
+                        size = int(response.headers['Content-Range'].split('/')[-1])
+            if size >= 1024**3:
+                fd = os.open(temporary, os.O_CREAT | os.O_TRUNC | os.O_RDWR, 0o644)
+                def fetch(bounds):
+                    start, end = bounds
+                    request = urllib.request.Request(url, headers={'Range': f'bytes={start}-{end}'})
+                    with urllib.request.urlopen(request, timeout=60) as response:
+                        if response.status != 206 or response.headers.get('Content-Range') != f'bytes {start}-{end}/{size}':
+                            raise ValueError('Archive server returned an unexpected byte range')
+                        offset = start
+                        while block := response.read(min(1024**2, end-offset+1)):
+                            view = memoryview(block)
+                            while view:
+                                written = os.pwrite(fd, view, offset)
+                                if written <= 0: raise OSError('Incomplete archive write')
+                                offset += written; view = view[written:]
+                        if offset != end+1: raise ValueError('Incomplete archive byte range')
+                    return end-start+1
+                parts = [(s, min(s+64*1024**2, size)-1) for s in range(0, size, 64*1024**2)]
+                def retry_fetch(bounds):
+                    for attempt in range(4):
+                        try: return fetch(bounds)
+                        except (urllib.error.URLError, TimeoutError, ConnectionError):
+                            if attempt == 3: raise
+                            time.sleep(2**attempt)
+                try:
+                    received = 0
+                    with ThreadPoolExecutor(max_workers=range_workers) as pool:
+                        for i, future in enumerate(as_completed([pool.submit(retry_fetch, part) for part in parts]), 1):
+                            received += future.result()
+                            if i % 8 == 0 or i == len(parts):
+                                print(f'{path.name}: {received/1e9:.2f}/{size/1e9:.2f} GB received', flush=True)
+                    os.fsync(fd)
+                finally:
+                    os.close(fd)
+            else:
+                with urllib.request.urlopen(url, timeout=60) as response, temporary.open('wb') as output:
+                    while chunk := response.read(1024 * 1024):
+                        output.write(chunk)
             with temporary.open('rb') as handle:
                 actual = hashlib.file_digest(handle, 'sha256').hexdigest()
             if actual != expected:
@@ -196,7 +240,7 @@ def prepare_premium(month, output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--date', default='2023-07-20', help='UTC day; recent bookTicker archives may be unavailable')
+    parser.add_argument('--date', default='2023-12-01', help='UTC day; recent bookTicker archives may be unavailable')
     parser.add_argument('--start-hour', type=int, default=0)
     parser.add_argument('--hours', type=int, default=1)
     parser.add_argument('--output', type=Path)

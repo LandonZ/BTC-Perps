@@ -14,6 +14,8 @@ struct Config {
     Millis funding_cancel_ms = 60000, max_spot_age_ms = 90000, max_perp_age_ms = 10000;
     bool fill_at_touch = true; // Joining best bid/ask: participation approximates queue allocation.
     bool exit_on_equilibrium = false;
+    bool retain_decisions = true; // Large archive replays need only the latest quote decision.
+    bool retain_fills = true; // Aggregate accounting remains exact without the optional fill ledger.
     bool exit_before_funding = true, funding_exit_payers_only = true, funding_cashflows = true;
     double funding_interest_bps = 1, funding_clamp_bps = 5;
 };
@@ -50,14 +52,21 @@ struct Totals {
     double net() const { return price_pnl-fees+funding_pnl; }
 };
 struct Equity { Millis time; Totals totals; };
+struct FillStats {
+    std::size_t count = 0,open = 0,max_open = 0;
+    double perp_maker_notional = 0,perp_taker_notional = 0,spot_taker_notional = 0;
+    double open_gross = 0,max_open_gross = 0;
+};
 class Engine {
 public:
     explicit Engine(Config config = {});
     void on_event(const Event& event, bool decide = true);
     void finish();
+    void mark_equity(); // Record a day-end mark without changing resting quotes or inventory.
     Totals totals() const;
     const Config& config() const { return config_; }
     const std::vector<Fill>& fills() const { return fills_; }
+    const FillStats& fill_stats() const { return fill_stats_; }
     const std::vector<Pair>& pairs() const { return pairs_; }
     const std::vector<Decision>& decisions() const { return decisions_; }
     const std::vector<Equity>& equity() const { return equity_; }
@@ -77,6 +86,7 @@ private:
     void close_converged();
     void close_before_funding();
     void close_pair(Pair& pair, const std::string& reason);
+    void record_fill(Fill fill);
     double used_capacity() const;
     double available_capacity() const;
     double basis() const;
@@ -96,6 +106,7 @@ private:
     bool premium_complete_ = true;
     int proxy_events_ = 0, mid_events_ = 0;
     std::vector<Fill> fills_;
+    FillStats fill_stats_;
     std::vector<Pair> pairs_;
     std::vector<std::size_t> open_pairs_;
     std::vector<Decision> decisions_;

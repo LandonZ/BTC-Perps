@@ -89,8 +89,9 @@ int main(int argc,char** argv) {
                 c.fill_at_touch = value == "1";
             } else throw std::runtime_error("Unknown argument: "+key);
         }
-        if (events.empty()) events.push_back("../data/binance/maker/2023-07-20/events-spot-trades.csv");
+        if (events.empty()) throw std::runtime_error("Supply --events or --events-list for CSV replay; use make run for the current archive backtest");
         if (c.exit_before_funding && premium.empty()) throw std::runtime_error("Pre-funding exits require --premium-events; future settlement rates cannot substitute");
+        c.retain_decisions = details; c.retain_fills = details;
         btc::basis_maker::Engine engine(c);
         btc::basis_maker::replay_files(engine,events,premium);
         btc::basis_maker::write_results(engine,output,details);
