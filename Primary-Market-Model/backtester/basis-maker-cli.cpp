@@ -35,7 +35,8 @@ int main(int argc,char** argv) {
                     << "  --participation 0.1 --fill-at-touch 1 (queue approximation)\n"
                     << "  --quantity-step 0.001 --tick 0.1\n"
                     << "  --center-halflife-seconds 0 (>0: fair basis is an EMA of the mid basis instead of --equilibrium-bps)\n"
-                    << "  --max-hold-seconds 0 (none) --close-at-end 0|1 --funding-exit-min-bps 0\n";
+                    << "  --max-hold-seconds 0 (none) --close-at-end 0|1 --funding-exit-min-bps 0\n"
+                    << "  --maker-exit 0|1 (exit the perp with a resting order at fair value; spot still crosses)\n";
                 return 0;
             }
             if (++i >= argc) throw std::runtime_error("Missing value for "+key);
@@ -93,6 +94,9 @@ int main(int argc,char** argv) {
             } else if (key == "--close-at-end") {
                 if (value != "0" && value != "1") throw std::runtime_error("close-at-end must be 0 or 1");
                 c.close_at_end = value == "1";
+            } else if (key == "--maker-exit") {
+                if (value != "0" && value != "1") throw std::runtime_error("maker-exit must be 0 or 1");
+                c.maker_exit = value == "1";
             } else if (key == "--funding-exit-min-bps") c.funding_exit_min_bps = number(value);
             else if (key == "--fill-at-touch") {
                 if (value != "0" && value != "1") throw std::runtime_error("fill-at-touch must be 0 or 1");

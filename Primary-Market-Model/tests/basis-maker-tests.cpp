@@ -8,6 +8,7 @@
 namespace {
 using namespace btc::basis_maker;
 void check(bool ok,const char* message) { if (!ok) throw std::runtime_error(message); }
+bool close_enough(double a,double b) { return std::abs(a-b)<1e-9; }
 void close(double a,double b,const char* message) {
     if (std::abs(a-b)>1e-8) { std::cerr << a << " != " << b << '\n'; throw std::runtime_error(message); }
 }
@@ -383,10 +384,36 @@ int main() {
         for (Millis t=start+70000;t<=start+122001;t+=8000) { ema.on_event(spot(t)); ema.on_event(book(t,99900,99910)); }
         check(ema.center_bps() < -5.5-1.9 && ema.center_bps() > -9.5,"Fair value moves halfway toward the new basis in one half-life");
 
+        Config resting=unbuffered; resting.exit_before_funding=false; resting.maker_exit=true; resting.exit_on_equilibrium=true;
+        resting.perp_maker_bps=0.5; resting.perp_taker_bps=2; resting.spot_taker_bps=2;
+        Engine maker(resting); seed(maker); maker.on_event(trade(start+1,99940,true));
+        check(maker.pairs().size()==1 && close_enough(maker.pairs()[0].btc,.004),"Entry fills 10% of the print");
+        maker.on_event(book(start+2,99970,99980));
+        check(!maker.pairs()[0].closed,"Crossing fair value alone does not exit: the resting order must be filled");
+        check(maker.decisions().back().reason=="EXIT_PENDING","Opposite entries wait while the long pair is open");
+        maker.on_event(book(start+3,99940,99950));
+        maker.on_event(trade(start+4,99949,false,.04));
+        check(!maker.pairs()[0].closed,"A buy below the resting ask does not fill it");
+        maker.on_event(trade(start+5,99950,false,.02));
+        check(maker.pairs().size()==2 && maker.pairs()[1].closed && !maker.pairs()[0].closed,"A partial exit splits the pair");
+        close(maker.pairs()[1].btc,.002,"The closed part is the filled quantity");
+        close(maker.pairs()[0].btc,.002,"The remainder stays open");
+        check(maker.pairs()[1].exit_reason=="MAKER_EXIT","Partial exit is a maker exit");
+        close(maker.pairs()[1].exit_perp_price,99950,"Resting ask sits at the fair-basis perp price (spot mid -5 bp)");
+        maker.on_event(trade(start+6,99950,false,.04));
+        check(maker.pairs()[0].closed && maker.totals().perp_btc==0 && maker.totals().spot_btc==0,"Second print closes the remainder");
+        const auto& f = maker.fills();
+        check(f[f.size()-2].liquidity=="MAKER" && f.back().leg=="SPOT" && f.back().liquidity=="TAKER",
+              "Perp exits as maker; the spot hedge is bought back as taker");
+        close(f[f.size()-2].fee,.002*99950*0.5/10000,"Maker exit pays the maker fee");
+        close(f.back().fee,.002*f.back().price*2/10000,"Spot buy-back pays the taker fee");
+        verify_side_attribution(maker);
+        close(maker.totals().net(),maker.totals().realized_pnl,"All PnL is realized once both pairs exit");
+
         std::cout << "PASS: -5 bps equilibrium, inclusive -6.5/-3.5 bps entry boundaries, band cancellations, equal-BTC spot hedges,\n"
             << "concurrent pairs, two-sided convergence exits, all four fees, optional recycled cap, legacy no-exit replay,\n"
             << "zero funding, pre-funding cancellations, partial fills, proxy/real spot spreads and per-direction price/funding attribution;\n"
-            << "funding exit minimum, maximum hold, end-of-data exit and EMA fair basis.\n";
+            << "funding exit minimum, maximum hold, end-of-data exit, EMA fair basis and resting maker exits.\n";
         return 0;
     } catch(const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }
 }

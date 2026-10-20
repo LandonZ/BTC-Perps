@@ -75,7 +75,7 @@ std::array<SideTotals,2> Engine::side_totals() const {
     return result;
 }
 double Engine::used_capacity() const {
-    return (config_.exit_on_equilibrium || config_.exit_before_funding) ? open_gross_btc_ : gross_btc_;
+    return (config_.exit_on_equilibrium || config_.exit_before_funding || config_.maker_exit) ? open_gross_btc_ : gross_btc_;
 }
 double Engine::available_capacity() const {
     return config_.max_gross_perp_btc > 0 ? config_.max_gross_perp_btc-used_capacity() : config_.order_btc;
@@ -93,7 +93,8 @@ void Engine::record_fill(Fill fill) {
     if (config_.retain_fills) fills_.push_back(std::move(fill));
 }
 void Engine::close_converged() {
-    if (!config_.exit_on_equilibrium || open_pairs_.empty() || !ready()) return;
+    // With maker exits the resting order at fair value replaces this crossing exit.
+    if (!config_.exit_on_equilibrium || config_.maker_exit || open_pairs_.empty() || !ready()) return;
     const double observed_basis = basis(), center = center_bps();
     // Every live pair has the same direction: crossing the shared equilibrium
     // closes that side before opposite entries become eligible. Avoid scanning
@@ -136,11 +137,14 @@ void Engine::update_center() {
 void Engine::close_pair(Pair& p, const std::string& reason) {
     // Both reduce-only legs cross the current executable side, even in the
     // pre-funding entry blackout. A midpoint crossing is not a free fill.
-    const double perp_price = p.direction > 0 ? perp_bid_ : perp_ask_;
+    close_pair_at(p,reason,p.direction > 0 ? perp_bid_ : perp_ask_,"TAKER");
+}
+void Engine::close_pair_at(Pair& p, const std::string& reason, double perp_price, const std::string& liquidity) {
+    // The spot leg always crosses: it is the hedge, bought or sold back at the market.
     const double spot_price = p.direction > 0 ? spot_ask_ : spot_bid_;
-    const double perp_fee = p.btc*perp_price*config_.perp_taker_bps/bps;
+    const double perp_fee = p.btc*perp_price*(liquidity == "MAKER" ? config_.perp_maker_bps : config_.perp_taker_bps)/bps;
     const double spot_fee = p.btc*spot_price*config_.spot_taker_bps/bps;
-    record_fill({now_,p.id,"PERP","TAKER",-p.direction,perp_price,p.btc,p.btc*perp_price,perp_fee,"EXIT"});
+    record_fill({now_,p.id,"PERP",liquidity,-p.direction,perp_price,p.btc,p.btc*perp_price,perp_fee,"EXIT"});
     record_fill({now_,p.id,"SPOT","TAKER",p.direction,spot_price,p.btc,p.btc*spot_price,spot_fee,"EXIT"});
     cash_ += p.direction*p.btc*(perp_price-spot_price);
     perp_btc_ -= p.direction*p.btc; spot_btc_ += p.direction*p.btc;
@@ -163,6 +167,59 @@ void Engine::close_pair(Pair& p, const std::string& reason) {
     // Funding cash was realized when paid, even while this pair was open.
     realized_pnl_ += p.realized_pnl-p.funding_pnl;
     quote_side_ = 0; remaining_ = 0;
+}
+void Engine::update_exit_quote() {
+    // Rest one reduce-only perp order for all open pairs (they share a direction) at the
+    // perp price where the mid basis equals fair value, never crossing the perp book.
+    int side = 0;
+    double price = 0;
+    if (config_.maker_exit && !open_pairs_.empty() && ready()) {
+        const double target = (spot_bid_+spot_ask_)/2*(1+center_bps()/bps), tick = config_.tick;
+        side = -pairs_[open_pairs_.front()].direction;
+        price = side < 0 ? std::max(std::ceil(target/tick-1e-9)*tick,perp_bid_+tick)
+                         : std::min(std::floor(target/tick+1e-9)*tick,perp_ask_-tick);
+    }
+    if (side != exit_side_ || std::abs(price-exit_price_) > config_.tick*1e-7) {
+        exit_side_ = side; exit_price_ = price; exit_since_ = now_;
+    }
+}
+void Engine::maker_exit_trade(const Event& e) {
+    // Same fill rule as entries: a print at (touch) or through our resting price, after the
+    // quote was placed, filling at most `participation` of the print.
+    if (!exit_side_ || open_pairs_.empty() || !ready() || e.time <= exit_since_) return;
+    if (e.buyer_maker != (exit_side_ > 0)) return;
+    const double gap = exit_side_ > 0 ? exit_price_-e.price : e.price-exit_price_;
+    const double tolerance = config_.tick*1e-7;
+    if (gap <= tolerance && !(config_.fill_at_touch && std::abs(gap) <= tolerance)) return;
+    double q = quantity(e.quantity*config_.participation);
+    if (q < config_.quantity_step) return;
+    // Close pairs oldest first; a partial fill splits a pair into a closed part and an open remainder.
+    std::vector<std::size_t> keep;
+    for (auto index : open_pairs_) {
+        if (q < config_.quantity_step-1e-12) { keep.push_back(index); continue; }
+        if (pairs_[index].btc <= q+1e-12) {
+            q -= pairs_[index].btc;
+            close_pair_at(pairs_[index],"MAKER_EXIT",exit_price_,"MAKER");
+            continue;
+        }
+        Pair part = pairs_[index];
+        const double share = q/part.btc;
+        part.id = pairs_.size()+1; part.btc = q; part.fees *= share; part.funding_pnl *= share;
+        auto& open = pairs_[index];
+        open.btc = quantity(open.btc-q); open.fees -= part.fees; open.funding_pnl -= part.funding_pnl;
+        ++sides_[part.direction > 0 ? 0 : 1].entries; // The closed part is its own pair record.
+        ++fill_stats_.open;
+        pairs_.push_back(part);
+        close_pair_at(pairs_.back(),"MAKER_EXIT",exit_price_,"MAKER");
+        keep.push_back(index);
+        q = 0;
+    }
+    open_pairs_ = std::move(keep);
+    if (std::abs(open_gross_btc_) < 1e-9) open_gross_btc_ = 0;
+    if (std::abs(open_long_btc_) < 1e-9) open_long_btc_ = 0;
+    if (std::abs(open_short_btc_) < 1e-9) open_short_btc_ = 0;
+    if (std::abs(perp_btc_) < 1e-9) perp_btc_ = 0;
+    if (std::abs(spot_btc_) < 1e-9) spot_btc_ = 0;
 }
 void Engine::close_before_funding() {
     // Causal estimate from completed official premium-index minutes only.
@@ -210,8 +267,11 @@ void Engine::decide() {
             reason = (config_.exit_on_equilibrium || config_.exit_before_funding) ? "OPEN_POSITION_CAP" : "GROSS_POSITION_CAP";
         else {
             side = entry_side(observed_basis);
+            if (side && config_.maker_exit && !open_pairs_.empty() && side != pairs_[open_pairs_.front()].direction) {
+                side = 0; reason = "EXIT_PENDING"; // Opposite entries wait for the resting exit.
+            }
             if (side) price = side > 0 ? perp_bid_ : perp_ask_;
-            else reason = "WITHIN_ENTRY_BAND";
+            else if (std::string(reason) != "EXIT_PENDING") reason = "WITHIN_ENTRY_BAND";
             if (side) {
                 price = (side > 0 ? std::floor(price/config_.tick+1e-9) : std::ceil(price/config_.tick-1e-9))*config_.tick;
                 size = quantity(std::min(config_.order_btc,available_capacity()));
@@ -293,6 +353,7 @@ void Engine::on_event(const Event& e, bool) {
         perp_bid_ = e.bid; perp_ask_ = e.ask; perp_time_ = now_;
     } else if (e.kind == 'T') {
         if (e.price <= 0 || e.quantity <= 0) throw std::runtime_error("Invalid basis perp trade");
+        maker_exit_trade(e);
         trade(e);
     } else if (e.kind == 'P') {
         // A candle is available at close_time+1ms, never at its open time.
@@ -329,6 +390,7 @@ void Engine::on_event(const Event& e, bool) {
     close_expired();
     close_before_funding();
     decide(); // Zero latency: references, exits and entry cancellations apply immediately.
+    update_exit_quote();
     const auto t = totals();
     peak_ = std::max(peak_,t.net()); drawdown_ = std::max(drawdown_,peak_-t.net());
     if (ready() && (last_equity_ < 0 || now_/60000 > last_equity_/60000)) {
@@ -342,7 +404,7 @@ void Engine::finish() {
         if (std::abs(perp_btc_) < 1e-9) perp_btc_ = 0;
         if (std::abs(spot_btc_) < 1e-9) spot_btc_ = 0;
     }
-    quote_side_ = 0; remaining_ = 0;
+    quote_side_ = 0; remaining_ = 0; exit_side_ = 0;
     mark_equity(); // No exit or artificial closing fill.
 }
 void Engine::mark_equity() {
@@ -406,7 +468,7 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
     }
     const auto& c = engine.config(); const auto t = engine.totals();
     std::size_t closed = 0, wins = 0, losses = 0, funding_closed = 0, convergence_closed = 0, entry_violations = 0;
-    std::size_t hold_closed = 0, end_closed = 0;
+    std::size_t hold_closed = 0, end_closed = 0, maker_closed = 0;
     double closed_bps = 0, closed_hold_ms = 0;
     for (const auto& p : engine.pairs()) {
         const auto& config = engine.config();
@@ -416,6 +478,7 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
             ++closed; wins += p.realized_pnl > 1e-10; losses += p.realized_pnl < -1e-10;
             funding_closed += p.exit_reason == "PRE_FUNDING_PAYER"; convergence_closed += p.exit_reason == "EQUILIBRIUM";
             hold_closed += p.exit_reason == "MAX_HOLD"; end_closed += p.exit_reason == "END_OF_DATA";
+            maker_closed += p.exit_reason == "MAKER_EXIT";
             closed_bps += p.realized_pnl/(p.btc*p.spot_price)*bps; closed_hold_ms += p.exit_time-p.time;
         }
     }
@@ -442,6 +505,7 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         << "  \"funding_interest_bps\": " << c.funding_interest_bps << ",\n  \"funding_clamp_bps\": " << c.funding_clamp_bps << ",\n"
         << "  \"funding_exit_pairs\": " << funding_closed << ",\n  \"convergence_exit_pairs\": " << convergence_closed << ",\n"
         << "  \"max_hold_exit_pairs\": " << hold_closed << ",\n  \"end_of_data_exit_pairs\": " << end_closed << ",\n"
+        << "  \"maker_exit\": " << (c.maker_exit ? "true" : "false") << ",\n  \"maker_exit_pairs\": " << maker_closed << ",\n"
         << "  \"closed_pair_mean_net_bps\": " << (closed ? closed_bps/closed : 0) << ",\n"
         << "  \"closed_pair_mean_hold_seconds\": " << (closed ? closed_hold_ms/closed/1000 : 0) << ",\n"
         << "  \"center_halflife_seconds\": " << c.center_halflife_ms/1000.0 << ",\n  \"max_hold_seconds\": " << c.max_hold_ms/1000.0 << ",\n"

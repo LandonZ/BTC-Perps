@@ -25,6 +25,10 @@ struct Config {
     Millis center_halflife_ms = 0;
     Millis max_hold_ms = 0;          // >0: close a pair after this long, whatever the basis.
     bool close_at_end = false;       // Close open pairs at the last book with taker fills, so PnL is realized.
+    // Exit the perp with a resting maker order at the fair-basis price instead of crossing the
+    // spread; the spot leg is still bought/sold back at the market when the perp order fills.
+    // Opposite-direction entries wait while pairs are open.
+    bool maker_exit = false;
 };
 struct Fill {
     Millis time;
@@ -104,6 +108,9 @@ private:
     void update_center();
     void close_before_funding();
     void close_pair(Pair& pair, const std::string& reason);
+    void close_pair_at(Pair& pair, const std::string& reason, double perp_price, const std::string& liquidity);
+    void update_exit_quote();
+    void maker_exit_trade(const Event& event);
     void record_fill(Fill fill);
     double used_capacity() const;
     double available_capacity() const;
@@ -125,6 +132,9 @@ private:
     int proxy_events_ = 0, mid_events_ = 0;
     double center_ = 0;
     Millis center_time_ = -1, center_start_ = -1;
+    int exit_side_ = 0;              // Resting maker exit: +1 perp bid (closing shorts), -1 perp ask (closing longs).
+    double exit_price_ = 0;
+    Millis exit_since_ = -1;
     std::vector<Fill> fills_;
     FillStats fill_stats_;
     struct SideAccounting {
