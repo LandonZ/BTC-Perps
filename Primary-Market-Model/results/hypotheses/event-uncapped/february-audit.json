@@ -1,0 +1,2947 @@
+{
+  "total": 610148.0021381073,
+  "daily": [
+    {
+      "date": "2023-12-01",
+      "net": 23.6515334539,
+      "price_after_fees": -60.10032113440002,
+      "funding": 83.7518545883,
+      "end_btc": 25.137,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1701388800000,
+          "rate_bps": 1.0,
+          "mark": 37716.8,
+          "held_perp_btc": 0,
+          "payment": 0.0
+        },
+        {
+          "time_ms": 1701417600000,
+          "rate_bps": 1.0,
+          "mark": 38241.69935461,
+          "held_perp_btc": -9.478,
+          "payment": 36.24548264829936
+        },
+        {
+          "time_ms": 1701446400000,
+          "rate_bps": 1.0,
+          "mark": 38401.4,
+          "held_perp_btc": -12.371,
+          "payment": 47.50637194000001
+        }
+      ]
+    },
+    {
+      "date": "2023-12-02",
+      "net": -60.3522480627,
+      "price_after_fees": -325.6907708459,
+      "funding": 265.3385227832,
+      "end_btc": 36.181,
+      "funding_rate_bps_sum": 2.5464,
+      "funding_settlements": [
+        {
+          "time_ms": 1701475200000,
+          "rate_bps": 0.9950000000000001,
+          "mark": 38661.09287589,
+          "held_perp_btc": -25.137,
+          "payment": 96.69647721631408
+        },
+        {
+          "time_ms": 1701504000000,
+          "rate_bps": 0.6973,
+          "mark": 38684.0,
+          "held_perp_btc": -26.715,
+          "payment": 72.06198457379999
+        },
+        {
+          "time_ms": 1701532800000,
+          "rate_bps": 0.8541,
+          "mark": 38794.48514894,
+          "held_perp_btc": -29.148,
+          "payment": 96.5800609930905
+        }
+      ]
+    },
+    {
+      "date": "2023-12-03",
+      "net": -629.5805779739,
+      "price_after_fees": -1092.8062519655,
+      "funding": 463.2256739916,
+      "end_btc": 44.547,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1701561600000,
+          "rate_bps": 1.0,
+          "mark": 39438.73455824,
+          "held_perp_btc": -36.181,
+          "payment": 142.69328550516815
+        },
+        {
+          "time_ms": 1701590400000,
+          "rate_bps": 1.0,
+          "mark": 39474.0,
+          "held_perp_btc": -38.991,
+          "payment": 153.9130734
+        },
+        {
+          "time_ms": 1701619200000,
+          "rate_bps": 1.0,
+          "mark": 39758.35522727,
+          "held_perp_btc": -41.908,
+          "payment": 166.61931508644315
+        }
+      ]
+    },
+    {
+      "date": "2023-12-04",
+      "net": 739.6232305304,
+      "price_after_fees": 181.25126627480006,
+      "funding": 558.3719642556999,
+      "end_btc": 47.303,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1701648000000,
+          "rate_bps": 1.0,
+          "mark": 39978.96550379,
+          "held_perp_btc": -44.547,
+          "payment": 178.09429762973332
+        },
+        {
+          "time_ms": 1701676800000,
+          "rate_bps": 1.0,
+          "mark": 41466.20294697,
+          "held_perp_btc": -44.71,
+          "payment": 185.3953933759029
+        },
+        {
+          "time_ms": 1701705600000,
+          "rate_bps": 1.0,
+          "mark": 41275.5,
+          "held_perp_btc": -47.215,
+          "payment": 194.88227325000003
+        }
+      ]
+    },
+    {
+      "date": "2023-12-05",
+      "net": 280.00893517500003,
+      "price_after_fees": -317.3493497018999,
+      "funding": 597.3582848768001,
+      "end_btc": 47.995,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1701734400000,
+          "rate_bps": 1.0,
+          "mark": 41993.0,
+          "held_perp_btc": -47.303,
+          "payment": 198.6394879
+        },
+        {
+          "time_ms": 1701763200000,
+          "rate_bps": 1.0,
+          "mark": 41531.28271631,
+          "held_perp_btc": -47.481,
+          "payment": 197.19468346531153
+        },
+        {
+          "time_ms": 1701792000000,
+          "rate_bps": 1.0,
+          "mark": 42265.96340426,
+          "held_perp_btc": -47.68,
+          "payment": 201.5241135115117
+        }
+      ]
+    },
+    {
+      "date": "2023-12-06",
+      "net": 443.05366971059993,
+      "price_after_fees": -189.10409465350017,
+      "funding": 632.1577643640999,
+      "end_btc": 48.221,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1701820800000,
+          "rate_bps": 1.0,
+          "mark": 44078.62530142,
+          "held_perp_btc": -47.995,
+          "payment": 211.55536213416528
+        },
+        {
+          "time_ms": 1701849600000,
+          "rate_bps": 1.0,
+          "mark": 43697.0,
+          "held_perp_btc": -48.005,
+          "payment": 209.76744850000006
+        },
+        {
+          "time_ms": 1701878400000,
+          "rate_bps": 1.0,
+          "mark": 43795.3,
+          "held_perp_btc": -48.141,
+          "payment": 210.83495373
+        }
+      ]
+    },
+    {
+      "date": "2023-12-07",
+      "net": 112.25903378570001,
+      "price_after_fees": -521.8987888651999,
+      "funding": 634.1578226509,
+      "end_btc": 48.417,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1701907200000,
+          "rate_bps": 1.0,
+          "mark": 43772.2,
+          "held_perp_btc": -48.221,
+          "payment": 211.07392561999998
+        },
+        {
+          "time_ms": 1701936000000,
+          "rate_bps": 1.0,
+          "mark": 43896.71856988,
+          "held_perp_btc": -48.221,
+          "payment": 211.67436661581837
+        },
+        {
+          "time_ms": 1701964800000,
+          "rate_bps": 1.0,
+          "mark": 43673.33865248,
+          "held_perp_btc": -48.407,
+          "payment": 211.40953041505992
+        }
+      ]
+    },
+    {
+      "date": "2023-12-08",
+      "net": 366.68513510160005,
+      "price_after_fees": -759.6202139752,
+      "funding": 1126.3053490768002,
+      "end_btc": 48.454,
+      "funding_rate_bps_sum": 5.353,
+      "funding_settlements": [
+        {
+          "time_ms": 1701993600000,
+          "rate_bps": 1.0,
+          "mark": 43296.0,
+          "held_perp_btc": -48.417,
+          "payment": 209.6262432
+        },
+        {
+          "time_ms": 1702022400000,
+          "rate_bps": 2.3288,
+          "mark": 43184.9,
+          "held_perp_btc": -48.454,
+          "payment": 487.297008954448
+        },
+        {
+          "time_ms": 1702051200000,
+          "rate_bps": 2.0242,
+          "mark": 43778.5,
+          "held_perp_btc": -48.454,
+          "payment": 429.3820969223801
+        }
+      ]
+    },
+    {
+      "date": "2023-12-09",
+      "net": 2124.9992858179,
+      "price_after_fees": 865.0475286504,
+      "funding": 1259.9517571674996,
+      "end_btc": 48.62,
+      "funding_rate_bps_sum": 5.8855,
+      "funding_settlements": [
+        {
+          "time_ms": 1702080000000,
+          "rate_bps": 1.1503999999999999,
+          "mark": 44209.6,
+          "held_perp_btc": -48.454,
+          "payment": 246.43086049433597
+        },
+        {
+          "time_ms": 1702108800000,
+          "rate_bps": 3.0159000000000002,
+          "mark": 44220.6,
+          "held_perp_btc": -48.454,
+          "payment": 646.206322994316
+        },
+        {
+          "time_ms": 1702137600000,
+          "rate_bps": 1.7191999999999998,
+          "mark": 44085.16812838,
+          "held_perp_btc": -48.464,
+          "payment": 367.31457367884104
+        }
+      ]
+    },
+    {
+      "date": "2023-12-10",
+      "net": 1392.0015940106005,
+      "price_after_fees": 4.2339526533000935,
+      "funding": 1387.7676413573,
+      "end_btc": 48.65,
+      "funding_rate_bps_sum": 6.503,
+      "funding_settlements": [
+        {
+          "time_ms": 1702166400000,
+          "rate_bps": 2.0724,
+          "mark": 43734.3,
+          "held_perp_btc": -48.62,
+          "payment": 440.66719166184004
+        },
+        {
+          "time_ms": 1702195200000,
+          "rate_bps": 2.0383,
+          "mark": 43995.9,
+          "held_perp_btc": -48.62,
+          "payment": 436.00881052014
+        },
+        {
+          "time_ms": 1702224000000,
+          "rate_bps": 2.3923,
+          "mark": 43940.82247727,
+          "held_perp_btc": -48.62,
+          "payment": 511.09163917535756
+        }
+      ]
+    },
+    {
+      "date": "2023-12-11",
+      "net": 871.5312012909999,
+      "price_after_fees": 98.37626826469989,
+      "funding": 773.1549330264006,
+      "end_btc": 54.841,
+      "funding_rate_bps_sum": 3.473,
+      "funding_settlements": [
+        {
+          "time_ms": 1702252800000,
+          "rate_bps": 1.473,
+          "mark": 43810.0,
+          "held_perp_btc": -48.65,
+          "payment": 313.94881245
+        },
+        {
+          "time_ms": 1702281600000,
+          "rate_bps": 1.0,
+          "mark": 42134.14321631,
+          "held_perp_btc": -54.629,
+          "payment": 230.17461097637994
+        },
+        {
+          "time_ms": 1702310400000,
+          "rate_bps": 1.0,
+          "mark": 41824.6,
+          "held_perp_btc": -54.76,
+          "payment": 229.0315096
+        }
+      ]
+    },
+    {
+      "date": "2023-12-12",
+      "net": 410.91337740909967,
+      "price_after_fees": -272.7607651451,
+      "funding": 683.6741425541004,
+      "end_btc": 54.96,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1702339200000,
+          "rate_bps": 1.0,
+          "mark": 41271.0,
+          "held_perp_btc": -54.841,
+          "payment": 226.3342911
+        },
+        {
+          "time_ms": 1702368000000,
+          "rate_bps": 1.0,
+          "mark": 41930.0,
+          "held_perp_btc": -54.841,
+          "payment": 229.948313
+        },
+        {
+          "time_ms": 1702396800000,
+          "rate_bps": 1.0,
+          "mark": 41374.00626894,
+          "held_perp_btc": -54.96,
+          "payment": 227.39153845409427
+        }
+      ]
+    },
+    {
+      "date": "2023-12-13",
+      "net": 1705.8126587155002,
+      "price_after_fees": 913.1597856764,
+      "funding": 792.6528730392001,
+      "end_btc": 55.167,
+      "funding_rate_bps_sum": 3.4672,
+      "funding_settlements": [
+        {
+          "time_ms": 1702425600000,
+          "rate_bps": 1.1909,
+          "mark": 41505.95139716,
+          "held_perp_btc": -54.96,
+          "payment": 271.6641886037527
+        },
+        {
+          "time_ms": 1702454400000,
+          "rate_bps": 1.0162,
+          "mark": 41141.22272695,
+          "held_perp_btc": -55.03,
+          "payment": 230.06783107480166
+        },
+        {
+          "time_ms": 1702483200001,
+          "rate_bps": 1.2601,
+          "mark": 41953.70580496,
+          "held_perp_btc": -55.03,
+          "payment": 290.92085336062
+        }
+      ]
+    },
+    {
+      "date": "2023-12-14",
+      "net": 534.8911800326996,
+      "price_after_fees": -190.9494141552999,
+      "funding": 725.8405941878991,
+      "end_btc": 59.676,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1702512000000,
+          "rate_bps": 1.0,
+          "mark": 42874.9,
+          "held_perp_btc": -55.167,
+          "payment": 236.52796083
+        },
+        {
+          "time_ms": 1702540800000,
+          "rate_bps": 1.0,
+          "mark": 42909.64841135,
+          "held_perp_btc": -55.177,
+          "payment": 236.76256703930588
+        },
+        {
+          "time_ms": 1702569600000,
+          "rate_bps": 1.0,
+          "mark": 42458.23380496,
+          "held_perp_btc": -59.482,
+          "payment": 252.55006631866308
+        }
+      ]
+    },
+    {
+      "date": "2023-12-15",
+      "net": -287.6257593319997,
+      "price_after_fees": -1050.2251628016002,
+      "funding": 762.5994034696996,
+      "end_btc": 59.752,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1702598400000,
+          "rate_bps": 1.0,
+          "mark": 43030.02054255,
+          "held_perp_btc": -59.676,
+          "payment": 256.78595058972144
+        },
+        {
+          "time_ms": 1702627200000,
+          "rate_bps": 1.0,
+          "mark": 42721.73764894,
+          "held_perp_btc": -59.752,
+          "payment": 255.2709267999463
+        },
+        {
+          "time_ms": 1702656000000,
+          "rate_bps": 1.0,
+          "mark": 41930.4,
+          "held_perp_btc": -59.752,
+          "payment": 250.54252608000004
+        }
+      ]
+    },
+    {
+      "date": "2023-12-16",
+      "net": 1852.6280056721998,
+      "price_after_fees": 1094.6844145978002,
+      "funding": 757.9435910743014,
+      "end_btc": 59.792,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1702684800000,
+          "rate_bps": 1.0,
+          "mark": 41963.01760993,
+          "held_perp_btc": -59.752,
+          "payment": 250.73742282285374
+        },
+        {
+          "time_ms": 1702713600000,
+          "rate_bps": 1.0,
+          "mark": 42242.61728092,
+          "held_perp_btc": -59.772,
+          "payment": 252.49257201151505
+        },
+        {
+          "time_ms": 1702742400001,
+          "rate_bps": 1.0,
+          "mark": 42614.2,
+          "held_perp_btc": -59.772,
+          "payment": 254.71359624
+        }
+      ]
+    },
+    {
+      "date": "2023-12-17",
+      "net": 4.883723126600671,
+      "price_after_fees": -748.8206476534002,
+      "funding": 753.7043707799985,
+      "end_btc": 59.917,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1702771200000,
+          "rate_bps": 1.0,
+          "mark": 42287.4,
+          "held_perp_btc": -59.792,
+          "payment": 252.84482208000003
+        },
+        {
+          "time_ms": 1702800000000,
+          "rate_bps": 1.0,
+          "mark": 41894.5,
+          "held_perp_btc": -59.802,
+          "payment": 250.5374889
+        },
+        {
+          "time_ms": 1702828800000,
+          "rate_bps": 1.0,
+          "mark": 41828.4,
+          "held_perp_btc": -59.845,
+          "payment": 250.32205980000003
+        }
+      ]
+    },
+    {
+      "date": "2023-12-18",
+      "net": 1440.0573319609994,
+      "price_after_fees": 475.11561105780015,
+      "funding": 964.9417209032999,
+      "end_btc": 60.059,
+      "funding_rate_bps_sum": 3.8966,
+      "funding_settlements": [
+        {
+          "time_ms": 1702857600000,
+          "rate_bps": 1.3355,
+          "mark": 41390.59169858,
+          "held_perp_btc": -59.917,
+          "payment": 331.20401105844985
+        },
+        {
+          "time_ms": 1702886400001,
+          "rate_bps": 1.0,
+          "mark": 41153.28794086,
+          "held_perp_btc": -59.937,
+          "payment": 246.66046193113257
+        },
+        {
+          "time_ms": 1702915200000,
+          "rate_bps": 1.5611,
+          "mark": 41284.67062411,
+          "held_perp_btc": -60.059,
+          "payment": 387.0772479137253
+        }
+      ]
+    },
+    {
+      "date": "2023-12-19",
+      "net": 270.6784776650002,
+      "price_after_fees": -499.77812687530013,
+      "funding": 770.4566045403008,
+      "end_btc": 60.1,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1702944000000,
+          "rate_bps": 1.0,
+          "mark": 42672.42150355,
+          "held_perp_btc": -60.059,
+          "payment": 256.28629630817096
+        },
+        {
+          "time_ms": 1702972800000,
+          "rate_bps": 1.0,
+          "mark": 43060.97652128,
+          "held_perp_btc": -60.079,
+          "payment": 258.70604084219815
+        },
+        {
+          "time_ms": 1703001600000,
+          "rate_bps": 1.0,
+          "mark": 42512.9,
+          "held_perp_btc": -60.091,
+          "payment": 255.46426739000003
+        }
+      ]
+    },
+    {
+      "date": "2023-12-20",
+      "net": 78.78238916189912,
+      "price_after_fees": -1074.5366945390997,
+      "funding": 1153.3190837010006,
+      "end_btc": 60.312,
+      "funding_rate_bps_sum": 4.4143,
+      "funding_settlements": [
+        {
+          "time_ms": 1703030400000,
+          "rate_bps": 1.0506,
+          "mark": 42296.25497656,
+          "held_perp_btc": -60.1,
+          "payment": 267.0630373250273
+        },
+        {
+          "time_ms": 1703059200000,
+          "rate_bps": 1.0,
+          "mark": 42950.0,
+          "held_perp_btc": -60.161,
+          "payment": 258.391495
+        },
+        {
+          "time_ms": 1703088000000,
+          "rate_bps": 2.3636999999999997,
+          "mark": 44072.24884043,
+          "held_perp_btc": -60.271,
+          "payment": 627.8645513759761
+        }
+      ]
+    },
+    {
+      "date": "2023-12-21",
+      "net": 2582.565651810901,
+      "price_after_fees": 329.9066399991998,
+      "funding": 2252.6590118115982,
+      "end_btc": 60.312,
+      "funding_rate_bps_sum": 8.5307,
+      "funding_settlements": [
+        {
+          "time_ms": 1703116800000,
+          "rate_bps": 2.7143,
+          "mark": 43698.37531584,
+          "held_perp_btc": -60.312,
+          "payment": 715.3636483224444
+        },
+        {
+          "time_ms": 1703145600000,
+          "rate_bps": 2.9216,
+          "mark": 43794.8,
+          "held_perp_btc": -60.312,
+          "payment": 771.697393775616
+        },
+        {
+          "time_ms": 1703174400000,
+          "rate_bps": 2.8948,
+          "mark": 43850.89671986,
+          "held_perp_btc": -60.312,
+          "payment": 765.5979697136333
+        }
+      ]
+    },
+    {
+      "date": "2023-12-22",
+      "net": 2330.8846016604984,
+      "price_after_fees": 261.7540800003999,
+      "funding": 2069.1305216602013,
+      "end_btc": 60.312,
+      "funding_rate_bps_sum": 7.8427,
+      "funding_settlements": [
+        {
+          "time_ms": 1703203200000,
+          "rate_bps": 3.0805999999999996,
+          "mark": 43896.3,
+          "held_perp_btc": -60.312,
+          "payment": 815.5807312635359
+        },
+        {
+          "time_ms": 1703232000000,
+          "rate_bps": 2.961,
+          "mark": 43614.1,
+          "held_perp_btc": -60.312,
+          "payment": 778.8773107231199
+        },
+        {
+          "time_ms": 1703260800000,
+          "rate_bps": 1.8011000000000001,
+          "mark": 43697.08803191,
+          "held_perp_btc": -60.312,
+          "payment": 474.672479673572
+        }
+      ]
+    },
+    {
+      "date": "2023-12-23",
+      "net": 1521.845282694103,
+      "price_after_fees": 428.83610549830007,
+      "funding": 1093.0091771957013,
+      "end_btc": 60.332,
+      "funding_rate_bps_sum": 4.1350999999999996,
+      "funding_settlements": [
+        {
+          "time_ms": 1703289600000,
+          "rate_bps": 1.6285,
+          "mark": 43998.57487234,
+          "held_perp_btc": -60.312,
+          "payment": 432.14560746803784
+        },
+        {
+          "time_ms": 1703318400001,
+          "rate_bps": 1.0,
+          "mark": 43579.4605307,
+          "held_perp_btc": -60.332,
+          "payment": 262.92360127381926
+        },
+        {
+          "time_ms": 1703347200000,
+          "rate_bps": 1.5066,
+          "mark": 43779.60871631,
+          "held_perp_btc": -60.332,
+          "payment": 397.93996845389006
+        }
+      ]
+    },
+    {
+      "date": "2023-12-24",
+      "net": 1682.6900292205974,
+      "price_after_fees": 350.7927659630001,
+      "funding": 1331.897263257597,
+      "end_btc": 62.175,
+      "funding_rate_bps_sum": 5.0519,
+      "funding_settlements": [
+        {
+          "time_ms": 1703376000000,
+          "rate_bps": 1.0,
+          "mark": 43725.2,
+          "held_perp_btc": -60.332,
+          "payment": 263.80287664
+        },
+        {
+          "time_ms": 1703404800000,
+          "rate_bps": 2.079,
+          "mark": 43678.0138899,
+          "held_perp_btc": -60.332,
+          "payment": 547.8543240797324
+        },
+        {
+          "time_ms": 1703433600000,
+          "rate_bps": 1.9729,
+          "mark": 43707.0,
+          "held_perp_btc": -60.332,
+          "payment": 520.24006253796
+        }
+      ]
+    },
+    {
+      "date": "2023-12-25",
+      "net": 385.74462800260153,
+      "price_after_fees": -1179.459749999,
+      "funding": 1565.204378001603,
+      "end_btc": 62.175,
+      "funding_rate_bps_sum": 5.7908,
+      "funding_settlements": [
+        {
+          "time_ms": 1703462400000,
+          "rate_bps": 1.0,
+          "mark": 43008.3,
+          "held_perp_btc": -62.175,
+          "payment": 267.40410525000004
+        },
+        {
+          "time_ms": 1703491200000,
+          "rate_bps": 1.0,
+          "mark": 43232.18695035,
+          "held_perp_btc": -62.175,
+          "payment": 268.79612236380115
+        },
+        {
+          "time_ms": 1703520000000,
+          "rate_bps": 3.7908,
+          "mark": 43658.66589362,
+          "held_perp_btc": -62.175,
+          "payment": 1029.004150387832
+        }
+      ]
+    },
+    {
+      "date": "2023-12-26",
+      "net": 2966.5802766345987,
+      "price_after_fees": 367.17252411389995,
+      "funding": 2599.4077525206994,
+      "end_btc": 63.591,
+      "funding_rate_bps_sum": 9.6707,
+      "funding_settlements": [
+        {
+          "time_ms": 1703548800000,
+          "rate_bps": 4.3391,
+          "mark": 43607.90541195,
+          "held_perp_btc": -62.175,
+          "payment": 1176.4695203040792
+        },
+        {
+          "time_ms": 1703577600000,
+          "rate_bps": 2.3756999999999997,
+          "mark": 42798.6347803,
+          "held_perp_btc": -62.403,
+          "payment": 634.4932148957606
+        },
+        {
+          "time_ms": 1703606400000,
+          "rate_bps": 2.9558999999999997,
+          "mark": 42420.52598582,
+          "held_perp_btc": -62.879,
+          "payment": 788.4450173209435
+        }
+      ]
+    },
+    {
+      "date": "2023-12-27",
+      "net": 2955.8897789334005,
+      "price_after_fees": 299.7693653783,
+      "funding": 2656.1204135552,
+      "end_btc": 63.601,
+      "funding_rate_bps_sum": 9.7867,
+      "funding_settlements": [
+        {
+          "time_ms": 1703635200000,
+          "rate_bps": 2.7620999999999998,
+          "mark": 42538.5,
+          "held_perp_btc": -63.591,
+          "payment": 747.166211774235
+        },
+        {
+          "time_ms": 1703664000000,
+          "rate_bps": 3.7942,
+          "mark": 42495.9,
+          "held_perp_btc": -63.591,
+          "payment": 1025.328208291398
+        },
+        {
+          "time_ms": 1703692800000,
+          "rate_bps": 3.2304000000000004,
+          "mark": 43007.9,
+          "held_perp_btc": -63.601,
+          "payment": 883.6259934896161
+        }
+      ]
+    },
+    {
+      "date": "2023-12-28",
+      "net": 2028.283620315502,
+      "price_after_fees": -725.4400280026999,
+      "funding": 2753.7236483181005,
+      "end_btc": 63.632,
+      "funding_rate_bps_sum": 10.1052,
+      "funding_settlements": [
+        {
+          "time_ms": 1703721600000,
+          "rate_bps": 1.3020999999999998,
+          "mark": 43453.337,
+          "held_perp_btc": -63.601,
+          "payment": 359.8582111439827
+        },
+        {
+          "time_ms": 1703750400000,
+          "rate_bps": 3.7879,
+          "mark": 43085.57530142,
+          "held_perp_btc": -63.62,
+          "payment": 1038.3028980531908
+        },
+        {
+          "time_ms": 1703779200000,
+          "rate_bps": 5.0152,
+          "mark": 42485.19706383,
+          "held_perp_btc": -63.62,
+          "payment": 1355.5625391209774
+        }
+      ]
+    },
+    {
+      "date": "2023-12-29",
+      "net": 4604.246779328198,
+      "price_after_fees": 496.4797036596,
+      "funding": 4107.767075668602,
+      "end_btc": 64.468,
+      "funding_rate_bps_sum": 15.2164,
+      "funding_settlements": [
+        {
+          "time_ms": 1703808000001,
+          "rate_bps": 5.517,
+          "mark": 42600.0,
+          "held_perp_btc": -63.632,
+          "payment": 1495.50598944
+        },
+        {
+          "time_ms": 1703836800000,
+          "rate_bps": 4.9912,
+          "mark": 42309.51908156,
+          "held_perp_btc": -63.662,
+          "payment": 1344.3840143138186
+        },
+        {
+          "time_ms": 1703865600000,
+          "rate_bps": 4.7082,
+          "mark": 42300.15579787,
+          "held_perp_btc": -63.662,
+          "payment": 1267.8770719149713
+        }
+      ]
+    },
+    {
+      "date": "2023-12-30",
+      "net": 2737.2392223262977,
+      "price_after_fees": -373.5860174078,
+      "funding": 3110.8252397342003,
+      "end_btc": 64.507,
+      "funding_rate_bps_sum": 11.445500000000001,
+      "funding_settlements": [
+        {
+          "time_ms": 1703894400001,
+          "rate_bps": 3.3032999999999997,
+          "mark": 42095.1,
+          "held_perp_btc": -64.468,
+          "payment": 896.4452289232439
+        },
+        {
+          "time_ms": 1703923200000,
+          "rate_bps": 4.3580000000000005,
+          "mark": 41979.90052482,
+          "held_perp_btc": -64.468,
+          "payment": 1179.431786941459
+        },
+        {
+          "time_ms": 1703952000000,
+          "rate_bps": 3.7842000000000002,
+          "mark": 42410.4,
+          "held_perp_btc": -64.487,
+          "payment": 1034.948223869616
+        }
+      ]
+    },
+    {
+      "date": "2023-12-31",
+      "net": 2860.196530297806,
+      "price_after_fees": 232.28812284540004,
+      "funding": 2627.908407452298,
+      "end_btc": 64.516,
+      "funding_rate_bps_sum": 9.602500000000001,
+      "funding_settlements": [
+        {
+          "time_ms": 1703980800000,
+          "rate_bps": 2.7855000000000003,
+          "mark": 42173.50049291,
+          "held_perp_btc": -64.507,
+          "payment": 757.7913742682915
+        },
+        {
+          "time_ms": 1704009600001,
+          "rate_bps": 3.4573,
+          "mark": 42564.0,
+          "held_perp_btc": -64.507,
+          "payment": 949.2625455020401
+        },
+        {
+          "time_ms": 1704038400000,
+          "rate_bps": 3.3597,
+          "mark": 42489.7,
+          "held_perp_btc": -64.507,
+          "payment": 920.854487682063
+        }
+      ]
+    },
+    {
+      "date": "2024-01-01",
+      "net": 1384.2932819506968,
+      "price_after_fees": -1311.6102799997,
+      "funding": 2695.9035619503993,
+      "end_btc": 64.516,
+      "funding_rate_bps_sum": 9.822299999999998,
+      "funding_settlements": [
+        {
+          "time_ms": 1704067200000,
+          "rate_bps": 3.7409,
+          "mark": 42313.9,
+          "held_perp_btc": -64.516,
+          "payment": 1021.2371091991162
+        },
+        {
+          "time_ms": 1704096000000,
+          "rate_bps": 2.7213,
+          "mark": 42525.11019858,
+          "held_perp_btc": -64.516,
+          "payment": 746.602264104716
+        },
+        {
+          "time_ms": 1704124800000,
+          "rate_bps": 3.3600999999999996,
+          "mark": 42811.29637234,
+          "held_perp_btc": -64.516,
+          "payment": 928.0641886466178
+        }
+      ]
+    },
+    {
+      "date": "2024-01-02",
+      "net": 5629.892427177503,
+      "price_after_fees": 1150.4025784285,
+      "funding": 4479.489848749101,
+      "end_btc": 64.586,
+      "funding_rate_bps_sum": 15.4755,
+      "funding_settlements": [
+        {
+          "time_ms": 1704153600000,
+          "rate_bps": 6.5846,
+          "mark": 44230.2,
+          "held_perp_btc": -64.516,
+          "payment": 1878.9522093138723
+        },
+        {
+          "time_ms": 1704182400000,
+          "rate_bps": 3.5179,
+          "mark": 45494.64708156,
+          "held_perp_btc": -64.516,
+          "payment": 1032.5503153353677
+        },
+        {
+          "time_ms": 1704211200000,
+          "rate_bps": 5.373,
+          "mark": 45212.27632624,
+          "held_perp_btc": -64.546,
+          "payment": 1567.9873240999486
+        }
+      ]
+    },
+    {
+      "date": "2024-01-03",
+      "net": 3383.402007382894,
+      "price_after_fees": 1960.7499637558,
+      "funding": 1422.6520436270002,
+      "end_btc": 73.771,
+      "funding_rate_bps_sum": 4.8282,
+      "funding_settlements": [
+        {
+          "time_ms": 1704240000000,
+          "rate_bps": 2.1159,
+          "mark": 44975.18398936,
+          "held_perp_btc": -64.586,
+          "payment": 614.6196988594165
+        },
+        {
+          "time_ms": 1704268800000,
+          "rate_bps": 1.7123,
+          "mark": 45030.4,
+          "held_perp_btc": -64.586,
+          "payment": 497.993930547712
+        },
+        {
+          "time_ms": 1704297600000,
+          "rate_bps": 1.0,
+          "mark": 42995.8,
+          "held_perp_btc": -72.109,
+          "payment": 310.03841422000005
+        }
+      ]
+    },
+    {
+      "date": "2024-01-04",
+      "net": 1807.7165767543047,
+      "price_after_fees": 848.7171469286999,
+      "funding": 958.9994298254969,
+      "end_btc": 75.567,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1704326400000,
+          "rate_bps": 1.0,
+          "mark": 42849.5,
+          "held_perp_btc": -73.771,
+          "payment": 316.10504645000003
+        },
+        {
+          "time_ms": 1704355200000,
+          "rate_bps": 1.0,
+          "mark": 42772.61299645,
+          "held_perp_btc": -73.932,
+          "payment": 316.22648240535415
+        },
+        {
+          "time_ms": 1704384000000,
+          "rate_bps": 1.0,
+          "mark": 44048.47574468,
+          "held_perp_btc": -74.161,
+          "payment": 326.66790097012137
+        }
+      ]
+    },
+    {
+      "date": "2024-01-05",
+      "net": 306.2046776421994,
+      "price_after_fees": -756.9262814827,
+      "funding": 1063.1309591250028,
+      "end_btc": 91.186,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1704412800001,
+          "rate_bps": 1.0,
+          "mark": 44147.0,
+          "held_perp_btc": -75.567,
+          "payment": 333.6056349
+        },
+        {
+          "time_ms": 1704441600000,
+          "rate_bps": 1.0,
+          "mark": 43772.86349645,
+          "held_perp_btc": -80.936,
+          "payment": 354.2800479948678
+        },
+        {
+          "time_ms": 1704470400000,
+          "rate_bps": 1.0,
+          "mark": 43495.1,
+          "held_perp_btc": -86.273,
+          "payment": 375.24527623
+        }
+      ]
+    },
+    {
+      "date": "2024-01-06",
+      "net": 2264.8281074460974,
+      "price_after_fees": 1061.9267342548999,
+      "funding": 1202.9013731910964,
+      "end_btc": 93.011,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1704499200000,
+          "rate_bps": 1.0,
+          "mark": 44143.29,
+          "held_perp_btc": -91.186,
+          "payment": 402.5250041940001
+        },
+        {
+          "time_ms": 1704528000000,
+          "rate_bps": 1.0,
+          "mark": 43651.6537695,
+          "held_perp_btc": -91.397,
+          "payment": 398.9630199570992
+        },
+        {
+          "time_ms": 1704556800000,
+          "rate_bps": 1.0,
+          "mark": 43863.6,
+          "held_perp_btc": -91.514,
+          "payment": 401.41334903999996
+        }
+      ]
+    },
+    {
+      "date": "2024-01-07",
+      "net": 1045.9600176923996,
+      "price_after_fees": -200.64801293920004,
+      "funding": 1246.6080306317017,
+      "end_btc": 109.314,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1704585600000,
+          "rate_bps": 1.0,
+          "mark": 43960.4300922,
+          "held_perp_btc": -93.011,
+          "payment": 408.88035633056137
+        },
+        {
+          "time_ms": 1704614400001,
+          "rate_bps": 1.0,
+          "mark": 44071.99074823,
+          "held_perp_btc": -93.662,
+          "payment": 412.7870797460718
+        },
+        {
+          "time_ms": 1704643200001,
+          "rate_bps": 1.0,
+          "mark": 44037.12014539,
+          "held_perp_btc": -96.496,
+          "payment": 424.94059455495534
+        }
+      ]
+    },
+    {
+      "date": "2024-01-08",
+      "net": -2988.2443916017946,
+      "price_after_fees": -4588.8373286893,
+      "funding": 1600.592937087502,
+      "end_btc": 128.986,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1704672000000,
+          "rate_bps": 1.0,
+          "mark": 43916.9,
+          "held_perp_btc": -109.314,
+          "payment": 480.07320066
+        },
+        {
+          "time_ms": 1704700800000,
+          "rate_bps": 1.0,
+          "mark": 43970.0,
+          "held_perp_btc": -124.488,
+          "payment": 547.373736
+        },
+        {
+          "time_ms": 1704729600000,
+          "rate_bps": 1.0,
+          "mark": 44964.26529433,
+          "held_perp_btc": -127.467,
+          "payment": 573.1460004272362
+        }
+      ]
+    },
+    {
+      "date": "2024-01-09",
+      "net": 4276.672785033596,
+      "price_after_fees": 2445.6960290882002,
+      "funding": 1830.9767559453976,
+      "end_btc": 142.184,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1704758400001,
+          "rate_bps": 1.0,
+          "mark": 46972.6,
+          "held_perp_btc": -128.986,
+          "payment": 605.88077836
+        },
+        {
+          "time_ms": 1704787200000,
+          "rate_bps": 1.0,
+          "mark": 46838.74650709,
+          "held_perp_btc": -129.104,
+          "payment": 604.7069529051348
+        },
+        {
+          "time_ms": 1704816000000,
+          "rate_bps": 1.0,
+          "mark": 46872.4,
+          "held_perp_btc": -132.357,
+          "payment": 620.38902468
+        }
+      ]
+    },
+    {
+      "date": "2024-01-10",
+      "net": 1072.5340279403026,
+      "price_after_fees": -895.3677438294,
+      "funding": 1967.9017717696988,
+      "end_btc": 160.345,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1704844800000,
+          "rate_bps": 1.0,
+          "mark": 46114.0,
+          "held_perp_btc": -142.184,
+          "payment": 655.6672976
+        },
+        {
+          "time_ms": 1704873600000,
+          "rate_bps": 1.0,
+          "mark": 45766.4,
+          "held_perp_btc": -142.215,
+          "payment": 650.8668576000001
+        },
+        {
+          "time_ms": 1704902400000,
+          "rate_bps": 1.0,
+          "mark": 45570.70327083,
+          "held_perp_btc": -145.13,
+          "payment": 661.3676165695558
+        }
+      ]
+    },
+    {
+      "date": "2024-01-11",
+      "net": 3851.129994541596,
+      "price_after_fees": 1595.0940680888,
+      "funding": 2256.0359264528015,
+      "end_btc": 164.655,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1704931200000,
+          "rate_bps": 1.0,
+          "mark": 46657.58933688,
+          "held_perp_btc": -160.345,
+          "payment": 748.1311162222024
+        },
+        {
+          "time_ms": 1704960000000,
+          "rate_bps": 1.0,
+          "mark": 46096.00527305,
+          "held_perp_btc": -161.287,
+          "payment": 743.4686402474417
+        },
+        {
+          "time_ms": 1704988800000,
+          "rate_bps": 1.0,
+          "mark": 46789.70540426,
+          "held_perp_btc": -163.377,
+          "payment": 764.4361699831787
+        }
+      ]
+    },
+    {
+      "date": "2024-01-12",
+      "net": 946.2769764594996,
+      "price_after_fees": -1310.3297187802002,
+      "funding": 2256.6066952398032,
+      "end_btc": 170.142,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705017600001,
+          "rate_bps": 1.0,
+          "mark": 46341.69723404,
+          "held_perp_btc": -164.655,
+          "payment": 763.0392158070857
+        },
+        {
+          "time_ms": 1705046400000,
+          "rate_bps": 1.0,
+          "mark": 46008.31871986,
+          "held_perp_btc": -164.906,
+          "payment": 758.7047806817234
+        },
+        {
+          "time_ms": 1705075200000,
+          "rate_bps": 1.0,
+          "mark": 44492.64061702,
+          "held_perp_btc": -165.165,
+          "payment": 734.8626987510107
+        }
+      ]
+    },
+    {
+      "date": "2024-01-13",
+      "net": 3511.3925068231038,
+      "price_after_fees": 1313.8834724559,
+      "funding": 2197.509034367198,
+      "end_btc": 170.63,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705104000000,
+          "rate_bps": 1.0,
+          "mark": 42789.0,
+          "held_perp_btc": -170.142,
+          "payment": 728.0206038
+        },
+        {
+          "time_ms": 1705132800000,
+          "rate_bps": 1.0,
+          "mark": 43102.1,
+          "held_perp_btc": -170.292,
+          "payment": 733.99428132
+        },
+        {
+          "time_ms": 1705161600001,
+          "rate_bps": 1.0,
+          "mark": 43159.76276596,
+          "held_perp_btc": -170.412,
+          "payment": 735.4941492472776
+        }
+      ]
+    },
+    {
+      "date": "2024-01-14",
+      "net": 1467.861865200306,
+      "price_after_fees": -730.1469728235996,
+      "funding": 2198.008838023801,
+      "end_btc": 172.049,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705190400000,
+          "rate_bps": 1.0,
+          "mark": 42847.30638298,
+          "held_perp_btc": -170.63,
+          "payment": 731.1035888127877
+        },
+        {
+          "time_ms": 1705219200000,
+          "rate_bps": 1.0,
+          "mark": 43011.45861702,
+          "held_perp_btc": -170.71,
+          "payment": 734.2486100511484
+        },
+        {
+          "time_ms": 1705248000001,
+          "rate_bps": 1.0,
+          "mark": 42908.4,
+          "held_perp_btc": -170.749,
+          "payment": 732.65663916
+        }
+      ]
+    },
+    {
+      "date": "2024-01-15",
+      "net": 1914.5084859576891,
+      "price_after_fees": -268.0295530628003,
+      "funding": 2182.5380390204955,
+      "end_btc": 173.617,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705276800000,
+          "rate_bps": 1.0,
+          "mark": 41739.6,
+          "held_perp_btc": -172.049,
+          "payment": 718.12564404
+        },
+        {
+          "time_ms": 1705305600000,
+          "rate_bps": 1.0,
+          "mark": 42716.86510638,
+          "held_perp_btc": -172.109,
+          "payment": 735.1956936593956
+        },
+        {
+          "time_ms": 1705334400000,
+          "rate_bps": 1.0,
+          "mark": 42278.82404255,
+          "held_perp_btc": -172.478,
+          "payment": 729.2167013210939
+        }
+      ]
+    },
+    {
+      "date": "2024-01-16",
+      "net": 3742.362047792005,
+      "price_after_fees": 1504.2351348043,
+      "funding": 2238.1269129877037,
+      "end_btc": 175.628,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705363200000,
+          "rate_bps": 1.0,
+          "mark": 42513.87702482,
+          "held_perp_btc": -173.617,
+          "payment": 738.1131787418174
+        },
+        {
+          "time_ms": 1705392000000,
+          "rate_bps": 1.0,
+          "mark": 42785.27425532,
+          "held_perp_btc": -173.785,
+          "payment": 743.5438886460786
+        },
+        {
+          "time_ms": 1705420800001,
+          "rate_bps": 1.0,
+          "mark": 43252.8,
+          "held_perp_btc": -174.895,
+          "payment": 756.4698456000001
+        }
+      ]
+    },
+    {
+      "date": "2024-01-17",
+      "net": 95.27246870739327,
+      "price_after_fees": -2161.7682336348,
+      "funding": 2257.0407023422013,
+      "end_btc": 176.65,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705449600000,
+          "rate_bps": 1.0,
+          "mark": 43140.2157695,
+          "held_perp_btc": -175.628,
+          "payment": 757.6629815165745
+        },
+        {
+          "time_ms": 1705478400000,
+          "rate_bps": 1.0,
+          "mark": 42656.31850355,
+          "held_perp_btc": -175.937,
+          "payment": 750.4824708559076
+        },
+        {
+          "time_ms": 1705507200000,
+          "rate_bps": 1.0,
+          "mark": 42480.1466859,
+          "held_perp_btc": -176.293,
+          "payment": 748.8952499697369
+        }
+      ]
+    },
+    {
+      "date": "2024-01-18",
+      "net": 4206.6097884050105,
+      "price_after_fees": 1939.2804923107997,
+      "funding": 2267.329296094191,
+      "end_btc": 183.028,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705536000001,
+          "rate_bps": 1.0,
+          "mark": 42781.95729433,
+          "held_perp_btc": -176.65,
+          "payment": 755.7432756043395
+        },
+        {
+          "time_ms": 1705564800000,
+          "rate_bps": 1.0,
+          "mark": 42915.94085106,
+          "held_perp_btc": -176.698,
+          "payment": 758.31609165006
+        },
+        {
+          "time_ms": 1705593600000,
+          "rate_bps": 1.0,
+          "mark": 42618.3,
+          "held_perp_btc": -176.748,
+          "payment": 753.26992884
+        }
+      ]
+    },
+    {
+      "date": "2024-01-19",
+      "net": 837.9724333537015,
+      "price_after_fees": -1438.2162733402001,
+      "funding": 2276.188706693909,
+      "end_btc": 185.94,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705622400000,
+          "rate_bps": 1.0,
+          "mark": 41319.17595745,
+          "held_perp_btc": -183.028,
+          "payment": 756.2566137140159
+        },
+        {
+          "time_ms": 1705651200000,
+          "rate_bps": 1.0,
+          "mark": 41282.0,
+          "held_perp_btc": -184.87,
+          "payment": 763.180334
+        },
+        {
+          "time_ms": 1705680000002,
+          "rate_bps": 1.0,
+          "mark": 40897.1,
+          "held_perp_btc": -185.038,
+          "payment": 756.7517589800001
+        }
+      ]
+    },
+    {
+      "date": "2024-01-20",
+      "net": 3678.929503484891,
+      "price_after_fees": 1356.0221442685001,
+      "funding": 2322.907359216493,
+      "end_btc": 186.149,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705708800000,
+          "rate_bps": 1.0,
+          "mark": 41662.1,
+          "held_perp_btc": -185.94,
+          "payment": 774.6650874000001
+        },
+        {
+          "time_ms": 1705737600003,
+          "rate_bps": 1.0,
+          "mark": 41650.68431818,
+          "held_perp_btc": -185.98,
+          "payment": 774.6194269495116
+        },
+        {
+          "time_ms": 1705766400000,
+          "rate_bps": 1.0,
+          "mark": 41568.26617021,
+          "held_perp_btc": -186.109,
+          "payment": 773.6228448671615
+        }
+      ]
+    },
+    {
+      "date": "2024-01-21",
+      "net": 1609.6750804121984,
+      "price_after_fees": -718.8400065039998,
+      "funding": 2328.5150869161007,
+      "end_btc": 186.586,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705795200000,
+          "rate_bps": 1.0,
+          "mark": 41693.91453546,
+          "held_perp_btc": -186.149,
+          "payment": 776.1280496861343
+        },
+        {
+          "time_ms": 1705824000000,
+          "rate_bps": 1.0,
+          "mark": 41648.18463415,
+          "held_perp_btc": -186.179,
+          "payment": 775.4017367001413
+        },
+        {
+          "time_ms": 1705852800000,
+          "rate_bps": 1.0,
+          "mark": 41652.7,
+          "held_perp_btc": -186.539,
+          "payment": 776.98530053
+        }
+      ]
+    },
+    {
+      "date": "2024-01-22",
+      "net": 2067.24674648371,
+      "price_after_fees": -258.60420834870035,
+      "funding": 2325.8509548324073,
+      "end_btc": 204.131,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705881600000,
+          "rate_bps": 1.0,
+          "mark": 41578.57680851,
+          "held_perp_btc": -186.586,
+          "payment": 775.7980332392648
+        },
+        {
+          "time_ms": 1705910400000,
+          "rate_bps": 1.0,
+          "mark": 41041.20808511,
+          "held_perp_btc": -187.918,
+          "payment": 771.2381740937702
+        },
+        {
+          "time_ms": 1705939200000,
+          "rate_bps": 1.0,
+          "mark": 40767.10361702,
+          "held_perp_btc": -191.04,
+          "payment": 778.8147474995502
+        }
+      ]
+    },
+    {
+      "date": "2024-01-23",
+      "net": 3753.134275572098,
+      "price_after_fees": 1323.8914629544006,
+      "funding": 2429.2428126176965,
+      "end_btc": 207.499,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1705968000000,
+          "rate_bps": 1.0,
+          "mark": 39566.15381552,
+          "held_perp_btc": -204.131,
+          "payment": 807.6678544515913
+        },
+        {
+          "time_ms": 1705996800000,
+          "rate_bps": 1.0,
+          "mark": 39776.93668085,
+          "held_perp_btc": -204.375,
+          "payment": 812.9411434148719
+        },
+        {
+          "time_ms": 1706025600000,
+          "rate_bps": 1.0,
+          "mark": 39204.77723404,
+          "held_perp_btc": -206.259,
+          "payment": 808.6338147515855
+        }
+      ]
+    },
+    {
+      "date": "2024-01-24",
+      "net": 1977.1906364258903,
+      "price_after_fees": -583.8795009183002,
+      "funding": 2561.070137344199,
+      "end_btc": 222.615,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1706054400000,
+          "rate_bps": 1.0,
+          "mark": 39891.9286553,
+          "held_perp_btc": -207.499,
+          "payment": 827.7535304046095
+        },
+        {
+          "time_ms": 1706083200000,
+          "rate_bps": 1.0,
+          "mark": 39974.2,
+          "held_perp_btc": -211.987,
+          "payment": 847.4010735399999
+        },
+        {
+          "time_ms": 1706112000000,
+          "rate_bps": 1.0,
+          "mark": 40048.43942661,
+          "held_perp_btc": -221.211,
+          "payment": 885.9155333999826
+        }
+      ]
+    },
+    {
+      "date": "2024-01-25",
+      "net": 2835.7628287746047,
+      "price_after_fees": 122.34265378909981,
+      "funding": 2713.4201749853964,
+      "end_btc": 236.88,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1706140800000,
+          "rate_bps": 1.0,
+          "mark": 40078.8,
+          "held_perp_btc": -222.615,
+          "payment": 892.2142062000001
+        },
+        {
+          "time_ms": 1706169600001,
+          "rate_bps": 1.0,
+          "mark": 40122.98766288,
+          "held_perp_btc": -223.967,
+          "payment": 898.6225177892246
+        },
+        {
+          "time_ms": 1706198400000,
+          "rate_bps": 1.0,
+          "mark": 39799.29385816,
+          "held_perp_btc": -231.809,
+          "payment": 922.5834509966212
+        }
+      ]
+    },
+    {
+      "date": "2024-01-26",
+      "net": 4712.544881519498,
+      "price_after_fees": 1656.6744161686997,
+      "funding": 3055.870465350803,
+      "end_btc": 297.4279999999,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1706227200001,
+          "rate_bps": 1.0,
+          "mark": 39953.3,
+          "held_perp_btc": -236.88,
+          "payment": 946.4137704000001
+        },
+        {
+          "time_ms": 1706256000000,
+          "rate_bps": 1.0,
+          "mark": 39958.29798106,
+          "held_perp_btc": -242.592,
+          "payment": 969.3563423821308
+        },
+        {
+          "time_ms": 1706284800000,
+          "rate_bps": 1.0,
+          "mark": 41408.20364394,
+          "held_perp_btc": -275.3319999999,
+          "payment": 1140.100352568915
+        }
+      ]
+    },
+    {
+      "date": "2024-01-27",
+      "net": 3693.409262345798,
+      "price_after_fees": 238.75748888810085,
+      "funding": 3454.6517734578083,
+      "end_btc": 315.6259999999,
+      "funding_rate_bps_sum": 2.7266,
+      "funding_settlements": [
+        {
+          "time_ms": 1706313600000,
+          "rate_bps": 0.8966000000000001,
+          "mark": 41806.4,
+          "held_perp_btc": -297.4279999999,
+          "payment": 1114.8677605882974
+        },
+        {
+          "time_ms": 1706342400000,
+          "rate_bps": 1.0,
+          "mark": 41699.0,
+          "held_perp_btc": -302.9459999999,
+          "payment": 1263.2545253995831
+        },
+        {
+          "time_ms": 1706371200000,
+          "rate_bps": 0.83,
+          "mark": 41797.4,
+          "held_perp_btc": -310.3119999999,
+          "payment": 1076.5294874700533
+        }
+      ]
+    },
+    {
+      "date": "2024-01-28",
+      "net": 69.46585406930535,
+      "price_after_fees": -3323.5702924293,
+      "funding": 3393.036146498591,
+      "end_btc": 349.4629999998,
+      "funding_rate_bps_sum": 2.4725,
+      "funding_settlements": [
+        {
+          "time_ms": 1706400000000,
+          "rate_bps": 1.0,
+          "mark": 42102.2,
+          "held_perp_btc": -315.6259999999,
+          "payment": 1328.854897719579
+        },
+        {
+          "time_ms": 1706428800000,
+          "rate_bps": 0.47250000000000003,
+          "mark": 42370.0,
+          "held_perp_btc": -323.9839999999,
+          "payment": 648.6102982797998
+        },
+        {
+          "time_ms": 1706457600000,
+          "rate_bps": 1.0,
+          "mark": 42244.5,
+          "held_perp_btc": -335.0899999998,
+          "payment": 1415.5709504991553
+        }
+      ]
+    },
+    {
+      "date": "2024-01-29",
+      "net": 5657.548886920704,
+      "price_after_fees": 1205.8650369220998,
+      "funding": 4451.683849998604,
+      "end_btc": 401.4389999998,
+      "funding_rate_bps_sum": 2.9142,
+      "funding_settlements": [
+        {
+          "time_ms": 1706486400000,
+          "rate_bps": 1.0,
+          "mark": 42021.3,
+          "held_perp_btc": -349.4629999998,
+          "payment": 1468.4889561891598
+        },
+        {
+          "time_ms": 1706515200001,
+          "rate_bps": 0.9142,
+          "mark": 42040.0,
+          "held_perp_btc": -358.6859999998,
+          "payment": 1378.5367560040313
+        },
+        {
+          "time_ms": 1706544000000,
+          "rate_bps": 1.0,
+          "mark": 42626.51582979,
+          "held_perp_btc": -376.4459999998,
+          "payment": 1604.6581378052601
+        }
+      ]
+    },
+    {
+      "date": "2024-01-30",
+      "net": 7260.262504937098,
+      "price_after_fees": 2875.6510050541,
+      "funding": 4384.611499883002,
+      "end_btc": 434.4889999997,
+      "funding_rate_bps_sum": 2.4641,
+      "funding_settlements": [
+        {
+          "time_ms": 1706572800000,
+          "rate_bps": 1.0,
+          "mark": 43287.7,
+          "held_perp_btc": -401.4389999998,
+          "payment": 1737.7371000291341
+        },
+        {
+          "time_ms": 1706601600000,
+          "rate_bps": 0.9492,
+          "mark": 43346.6,
+          "held_perp_btc": -411.5729999998,
+          "payment": 1693.4003459540334
+        },
+        {
+          "time_ms": 1706630400001,
+          "rate_bps": 0.5149,
+          "mark": 43355.4,
+          "held_perp_btc": -427.1129999997,
+          "payment": 953.4740539000283
+        }
+      ]
+    },
+    {
+      "date": "2024-01-31",
+      "net": 2408.5551865029993,
+      "price_after_fees": -1958.4732773628002,
+      "funding": 4367.02846386579,
+      "end_btc": 501.6689999996,
+      "funding_rate_bps_sum": 2.2154,
+      "funding_settlements": [
+        {
+          "time_ms": 1706659200000,
+          "rate_bps": 0.2154,
+          "mark": 42925.49865957,
+          "held_perp_btc": -434.4889999997,
+          "payment": 401.73515150181163
+        },
+        {
+          "time_ms": 1706688000000,
+          "rate_bps": 1.0,
+          "mark": 43040.12039716,
+          "held_perp_btc": -446.3349999997,
+          "payment": 1921.0312137453498
+        },
+        {
+          "time_ms": 1706716800000,
+          "rate_bps": 1.0,
+          "mark": 43348.2,
+          "held_perp_btc": -471.5909999997,
+          "payment": 2044.2620986186994
+        }
+      ]
+    },
+    {
+      "date": "2024-02-01",
+      "net": 1192.0740410838043,
+      "price_after_fees": -5370.4902652194005,
+      "funding": 6562.564306303204,
+      "end_btc": 551.0329999996,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1706745600000,
+          "rate_bps": 1.0,
+          "mark": 42563.08635461,
+          "held_perp_btc": -501.6689999996,
+          "payment": 2135.2580968413818
+        },
+        {
+          "time_ms": 1706774400000,
+          "rate_bps": 1.0,
+          "mark": 42182.2,
+          "held_perp_btc": -516.6769999996,
+          "payment": 2179.4572549383124
+        },
+        {
+          "time_ms": 1706803200002,
+          "rate_bps": 1.0,
+          "mark": 42500.13148936,
+          "held_perp_btc": -528.9039999996,
+          "payment": 2247.8489545231464
+        }
+      ]
+    },
+    {
+      "date": "2024-02-02",
+      "net": 11082.25032477219,
+      "price_after_fees": 3801.209414813201,
+      "funding": 7281.0409099589015,
+      "end_btc": 586.6899999995,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1706832000000,
+          "rate_bps": 1.0,
+          "mark": 43072.6,
+          "held_perp_btc": -551.0329999996,
+          "payment": 2373.4423995782768
+        },
+        {
+          "time_ms": 1706860800000,
+          "rate_bps": 1.0,
+          "mark": 43085.75394326,
+          "held_perp_btc": -560.1029999996,
+          "payment": 2413.2460040864526
+        },
+        {
+          "time_ms": 1706889600000,
+          "rate_bps": 1.0,
+          "mark": 43224.06110638,
+          "held_perp_btc": -577.0749999995,
+          "payment": 2494.352506294263
+        }
+      ]
+    },
+    {
+      "date": "2024-02-03",
+      "net": 6633.709068793192,
+      "price_after_fees": 341.68585344729945,
+      "funding": 6292.023215346009,
+      "end_btc": 599.6849999995,
+      "funding_rate_bps_sum": 2.4697,
+      "funding_settlements": [
+        {
+          "time_ms": 1706918400000,
+          "rate_bps": 0.7627,
+          "mark": 43182.0,
+          "held_perp_btc": -586.6899999995,
+          "payment": 1932.258316924953
+        },
+        {
+          "time_ms": 1706947200000,
+          "rate_bps": 0.9042,
+          "mark": 43037.0,
+          "held_perp_btc": -591.4459999995,
+          "payment": 2301.5562410088946
+        },
+        {
+          "time_ms": 1706976000001,
+          "rate_bps": 0.8028,
+          "mark": 43098.7902305,
+          "held_perp_btc": -594.8629999995,
+          "payment": 2058.2086574119517
+        }
+      ]
+    },
+    {
+      "date": "2024-02-04",
+      "net": 3032.924250521726,
+      "price_after_fees": -4007.3381849816,
+      "funding": 7040.262435503304,
+      "end_btc": 617.5739999995,
+      "funding_rate_bps_sum": 2.7153,
+      "funding_settlements": [
+        {
+          "time_ms": 1707004800000,
+          "rate_bps": 0.8307,
+          "mark": 42993.33852128,
+          "held_perp_btc": -599.6849999995,
+          "payment": 2141.748969737099
+        },
+        {
+          "time_ms": 1707033600004,
+          "rate_bps": 0.8846,
+          "mark": 42824.48293972,
+          "held_perp_btc": -603.5209999995,
+          "payment": 2286.290697998629
+        },
+        {
+          "time_ms": 1707062400000,
+          "rate_bps": 1.0,
+          "mark": 42926.7,
+          "held_perp_btc": -608.5309999995,
+          "payment": 2612.2227677678534
+        }
+      ]
+    },
+    {
+      "date": "2024-02-05",
+      "net": 9661.386860034574,
+      "price_after_fees": 1607.9949988816002,
+      "funding": 8053.391861152893,
+      "end_btc": 651.1269999994,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1707091200000,
+          "rate_bps": 1.0,
+          "mark": 42570.4,
+          "held_perp_btc": -617.5739999995,
+          "payment": 2629.037220957872
+        },
+        {
+          "time_ms": 1707120000000,
+          "rate_bps": 1.0,
+          "mark": 43059.0,
+          "held_perp_btc": -626.3939999994,
+          "payment": 2697.1899245974164
+        },
+        {
+          "time_ms": 1707148800000,
+          "rate_bps": 1.0,
+          "mark": 42629.6,
+          "held_perp_btc": -639.7349999994,
+          "payment": 2727.1647155974424
+        }
+      ]
+    },
+    {
+      "date": "2024-02-06",
+      "net": 9955.191397720599,
+      "price_after_fees": 2363.0087667558,
+      "funding": 7592.182630964904,
+      "end_btc": 686.2879999994,
+      "funding_rate_bps_sum": 2.6723,
+      "funding_settlements": [
+        {
+          "time_ms": 1707177600000,
+          "rate_bps": 1.0,
+          "mark": 42693.5927695,
+          "held_perp_btc": -651.1269999994,
+          "payment": 2779.8950979200613
+        },
+        {
+          "time_ms": 1707206400001,
+          "rate_bps": 0.6723,
+          "mark": 42875.22371986,
+          "held_perp_btc": -656.9879999994,
+          "payment": 1893.7687579636079
+        },
+        {
+          "time_ms": 1707235200000,
+          "rate_bps": 1.0,
+          "mark": 43232.25541135,
+          "held_perp_btc": -675.0789999994,
+          "payment": 2918.518775081281
+        }
+      ]
+    },
+    {
+      "date": "2024-02-07",
+      "net": 8599.065787080617,
+      "price_after_fees": 2262.6582716778003,
+      "funding": 6336.407515402796,
+      "end_btc": 723.7419999993,
+      "funding_rate_bps_sum": 2.1206,
+      "funding_settlements": [
+        {
+          "time_ms": 1707264000000,
+          "rate_bps": 0.7527,
+          "mark": 43079.1,
+          "held_perp_btc": -686.2879999994,
+          "payment": 2225.3326642908705
+        },
+        {
+          "time_ms": 1707292800000,
+          "rate_bps": 0.5373,
+          "mark": 42904.8,
+          "held_perp_btc": -692.0279999994,
+          "payment": 1595.314781263929
+        },
+        {
+          "time_ms": 1707321600000,
+          "rate_bps": 0.8305999999999999,
+          "mark": 43052.5,
+          "held_perp_btc": -703.5239999993,
+          "payment": 2515.760069848097
+        }
+      ]
+    },
+    {
+      "date": "2024-02-08",
+      "net": 3062.1584058887092,
+      "price_after_fees": -3154.624885409,
+      "funding": 6216.783291297703,
+      "end_btc": 759.0789999993,
+      "funding_rate_bps_sum": 1.9125,
+      "funding_settlements": [
+        {
+          "time_ms": 1707350400000,
+          "rate_bps": 1.0,
+          "mark": 44326.22497872,
+          "held_perp_btc": -723.7419999993,
+          "payment": 3208.0750718517743
+        },
+        {
+          "time_ms": 1707379200000,
+          "rate_bps": 0.6535000000000001,
+          "mark": 44499.75039716,
+          "held_perp_btc": -732.8419999993,
+          "payment": 2131.1475453622684
+        },
+        {
+          "time_ms": 1707408000000,
+          "rate_bps": 0.259,
+          "mark": 45409.54719858,
+          "held_perp_btc": -746.1569999993,
+          "payment": 877.5606740835939
+        }
+      ]
+    },
+    {
+      "date": "2024-02-09",
+      "net": 5130.507045319595,
+      "price_after_fees": -3297.5161816135997,
+      "funding": 8428.023226933088,
+      "end_btc": 833.9639999992,
+      "funding_rate_bps_sum": 2.2961,
+      "funding_settlements": [
+        {
+          "time_ms": 1707436800000,
+          "rate_bps": 0.316,
+          "mark": 45269.1,
+          "held_perp_btc": -759.0789999993,
+          "payment": 1085.8652118202388
+        },
+        {
+          "time_ms": 1707465600000,
+          "rate_bps": 1.0,
+          "mark": 46188.30406028,
+          "held_perp_btc": -776.2699999992,
+          "payment": 3585.459479283661
+        },
+        {
+          "time_ms": 1707494400001,
+          "rate_bps": 0.9801000000000001,
+          "mark": 47136.9,
+          "held_perp_btc": -813.1579999992,
+          "payment": 3756.698535829207
+        }
+      ]
+    },
+    {
+      "date": "2024-02-10",
+      "net": 12358.069714513898,
+      "price_after_fees": 1180.8413028633986,
+      "funding": 11177.228411650605,
+      "end_btc": 862.8439999991,
+      "funding_rate_bps_sum": 2.8041,
+      "funding_settlements": [
+        {
+          "time_ms": 1707523200001,
+          "rate_bps": 0.8040999999999999,
+          "mark": 47116.64691288,
+          "held_perp_btc": -833.9639999992,
+          "payment": 3159.597356884896
+        },
+        {
+          "time_ms": 1707552000000,
+          "rate_bps": 1.0,
+          "mark": 47132.3889697,
+          "held_perp_btc": -843.6919999991,
+          "payment": 3976.5219514581713
+        },
+        {
+          "time_ms": 1707580800000,
+          "rate_bps": 1.0,
+          "mark": 47334.5777112,
+          "held_perp_btc": -853.7329999991,
+          "payment": 4041.1091033073308
+        }
+      ]
+    },
+    {
+      "date": "2024-02-11",
+      "net": -6662.068748162419,
+      "price_after_fees": -19157.796513597597,
+      "funding": 12495.727765435207,
+      "end_btc": 870.8529999991,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1707609600000,
+          "rate_bps": 1.0,
+          "mark": 47734.61973485,
+          "held_perp_btc": -862.8439999991,
+          "payment": 4118.753023045396
+        },
+        {
+          "time_ms": 1707638400001,
+          "rate_bps": 1.0,
+          "mark": 48169.53924621,
+          "held_perp_btc": -868.9259999991,
+          "payment": 4185.576505900892
+        },
+        {
+          "time_ms": 1707667200000,
+          "rate_bps": 1.0,
+          "mark": 48145.50295833,
+          "held_perp_btc": -870.5689999991,
+          "payment": 4191.398236488706
+        }
+      ]
+    },
+    {
+      "date": "2024-02-12",
+      "net": -7161.011105727783,
+      "price_after_fees": -19920.160865208498,
+      "funding": 12759.1497594807,
+      "end_btc": 871.8749999991,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1707696000000,
+          "rate_bps": 1.0,
+          "mark": 48298.57401136,
+          "held_perp_btc": -870.8529999991,
+          "payment": 4206.095807347142
+        },
+        {
+          "time_ms": 1707724800000,
+          "rate_bps": 1.0,
+          "mark": 48206.78867803,
+          "held_perp_btc": -871.5069999991,
+          "payment": 4201.255378038051
+        },
+        {
+          "time_ms": 1707753600000,
+          "rate_bps": 1.0,
+          "mark": 49919.4,
+          "held_perp_btc": -871.7649999991,
+          "payment": 4351.798574095508
+        }
+      ]
+    },
+    {
+      "date": "2024-02-13",
+      "net": 38615.85405285339,
+      "price_after_fees": 25645.8199936579,
+      "funding": 12970.034059195401,
+      "end_btc": 873.0209999991,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1707782400000,
+          "rate_bps": 1.0,
+          "mark": 49935.64595076,
+          "held_perp_btc": -871.8749999991,
+          "payment": 4353.764131327393
+        },
+        {
+          "time_ms": 1707811200000,
+          "rate_bps": 1.0,
+          "mark": 50016.04285106,
+          "held_perp_btc": -871.8749999991,
+          "payment": 4360.773736072293
+        },
+        {
+          "time_ms": 1707840000000,
+          "rate_bps": 1.0,
+          "mark": 48753.2,
+          "held_perp_btc": -872.8649999991,
+          "payment": 4255.496191795612
+        }
+      ]
+    },
+    {
+      "date": "2024-02-14",
+      "net": -12947.130576463707,
+      "price_after_fees": -27172.366543956196,
+      "funding": 14225.235967492481,
+      "end_btc": 873.1439999991,
+      "funding_rate_bps_sum": 3.2283,
+      "funding_settlements": [
+        {
+          "time_ms": 1707868800000,
+          "rate_bps": 1.0,
+          "mark": 49697.29248227,
+          "held_perp_btc": -873.0209999991,
+          "payment": 4338.677998011911
+        },
+        {
+          "time_ms": 1707897600000,
+          "rate_bps": 1.0,
+          "mark": 49841.90018794,
+          "held_perp_btc": -873.0609999991,
+          "payment": 4351.501921993823
+        },
+        {
+          "time_ms": 1707926400000,
+          "rate_bps": 1.2283,
+          "mark": 51610.33415603,
+          "held_perp_btc": -873.1339999991,
+          "payment": 5535.056047486691
+        }
+      ]
+    },
+    {
+      "date": "2024-02-15",
+      "net": 21904.045693521213,
+      "price_after_fees": 8318.941063897699,
+      "funding": 13585.104629623616,
+      "end_btc": 873.3659999991,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1707955200000,
+          "rate_bps": 1.0,
+          "mark": 51817.98284752,
+          "held_perp_btc": -873.1439999991,
+          "payment": 4524.456081536837
+        },
+        {
+          "time_ms": 1707984000000,
+          "rate_bps": 1.0,
+          "mark": 51802.4,
+          "held_perp_btc": -873.1839999991,
+          "payment": 4523.302684155338
+        },
+        {
+          "time_ms": 1708012800000,
+          "rate_bps": 1.0,
+          "mark": 51961.44202837,
+          "held_perp_btc": -873.2139999991,
+          "payment": 4537.345863931432
+        }
+      ]
+    },
+    {
+      "date": "2024-02-16",
+      "net": 8269.932243364106,
+      "price_after_fees": -5318.925090290599,
+      "funding": 13588.857333654683,
+      "end_btc": 873.3959999991,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1708041600000,
+          "rate_bps": 1.0,
+          "mark": 51899.1,
+          "held_perp_btc": -873.3659999991,
+          "payment": 4532.690937055329
+        },
+        {
+          "time_ms": 1708070400000,
+          "rate_bps": 1.0,
+          "mark": 51781.60013475,
+          "held_perp_btc": -873.3659999991,
+          "payment": 4522.428898323947
+        },
+        {
+          "time_ms": 1708099200000,
+          "rate_bps": 1.0,
+          "mark": 51909.3,
+          "held_perp_btc": -873.3959999991,
+          "payment": 4533.737498275329
+        }
+      ]
+    },
+    {
+      "date": "2024-02-17",
+      "net": 5515.903109433682,
+      "price_after_fees": -10722.4174345153,
+      "funding": 16238.320543949085,
+      "end_btc": 873.5149999991,
+      "funding_rate_bps_sum": 3.6041,
+      "funding_settlements": [
+        {
+          "time_ms": 1708128000000,
+          "rate_bps": 1.0,
+          "mark": 52145.88278014,
+          "held_perp_btc": -873.3959999991,
+          "payment": 4554.400543659623
+        },
+        {
+          "time_ms": 1708156800000,
+          "rate_bps": 1.0,
+          "mark": 51934.0,
+          "held_perp_btc": -873.3959999991,
+          "payment": 4535.894786395326
+        },
+        {
+          "time_ms": 1708185600000,
+          "rate_bps": 1.6040999999999999,
+          "mark": 51013.4,
+          "held_perp_btc": -873.5149999991,
+          "payment": 7148.025213894046
+        }
+      ]
+    },
+    {
+      "date": "2024-02-18",
+      "net": 21233.27677869011,
+      "price_after_fees": -1196.7155500053996,
+      "funding": 22429.992328695545,
+      "end_btc": 873.5149999991,
+      "funding_rate_bps_sum": 4.964,
+      "funding_settlements": [
+        {
+          "time_ms": 1708214400000,
+          "rate_bps": 1.724,
+          "mark": 51675.01974242,
+          "held_perp_btc": -873.5149999991,
+          "payment": 7781.947199631703
+        },
+        {
+          "time_ms": 1708243200000,
+          "rate_bps": 1.5305,
+          "mark": 51697.70652273,
+          "held_perp_btc": -873.5149999991,
+          "payment": 6911.542419418522
+        },
+        {
+          "time_ms": 1708272000000,
+          "rate_bps": 1.7095,
+          "mark": 51809.0,
+          "held_perp_btc": -873.5149999991,
+          "payment": 7736.5027096452795
+        }
+      ]
+    },
+    {
+      "date": "2024-02-19",
+      "net": 24820.16183029281,
+      "price_after_fees": -733.7525999770005,
+      "funding": 25553.91443026968,
+      "end_btc": 873.5149999991,
+      "funding_rate_bps_sum": 5.5985,
+      "funding_settlements": [
+        {
+          "time_ms": 1708300800000,
+          "rate_bps": 2.3064,
+          "mark": 52163.39962677,
+          "held_perp_btc": -873.5149999991,
+          "payment": 10509.229693430098
+        },
+        {
+          "time_ms": 1708329600000,
+          "rate_bps": 1.9594,
+          "mark": 52423.9,
+          "held_perp_btc": -873.5149999991,
+          "payment": 8972.692765876247
+        },
+        {
+          "time_ms": 1708358400000,
+          "rate_bps": 1.3327,
+          "mark": 52158.9,
+          "held_perp_btc": -873.5149999991,
+          "payment": 6071.9919709632895
+        }
+      ]
+    },
+    {
+      "date": "2024-02-20",
+      "net": 19255.459437573212,
+      "price_after_fees": 425.60754281720256,
+      "funding": 18829.85189475608,
+      "end_btc": 873.6439999991,
+      "funding_rate_bps_sum": 4.1632,
+      "funding_settlements": [
+        {
+          "time_ms": 1708387200000,
+          "rate_bps": 1.0461,
+          "mark": 51813.08142803,
+          "held_perp_btc": -873.5149999991,
+          "payment": 4734.596694982506
+        },
+        {
+          "time_ms": 1708416000000,
+          "rate_bps": 1.0912,
+          "mark": 51868.89496454,
+          "held_perp_btc": -873.5249999991,
+          "payment": 4944.0936888268525
+        },
+        {
+          "time_ms": 1708444800000,
+          "rate_bps": 2.0259,
+          "mark": 51707.50049291,
+          "held_perp_btc": -873.5839999991,
+          "payment": 9151.16151094668
+        }
+      ]
+    },
+    {
+      "date": "2024-02-21",
+      "net": 22894.743370088283,
+      "price_after_fees": 8785.5315255607,
+      "funding": 14109.211844527628,
+      "end_btc": 873.9539999991,
+      "funding_rate_bps_sum": 3.1242,
+      "funding_settlements": [
+        {
+          "time_ms": 1708473600000,
+          "rate_bps": 1.0,
+          "mark": 52297.4,
+          "held_perp_btc": -873.6439999991,
+          "payment": 4568.930972555293
+        },
+        {
+          "time_ms": 1708502400000,
+          "rate_bps": 1.1241999999999999,
+          "mark": 51595.13521986,
+          "held_perp_btc": -873.6439999991,
+          "payment": 5067.419222896837
+        },
+        {
+          "time_ms": 1708531200000,
+          "rate_bps": 1.0,
+          "mark": 51183.7,
+          "held_perp_btc": -873.8839999991,
+          "payment": 4472.861649075393
+        }
+      ]
+    },
+    {
+      "date": "2024-02-22",
+      "net": 16250.800984096772,
+      "price_after_fees": -58.28156412580756,
+      "funding": 16309.082548222505,
+      "end_btc": 874.0619999991,
+      "funding_rate_bps_sum": 3.6037,
+      "funding_settlements": [
+        {
+          "time_ms": 1708560000001,
+          "rate_bps": 1.0,
+          "mark": 51877.9,
+          "held_perp_btc": -873.9539999991,
+          "payment": 4533.889821655331
+        },
+        {
+          "time_ms": 1708588800001,
+          "rate_bps": 1.3479999999999999,
+          "mark": 51856.75509429,
+          "held_perp_btc": -873.9539999991,
+          "payment": 6109.1924194115145
+        },
+        {
+          "time_ms": 1708617600000,
+          "rate_bps": 1.2557,
+          "mark": 51630.0,
+          "held_perp_btc": -873.9539999991,
+          "payment": 5666.000307155566
+        }
+      ]
+    },
+    {
+      "date": "2024-02-23",
+      "net": 15447.665320407948,
+      "price_after_fees": 725.4642063683059,
+      "funding": 14722.20111403946,
+      "end_btc": 874.0719999991,
+      "funding_rate_bps_sum": 3.2991,
+      "funding_settlements": [
+        {
+          "time_ms": 1708646400000,
+          "rate_bps": 1.0,
+          "mark": 51315.77902837,
+          "held_perp_btc": -874.0619999991,
+          "payment": 4485.317244904895
+        },
+        {
+          "time_ms": 1708675200000,
+          "rate_bps": 1.0,
+          "mark": 50948.20213487,
+          "held_perp_btc": -874.0719999991,
+          "payment": 4453.239693638423
+        },
+        {
+          "time_ms": 1708704000000,
+          "rate_bps": 1.2991000000000001,
+          "mark": 50934.46808833,
+          "held_perp_btc": -874.0719999991,
+          "payment": 5783.644175496225
+        }
+      ]
+    },
+    {
+      "date": "2024-02-24",
+      "net": 7925.960810931749,
+      "price_after_fees": -5445.468559995301,
+      "funding": 13371.429370927217,
+      "end_btc": 874.0719999991,
+      "funding_rate_bps_sum": 3.0,
+      "funding_settlements": [
+        {
+          "time_ms": 1708732800000,
+          "rate_bps": 1.0,
+          "mark": 50759.00207801,
+          "held_perp_btc": -874.0719999991,
+          "payment": 4436.702246428467
+        },
+        {
+          "time_ms": 1708761600001,
+          "rate_bps": 1.0,
+          "mark": 51094.97830142,
+          "held_perp_btc": -874.0719999991,
+          "payment": 4466.06898738328
+        },
+        {
+          "time_ms": 1708790400000,
+          "rate_bps": 1.0,
+          "mark": 51124.6,
+          "held_perp_btc": -874.0719999991,
+          "payment": 4468.658137115398
+        }
+      ]
+    },
+    {
+      "date": "2024-02-25",
+      "net": 16838.67670862103,
+      "price_after_fees": -1896.736239992002,
+      "funding": 18735.412948612997,
+      "end_btc": 874.0719999991,
+      "funding_rate_bps_sum": 4.1512,
+      "funding_settlements": [
+        {
+          "time_ms": 1708819200001,
+          "rate_bps": 1.1438,
+          "mark": 51601.57573485,
+          "held_perp_btc": -874.0719999991,
+          "payment": 5158.937472798004
+        },
+        {
+          "time_ms": 1708848000000,
+          "rate_bps": 1.5012,
+          "mark": 51747.27246212,
+          "held_perp_btc": -874.0719999991,
+          "payment": 6790.053991351792
+        },
+        {
+          "time_ms": 1708876800000,
+          "rate_bps": 1.5062,
+          "mark": 51547.9,
+          "held_perp_btc": -874.0719999991,
+          "payment": 6786.421484463268
+        }
+      ]
+    },
+    {
+      "date": "2024-02-26",
+      "net": 35168.42507515027,
+      "price_after_fees": 804.0121421775002,
+      "funding": 34364.41293297283,
+      "end_btc": 874.0819999991,
+      "funding_rate_bps_sum": 7.5555,
+      "funding_settlements": [
+        {
+          "time_ms": 1708905600000,
+          "rate_bps": 2.6761,
+          "mark": 51758.94718182,
+          "held_perp_btc": -874.0719999991,
+          "payment": 12106.956448796785
+        },
+        {
+          "time_ms": 1708934400000,
+          "rate_bps": 2.1567,
+          "mark": 51326.60957197,
+          "held_perp_btc": -874.0719999991,
+          "payment": 9675.636052603895
+        },
+        {
+          "time_ms": 1708963200000,
+          "rate_bps": 2.7227,
+          "mark": 52868.43844318,
+          "held_perp_btc": -874.0719999991,
+          "payment": 12581.820431572076
+        }
+      ]
+    },
+    {
+      "date": "2024-02-27",
+      "net": 61135.49279885815,
+      "price_after_fees": -1685.814023819299,
+      "funding": 62821.306822677376,
+      "end_btc": 874.1309999991,
+      "funding_rate_bps_sum": 12.8748,
+      "funding_settlements": [
+        {
+          "time_ms": 1708992000000,
+          "rate_bps": 3.2262000000000004,
+          "mark": 54511.6,
+          "held_perp_btc": -874.0819999991,
+          "payment": 15372.071406248317
+        },
+        {
+          "time_ms": 1709020800000,
+          "rate_bps": 7.3521,
+          "mark": 56100.1,
+          "held_perp_btc": -874.1019999991,
+          "payment": 36052.64687747802
+        },
+        {
+          "time_ms": 1709049600000,
+          "rate_bps": 2.2965,
+          "mark": 56772.2842234,
+          "held_perp_btc": -874.1219999991,
+          "payment": 11396.588538950968
+        }
+      ]
+    },
+    {
+      "date": "2024-02-28",
+      "net": 37687.234332020395,
+      "price_after_fees": -16264.277366052702,
+      "funding": 53951.511698073125,
+      "end_btc": 874.5219999991,
+      "funding_rate_bps_sum": 10.3949,
+      "funding_settlements": [
+        {
+          "time_ms": 1709078400000,
+          "rate_bps": 2.6729,
+          "mark": 57074.34581915,
+          "held_perp_btc": -874.1309999991,
+          "payment": 13335.219712990913
+        },
+        {
+          "time_ms": 1709107200000,
+          "rate_bps": 2.3682,
+          "mark": 58299.9,
+          "held_perp_btc": -874.1309999991,
+          "payment": 12068.761608203233
+        },
+        {
+          "time_ms": 1709136000000,
+          "rate_bps": 5.353800000000001,
+          "mark": 60999.3082305,
+          "held_perp_btc": -874.1409999991,
+          "payment": 28547.53037687892
+        }
+      ]
+    },
+    {
+      "date": "2024-02-29",
+      "net": 96435.8028162453,
+      "price_after_fees": -14536.680908056505,
+      "funding": 110972.48372430191,
+      "end_btc": 874.5619999991,
+      "funding_rate_bps_sum": 20.2459,
+      "funding_settlements": [
+        {
+          "time_ms": 1709164800000,
+          "rate_bps": 6.9091,
+          "mark": 62477.49954094,
+          "held_perp_btc": -874.5219999991,
+          "payment": 37749.90455145181
+        },
+        {
+          "time_ms": 1709193600000,
+          "rate_bps": 7.6337,
+          "mark": 62758.0596412,
+          "held_perp_btc": -874.5219999991,
+          "payment": 41896.26764736746
+        },
+        {
+          "time_ms": 1709222400000,
+          "rate_bps": 5.7031,
+          "mark": 62809.1,
+          "held_perp_btc": -874.5319999991,
+          "payment": 31326.311525482528
+        }
+      ]
+    }
+  ],
+  "concentration_last_days": {
+    "1": {
+      "net": 96435.8028162453,
+      "funding": 110972.48372430191,
+      "price_after_fees": -14536.680908056505,
+      "share": 0.15805313215533073
+    },
+    "3": {
+      "net": 195258.52994712384,
+      "funding": 227745.30224505241,
+      "price_after_fees": -32486.772297928506,
+      "share": 0.32001830582561996
+    },
+    "5": {
+      "net": 247265.63173089514,
+      "funding": 280845.12812663824,
+      "price_after_fees": -33579.49639574301,
+      "share": 0.4052551690154128
+    },
+    "7": {
+      "net": 270639.25786223484,
+      "funding": 308938.7586116049,
+      "price_after_fees": -38299.50074937,
+      "share": 0.4435632943381752
+    },
+    "14": {
+      "net": 388879.5356157738,
+      "funding": 435997.98953568016,
+      "price_after_fees": -47118.453919906206,
+      "share": 0.6373527967854441
+    },
+    "29": {
+      "net": 493336.5618275234,
+      "funding": 577013.149521421,
+      "price_after_fees": -83676.5876938974,
+      "share": 0.8085522858367999
+    }
+  },
+  "sensitivities": {
+    "all": {
+      "n": 91,
+      "total": 610148.0021381073,
+      "mean": 6704.923100418761,
+      "positive": 84,
+      "lag1_correlation": 0.5688328128599801,
+      "p_t": 8.398515079201343e-06,
+      "p_hac7": 0.006656811549517348
+    },
+    "exclude_last_day": {
+      "n": 90,
+      "total": 513712.199321862,
+      "mean": 5707.913325798467,
+      "positive": 83,
+      "lag1_correlation": 0.49928503501063787,
+      "p_t": 6.326000227736999e-07,
+      "p_hac7": 0.002736177763574624
+    },
+    "exclude_last_3_days": {
+      "n": 88,
+      "total": 414889.4721909835,
+      "mean": 4714.653093079358,
+      "positive": 81,
+      "lag1_correlation": 0.2071439918762023,
+      "p_t": 1.360839722043285e-07,
+      "p_hac7": 0.0009516720119269495
+    },
+    "exclude_last_7_days": {
+      "n": 84,
+      "total": 339508.7442758725,
+      "mean": 4041.770765188958,
+      "positive": 77,
+      "lag1_correlation": 0.10100361694401068,
+      "p_t": 7.451226205726259e-07,
+      "p_hac7": 0.0007552662097671717
+    },
+    "exclude_last_14_days": {
+      "n": 77,
+      "total": 221268.4665223335,
+      "mean": 2873.6164483419934,
+      "positive": 70,
+      "lag1_correlation": -0.40807960084659234,
+      "p_t": 2.761158470935584e-05,
+      "p_hac7": 1.4343595056082911e-05
+    },
+    "exclude_best_day": {
+      "n": 90,
+      "total": 513712.199321862,
+      "mean": 5707.913325798467,
+      "positive": 83,
+      "lag1_correlation": 0.49928503501063787,
+      "p_t": 6.326000227736999e-07,
+      "p_hac7": 0.002736177763574624
+    }
+  },
+  "monthly": {
+    "2023-12": {
+      "net": 38331.0685784766,
+      "funding": 41314.3268415642,
+      "price_after_fees": -2983.2582630876,
+      "average_daily_funding_bps": 5.442490322580645,
+      "average_settlement_short_btc": 53.955677419354835,
+      "average_settlement_usdt_notional": 2299916.5296494244
+    },
+    "2024-01": {
+      "net": 78480.3717321073,
+      "funding": 76386.42958809139,
+      "price_after_fees": 2093.9421440159,
+      "average_daily_funding_bps": 3.6102838709677423,
+      "average_settlement_short_btc": 186.85665591394624,
+      "average_settlement_usdt_notional": 7960084.161164131
+    },
+    "2024-02": {
+      "net": 493336.5618275234,
+      "funding": 577013.149521421,
+      "price_after_fees": -83676.5876938974,
+      "average_daily_funding_bps": 4.510275862068966,
+      "average_settlement_short_btc": 800.2957471256414,
+      "average_settlement_usdt_notional": 39995420.855152205
+    }
+  },
+  "feb29_flat_1bp_per_settlement_funding": 16444.98195281142
+}

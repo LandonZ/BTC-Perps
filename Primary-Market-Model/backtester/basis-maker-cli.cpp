@@ -26,6 +26,8 @@ int main(int argc,char** argv) {
                     << "Hold through convergence; exit any expected funding payer before settlement, including the flat region.\n"
                     << "  --events FILE (repeatable) --events-list FILE --output DIR --details 0|1\n"
                     << "  --equilibrium-bps -5 --entry-offset-bps 1.5 --order-btc 0.01 --max-gross-perp-btc 0 (unlimited)\n"
+                    << "  --one-order-per-entry-event 0|1 (1: at most one order per fresh threshold crossing)\n"
+                    << "  --single-basis-position 0|1 (1: signed position limited to one order-sized trade)\n"
                     << "  --premium-events FILE (required for pre-funding exits)\n"
                     << "  --exit-on-equilibrium 0 --exit-before-funding 1 --funding-cashflows 1\n"
                     << "  --funding-exit-payers-only 1 --funding-interest-bps 1 --funding-clamp-bps 5\n"
@@ -56,6 +58,14 @@ int main(int argc,char** argv) {
             }
             else if (key == "--equilibrium-bps") c.equilibrium_bps = number(value);
             else if (key == "--entry-offset-bps") c.entry_offset_bps = number(value);
+            else if (key == "--one-order-per-entry-event") {
+                if (value!="0" && value!="1") throw std::runtime_error("Entry event mode must be 0 or 1");
+                c.one_order_per_entry_event=value=="1";
+            }
+            else if (key == "--single-basis-position") {
+                if (value!="0" && value!="1") throw std::runtime_error("Single basis position mode must be 0 or 1");
+                c.single_basis_position=value=="1";
+            }
             else if (key == "--order-btc") c.order_btc = number(value);
             else if (key == "--max-gross-perp-btc") c.max_gross_perp_btc = number(value);
             else if (key == "--cycle-fee-bps") {

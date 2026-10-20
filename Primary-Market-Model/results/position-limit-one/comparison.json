@@ -1,0 +1,23 @@
+{
+  "same_source_data": true,
+  "same_observation_clock": true,
+  "same_execution_and_exit_settings": true,
+  "changed_setting": "single_basis_position: false -> true; one unit = 0.01 BTC per leg",
+  "uncapped": {
+    "net_pnl": 610148.0021381073,
+    "funding_pnl": 694713.9059510765,
+    "price_after_fees": -84565.9038129691,
+    "peak_btc_per_leg": 874.6589999991
+  },
+  "capped": {
+    "net_pnl": 17.9680740048,
+    "funding_pnl": 18.8756161447,
+    "price_after_fees": -0.9075421399,
+    "peak_btc_per_leg": 0.01,
+    "last7_pnl": 3.095351407099999,
+    "last7_share": 0.17226951571287527,
+    "last_day_pnl": 1.1027460701999985,
+    "last_day_share": 0.061372524952057216
+  },
+  "interpretation": "Different position paths and capital requirements; dollar PnLs are not returns on equal capital. Three partial fills make one short basis position held throughout; daily marks are not separate trades."
+}

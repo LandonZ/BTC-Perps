@@ -92,6 +92,30 @@ class ArchiveReplayTests(unittest.TestCase):
             self.assertEqual((zero['equilibrium_bps'],zero['entry_bid_basis_bps'],zero['entry_ask_basis_bps']),(0,-1.5,1.5))
             self.assertEqual(zero['entry_band_violations'],0)
             self.assertFalse(zero['funding_exit_flat_region_exempt'])
+            settings=['--equilibrium-bps','-5','--entry-offset-bps','1.25',
+                      '--perp-maker-bps','0.5','--perp-taker-bps','2','--spot-taker-bps','2',
+                      '--one-order-per-entry-event','1']
+            subprocess.run([str(MODEL/'build/basis-maker'),'--events',str(root/'events.csv'),
+                            '--premium-events',str(root/'premium.csv'),*settings,
+                            '--output',str(root/'event-reference')],check=True,capture_output=True)
+            subprocess.run([str(MODEL/'build/archive-replay'),str(root/'sources.tsv'),str(root/'small.csv'),
+                            str(root/'event-streaming'),*settings],check=True,capture_output=True)
+            final=json.loads((root/'event-streaming/summary.json').read_text())
+            self.assertEqual(final,json.loads((root/'event-reference/summary.json').read_text()))
+            self.assertEqual((final['entry_bid_basis_bps'],final['entry_ask_basis_bps']),(-6.25,-3.75))
+            self.assertEqual((final['perp_maker_bps'],final['perp_taker_bps'],final['spot_taker_bps']),(.5,2,2))
+            self.assertTrue(final['one_order_per_entry_event'])
+            self.assertLessEqual(final['max_entry_event_btc'],final['order_btc'])
+            limited_settings=[*settings,'--single-basis-position','1']
+            subprocess.run([str(MODEL/'build/basis-maker'),'--events',str(root/'events.csv'),
+                            '--premium-events',str(root/'premium.csv'),*limited_settings,
+                            '--output',str(root/'limited-reference')],check=True,capture_output=True)
+            subprocess.run([str(MODEL/'build/archive-replay'),str(root/'sources.tsv'),str(root/'small.csv'),
+                            str(root/'limited-streaming'),*limited_settings],check=True,capture_output=True)
+            limited=json.loads((root/'limited-streaming/summary.json').read_text())
+            self.assertEqual(limited,json.loads((root/'limited-reference/summary.json').read_text()))
+            self.assertTrue(limited['single_basis_position'])
+            self.assertLessEqual(limited['max_open_gross_perp_btc'],.01+1e-9)
 
     def test_multi_pass_sort_preserves_timestamp_ties_and_every_record(self):
         with tempfile.TemporaryDirectory(prefix='archive-sort-test-') as temporary:

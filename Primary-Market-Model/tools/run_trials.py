@@ -141,69 +141,8 @@ def analyze(values, bootstrap_samples=20000, seed=20261018):
 def render(report, output):
     os.environ.setdefault('MPLCONFIGDIR', str(MODEL/'build/matplotlib-cache'))
     os.environ.setdefault('XDG_CACHE_HOME', str(MODEL/'build/cache'))
-    Path(os.environ['XDG_CACHE_HOME']).mkdir(parents=True,exist_ok=True)
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.ticker as ticker
-    trials, a = report['trials'], report['statistics']
-    pnl = [r['summary']['net_pnl'] for r in trials]
-    price = [r['summary']['price_pnl']-r['summary']['fees'] for r in trials]
-    ci = a['t_test']['ci95_two_sided']
-    plt.rcParams.update({'font.family':'DejaVu Sans', 'font.size':10,
-                         'axes.spines.top':False, 'axes.spines.right':False})
-    fig, axes = plt.subplots(2, 1, figsize=(12, 8.5), dpi=170,
-                             gridspec_kw={'height_ratios':[2.1, 1]})
-    fig.subplots_adjust(top=.72, bottom=.16, left=.105, right=.97, hspace=.5)
-    continuous = report.get('continuous_inventory',False)
-    fig.suptitle('BTC basis strategy · daily equity changes' if continuous else 'BTC basis strategy · repeated daily trials', x=.08, y=.965,
-                 ha='left', fontsize=23, fontweight='bold')
-    s = trials[0]['summary']
-    fee_label = f"Maker {s['perp_maker_bps']:g} / perp taker {s['perp_taker_bps']:g} / spot taker {s['spot_taker_bps']:g} bps"
-    inventory_label = 'Carried inventory' if continuous else 'Flat daily start'
-    fig.text(.08, .914, f"{trials[0]['date']} to {trials[-1]['date']} UTC  |  {inventory_label}  |  {fee_label}",fontsize=9.5,color='#52656e')
-    lower=s.get('entry_bid_basis_bps',s['equilibrium_bps'])
-    upper=s.get('entry_ask_basis_bps',s['equilibrium_bps'])
-    funding_rule='Exit any expected funding payer, including flat rates.' if s.get('funding_exit_flat_region_exempt',True) is False else 'Funding exits retain the outside-flat-region payer rule.'
-    fig.text(.08,.881,f'Entry basis: bid at/below {lower:g} bps; offer at/above {upper:g} bps. {funding_rule}',fontsize=9,color='#52656e')
-    for x, title, value in [(.08,'MEAN DAILY MARKED PNL',f"{a['mean']:+,.2f} USDT"),
-                            (.40,'POSITIVE DAYS' if continuous else 'POSITIVE TRIALS',f"{a['positive']} / {a['n']}"),
-                            (.72,'ONE-SIDED T-TEST p',f"{a['t_test']['p_one_sided']:.4g}")]:
-        fig.text(x,.845,title,fontsize=9,color='#52656e')
-        fig.text(x,.794,value,fontsize=20,fontweight='bold')
-    days = list(range(1, len(trials)+1))
-    axes[0].bar(days,pnl,color=['#08765f' if p>=0 else '#b33b4c' for p in pnl], label='Total marked PnL')
-    axes[0].plot(days,price,'o',ms=3,color='#243d65', label='PnL excluding funding, after fees')
-    axes[0].axhline(0,color='#9ba9b0',lw=.8)
-    axes[0].set_ylabel('Daily equity change · USDT' if continuous else 'USDT per 24-hour trial')
-    axes[0].set_xlabel('Chronological UTC day' if continuous else 'Chronological trial number')
-    axes[0].yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
-    axes[0].legend(frameon=False,fontsize=9)
-    labels, intervals = ['Ordinary t interval'], [ci]
-    for lag in (3,7):
-        effective = a['hac'][str(lag)].get('effective_lags',lag)
-        labels.append(f'HAC, {effective} daily lags (asymptotic)')
-        intervals.append(a['hac'][str(lag)]['ci95_asymptotic'])
-    labels.append('Block bootstrap, 7-day blocks')
-    intervals.append(a['block_bootstrap']['7']['ci95_basic'])
-    for i, (label, bounds) in enumerate(zip(labels, intervals)):
-        color = '#08765f' if bounds[0]>0 else '#b33b4c' if bounds[1]<0 else '#71808a'
-        axes[1].plot(bounds,[i,i],lw=3,color=color)
-        axes[1].plot(a['mean'],i,'o',color='#243d65')
-    axes[1].axvline(0,color='#9ba9b0',lw=.8)
-    axes[1].set_yticks(range(len(labels)),labels,fontsize=9)
-    axes[1].invert_yaxis()
-    axes[1].set_xlabel('95% interval for mean daily PnL · USDT')
-    axes[1].xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
-    axes[1].tick_params(axis='y',length=0)
-    axes[1].set_position([.32,.16,.65,.145])
-    fig.text(.08,.075,report.get('sample_note','In-sample diagnostics: July was used to develop the strategy. Daily observations may remain dependent; only one month.'),fontsize=9,color='#52656e')
-    assumptions='Open positions marked at mids; no end-of-day liquidation. Unlimited inventory. Borrow, impact, depth and margin omitted.'
-    gap=report.get('data_quality',{}).get('max_quote_gap_ms',0)
-    if gap>10000: assumptions=f'Quote gaps up to {gap/60000:.1f} min. Unlimited inventory; mid marks; no terminal liquidation. Borrow, impact, depth and margin omitted.'
-    fig.text(.08,.047,assumptions,fontsize=9,color='#52656e')
-    fig.savefig(output, facecolor='#fafbfc')
-    plt.close(fig)
+    from presentation import render_trials
+    return render_trials(report, output)
 
 
 def make_report(trials):

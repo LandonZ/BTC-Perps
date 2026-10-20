@@ -46,6 +46,9 @@ def continuous_statistics(directory, summary):
         for key in ('perp_maker_bps','perp_taker_bps','spot_taker_bps','equilibrium_bps','entry_bid_basis_bps','entry_ask_basis_bps'):
             increment[key] = summary[key]
         increment['funding_exit_flat_region_exempt']=summary.get('funding_exit_flat_region_exempt',True)
+        increment['one_order_per_entry_event']=summary.get('one_order_per_entry_event',False)
+        increment['order_btc']=summary.get('order_btc',.01)
+        increment['single_basis_position']=summary.get('single_basis_position',False)
         trials.append(dict(date=datetime.fromtimestamp(day*86400,timezone.utc).strftime('%Y-%m-%d'),summary=increment))
     if not math.isclose(sum(t['summary']['net_pnl'] for t in trials),summary['net_pnl'],abs_tol=1e-6):
         raise ValueError('Daily equity changes do not reconcile')
@@ -54,7 +57,8 @@ def continuous_statistics(directory, summary):
         hypothesis='H0: mean daily marked equity change <= 0; H1: mean > 0',
         interpretation='Hypothesis tested on previously inspected history; dependent daily USD PnL, not fixed-capital returns or proof of live profitability',
         sample_note='Hypothesis tested on previously inspected history. Carried inventory makes daily PnL dependent; tests are in-sample diagnostics.',
-        limitations=['Queue, impact, depth, borrowing costs, margin and liquidation omitted; unlimited inventory.',
+        limitations=['Queue, impact, depth, borrowing costs, margin and liquidation omitted.'+
+                     (' Position limited to one signed trade.' if summary.get('single_basis_position') else ' Unlimited inventory.'),
                      'Spot last-trade midpoint proxy and assumed 1 bp full spread; zero latency.',
                      'Funding exits use causal premium-minute CLOSE proxies.',
                      'HAC and block bootstrap address some serial dependence but not structural change or fill-model error.'],
@@ -128,13 +132,21 @@ def main():
     parser.add_argument('--output', type=Path, default=MODEL/'build/current')
     parser.add_argument('--report-dir',type=Path,default=MODEL/'results',help='Keep experiment plots and statistics separate from the baseline')
     parser.add_argument('--equilibrium-bps',type=float,default=-5,help='Configured midpoint-basis target; defaults to the original -5 bp hypothesis')
-    parser.add_argument('--entry-offset-bps',type=float,default=1.5)
+    parser.add_argument('--entry-offset-bps',type=float,default=1.25)
+    parser.add_argument('--perp-maker-bps',type=float,default=.5)
+    parser.add_argument('--perp-taker-bps',type=float,default=2)
+    parser.add_argument('--spot-taker-bps',type=float,default=2)
+    parser.add_argument('--one-order-per-entry-event',type=int,choices=(0,1),default=1)
+    parser.add_argument('--single-basis-position',type=int,choices=(0,1),default=1)
     parser.add_argument('--wait-for-inputs', action='store_true',help='Allow verified monthly downloads to finish while earlier months replay')
     parser.add_argument('--stream-source', nargs=3,help=argparse.SUPPRESS)
     args = parser.parse_args()
     if (not math.isfinite(args.equilibrium_bps) or not math.isfinite(args.entry_offset_bps)
             or args.entry_offset_bps<0 or args.equilibrium_bps-args.entry_offset_bps<=-10000):
         parser.error('Invalid basis target or entry offset')
+    if any(not math.isfinite(value) or value<0 or value>=10000 for value in
+           (args.perp_maker_bps,args.perp_taker_bps,args.spot_taker_bps)):
+        parser.error('Fees must be finite and in [0,10000) bps')
     if args.stream_source:
         month,key,work=args.stream_source
         deadline=time.monotonic()+7200
@@ -199,7 +211,12 @@ def main():
                         handle.write(f'{kind} {m["start_ms"]} {m["end_ms"]} /dev/fd/{process.stdout.fileno()} BINARY\n')
             subprocess.run([str(MODEL/'build/archive-replay'),str(folder/'sources.tsv'),str(folder/'small.csv'),
                             str(args.output),'--equilibrium-bps',str(args.equilibrium_bps),
-                            '--entry-offset-bps',str(args.entry_offset_bps)],check=True,
+                            '--entry-offset-bps',str(args.entry_offset_bps),
+                            '--perp-maker-bps',str(args.perp_maker_bps),
+                            '--perp-taker-bps',str(args.perp_taker_bps),
+                            '--spot-taker-bps',str(args.spot_taker_bps),
+                            '--one-order-per-entry-event',str(args.one_order_per_entry_event),
+                            '--single-basis-position',str(args.single_basis_position)],check=True,
                            pass_fds=tuple(p.stdout.fileno() for p in streams))
             for process in streams:
                 process.stdout.close()
@@ -214,6 +231,16 @@ def main():
     summary=json.loads((args.output/'summary.json').read_text())
     if summary['equilibrium_bps']!=args.equilibrium_bps or summary['entry_offset_bps']!=args.entry_offset_bps:
         raise ValueError('Replay used different hypothesis parameters than requested')
+    for key in ('perp_maker_bps','perp_taker_bps','spot_taker_bps'):
+        if summary[key]!=getattr(args,key):raise ValueError(f'Replay used different fees: {key}')
+    if summary['one_order_per_entry_event']!=bool(args.one_order_per_entry_event):
+        raise ValueError('Replay used a different entry-event rule')
+    if args.one_order_per_entry_event and summary['max_entry_event_btc']>summary['order_btc']+1e-9:
+        raise ValueError('A threshold event exceeded its single-order BTC budget')
+    if summary['single_basis_position']!=bool(args.single_basis_position):
+        raise ValueError('Replay used a different position-limit rule')
+    if args.single_basis_position and summary['max_open_gross_perp_btc']>summary['order_btc']+1e-9:
+        raise ValueError('Single basis position exceeded its one-trade limit')
     with (args.output/'coverage.csv').open() as handle:
         quote_coverage=[row for row in csv.DictReader(handle) if row['kind']=='Q']
     summary['max_quote_gap_ms']=max(int(row['max_gap_ms']) for row in quote_coverage)
@@ -227,12 +254,24 @@ def main():
     if not math.isclose(summary['fees'],expected,rel_tol=1e-9,abs_tol=1e-4): raise ValueError('Fee reconciliation failed')
     validation=verify_funding(args.output,manifests)
     validation.update(verify_sides(args.output,summary))
+    if args.single_basis_position:
+        with (args.output/'equity.csv').open() as handle:
+            for row in csv.DictReader(handle):
+                long_btc=float(row['long_perp_short_spot_open_btc'])
+                short_btc=float(row['short_perp_long_spot_open_btc'])
+                if min(long_btc,short_btc)>1e-9:raise ValueError('Opposite basis positions held simultaneously')
+        validation['single_basis_position_verified']=True
+        validation['max_position_units']=summary['max_open_gross_perp_btc']/summary['order_btc']
     summary['funding_paid_usdt']=validation['gross_funding_paid_usdt']
     summary['funding_received_usdt']=validation['gross_funding_received_usdt']
     (args.output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     (args.output/'validation.json').write_text(json.dumps(validation,indent=2)+'\n')
     provenance=dict(months=months,start_ms=manifests[0]['start_ms'],end_ms=manifests[-1]['end_ms'],
-                    hypothesis=dict(equilibrium_bps=args.equilibrium_bps,entry_offset_bps=args.entry_offset_bps),
+                    hypothesis=dict(equilibrium_bps=args.equilibrium_bps,entry_offset_bps=args.entry_offset_bps,
+                                    one_order_per_entry_event=bool(args.one_order_per_entry_event),
+                                    single_basis_position=bool(args.single_basis_position)),
+                    fees=dict(perp_maker_bps=args.perp_maker_bps,perp_taker_bps=args.perp_taker_bps,
+                              spot_taker_bps=args.spot_taker_bps),
                     engine_sha256=hashlib.sha256((MODEL/'build/archive-replay').read_bytes()).hexdigest(),
                     archive_sort_sha256=hashlib.sha256((MODEL/'build/archive-sort').read_bytes()).hexdigest(),
                     sorting='Exact stable external sort; all source rows retained',sources=manifests)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare saved basis-target hypotheses on identical data and execution rules."""
+"""Compare saved basis targets and entry offsets on identical data and execution rules."""
 import argparse
 import csv
 import json
@@ -21,7 +21,11 @@ def compare(baseline, experiment, output):
         return sorted((month['month'],name,source['sha256']) for month in provenance['sources']
                       for name,source in month['sources'].items())
     if source_hashes(inputs[0])!=source_hashes(inputs[1]):raise ValueError('Hypotheses use different source data')
-    for key in ('entry_offset_bps','latency_ms','perp_maker_bps','perp_taker_bps','spot_taker_bps',
+    if summaries[0].get('one_order_per_entry_event',False)!=summaries[1].get('one_order_per_entry_event',False):
+        raise ValueError('Additional strategy change: one_order_per_entry_event')
+    if summaries[0].get('single_basis_position',False)!=summaries[1].get('single_basis_position',False):
+        raise ValueError('Additional strategy change: single_basis_position')
+    for key in ('latency_ms','perp_maker_bps','perp_taker_bps','spot_taker_bps',
                 'funding_cancel_seconds','exit_on_equilibrium','exit_before_funding','funding_exit_payers_only',
                 'funding_exit_flat_region_exempt','funding_cashflows','funding_interest_bps','funding_clamp_bps',
                 'order_btc','max_gross_perp_btc','participation','fill_at_touch','proxy_spot_half_spread_bps'):
@@ -46,7 +50,7 @@ def compare(baseline, experiment, output):
     comparison=dict(baseline=str(baseline.resolve()),experiment=str(experiment.resolve()),
         start_ms=inputs[0]['start_ms'],end_ms=inputs[0]['end_ms'],same_data_and_execution_rules=True,
         interpretation='Exploratory comparison on previously inspected history; changing inventory sizes mean dollar PnLs are not equal-capital returns',
-        hypotheses=[dict(target_bps=s['equilibrium_bps'],entry_bid_basis_bps=s['entry_bid_basis_bps'],
+        hypotheses=[dict(target_bps=s['equilibrium_bps'],entry_offset_bps=s['entry_offset_bps'],entry_bid_basis_bps=s['entry_bid_basis_bps'],
             entry_ask_basis_bps=s['entry_ask_basis_bps'],price_pnl_after_fees=s['price_pnl']-s['fees'],
             funding_pnl=s['funding_pnl'],net_pnl=s['net_pnl'],fees=s['fees'],
             funding_paid_usdt=s['funding_paid_usdt'],entries=s['paired_partial_fills'],
@@ -68,9 +72,11 @@ def compare(baseline, experiment, output):
     fig,axes=plt.subplots(2,1,figsize=(12,11.6),dpi=170,facecolor='#fafbfc')
     fig.subplots_adjust(left=.115,right=.96,top=.78,bottom=.365,hspace=.5)
     targets=[f'{summary["equilibrium_bps"]:g} bp target' for summary in summaries]
+    if summaries[0]['entry_offset_bps'] != summaries[1]['entry_offset_bps']:
+        targets=[f'{summary["equilibrium_bps"]:g} bp target / {summary["entry_offset_bps"]:g} bp offset' for summary in summaries]
     colors=('#77869c','#08765f')
     first,last=[datetime.fromtimestamp(rows[0][index][0]/1000,timezone.utc) for index in (0,-1)]
-    fig.text(.075,.951,'BTC basis targets: controlled comparison',fontsize=24,fontweight='bold')
+    fig.text(.075,.951,'BTC basis entries: controlled comparison',fontsize=24,fontweight='bold')
     fig.text(.075,.918,f'Binance BTCUSDT | {first:%Y-%m-%d} to {last:%Y-%m-%d} UTC | Zero latency',color='#52656e')
     rules=summaries[0]
     fig.text(.075,.891,f'Maker {rules["perp_maker_bps"]:g} / perp taker {rules["perp_taker_bps"]:g} / spot taker {rules["spot_taker_bps"]:g} bps. Both legs exit before any expected funding payment.',fontsize=9,color='#52656e')
@@ -106,8 +112,8 @@ def compare(baseline, experiment, output):
         cell.set_edgecolor('#dce4e8');cell.set_linewidth(.5);cell.set_facecolor('#edf2f5' if row==0 else '#fafbfc')
         if row==0:cell.set_text_props(weight='bold')
         if column==0:cell.set_text_props(ha='left')
-    fig.text(.075,.32,'Same source events, fee rates, fill model and funding-exit policy. Only the midpoint-basis target changes.',fontsize=9,color='#52656e')
-    fig.text(.075,.078,'Unlimited inventory: different targets grow different exposures. Dollar PnLs are not returns on equal capital.',fontsize=9,color='#52656e')
+    fig.text(.075,.32,'Same source events, fee rates, fill model and funding-exit policy. Entry target and/or offset changes.',fontsize=9,color='#52656e')
+    fig.text(.075,.078,'Unlimited inventory: different entry settings grow different exposures. Dollar PnLs are not returns on equal capital.',fontsize=9,color='#52656e')
     fig.text(.075,.054,'Previously inspected history. Open positions marked at mids; no terminal liquidation. Spot trade-price proxy; 1 bp full spread.',fontsize=9,color='#52656e')
     gap=max(summary.get('max_quote_gap_ms',0) for summary in summaries)/60000
     fig.text(.075,.03,f'Quote gaps up to {gap:.1f} min can distort interim marks. Queue, impact, depth, borrow, margin and liquidation omitted.',fontsize=9,color='#52656e')

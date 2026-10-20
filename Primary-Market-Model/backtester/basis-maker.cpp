@@ -76,7 +76,13 @@ double Engine::used_capacity() const {
     return (config_.exit_on_equilibrium || config_.exit_before_funding) ? open_gross_btc_ : gross_btc_;
 }
 double Engine::available_capacity() const {
-    return config_.max_gross_perp_btc > 0 ? config_.max_gross_perp_btc-used_capacity() : config_.order_btc;
+    double capacity = config_.max_gross_perp_btc > 0 ? config_.max_gross_perp_btc-used_capacity() : config_.order_btc;
+    if (config_.single_basis_position) {
+        const int direction = entry_side(basis());
+        if ((direction>0 && open_short_btc_>1e-10) || (direction<0 && open_long_btc_>1e-10)) return 0;
+        capacity = std::min(capacity,config_.order_btc-open_gross_btc_);
+    }
+    return capacity;
 }
 void Engine::record_fill(Fill fill) {
     auto& stats = fill_stats_; ++stats.count;
@@ -177,13 +183,27 @@ double Engine::estimated_funding_bps() const {
     return p+std::clamp(config_.funding_interest_bps-p,-config_.funding_clamp_bps,config_.funding_clamp_bps);
 }
 
+void Engine::refresh_entry_event() {
+    if (!config_.one_order_per_entry_event || !ready()) return;
+    const int side = entry_side(basis());
+    if (side == entry_event_side_) return;
+    entry_event_side_ = side;
+    entry_event_remaining_ = side ? quantity(config_.order_btc) : 0;
+    entry_event_filled_ = 0;
+    if (side) ++entry_events_;
+    // A new episode gets a new order even when its side/price matches the old quote.
+    quote_side_ = 0; remaining_ = 0;
+}
 void Engine::decide() {
+    refresh_entry_event();
     int side = 0;
     double price = 0, size = 0, observed_basis = 0;
     const char* reason = "MISSING_OR_STALE_MARKET";
     if (ready()) {
         observed_basis = basis();
         if (funding_guard()) reason = "PRE_FUNDING_CANCEL";
+        else if (config_.one_order_per_entry_event && entry_event_side_ && entry_event_remaining_ < config_.quantity_step)
+            reason = "ENTRY_EVENT_FILLED";
         else if (quantity(available_capacity()) < config_.quantity_step)
             reason = (config_.exit_on_equilibrium || config_.exit_before_funding) ? "OPEN_POSITION_CAP" : "GROSS_POSITION_CAP";
         else {
@@ -193,6 +213,7 @@ void Engine::decide() {
             if (side) {
                 price = (side > 0 ? std::floor(price/config_.tick+1e-9) : std::ceil(price/config_.tick-1e-9))*config_.tick;
                 size = quantity(std::min(config_.order_btc,available_capacity()));
+                if (config_.one_order_per_entry_event) size = std::min(size,entry_event_remaining_);
                 const double hedge_price = side > 0 ? spot_bid_ : spot_ask_;
                 if (size*price < config_.perp_min_notional || size*hedge_price < config_.spot_min_notional) {
                     reason = "MIN_NOTIONAL"; side = 0; size = 0;
@@ -212,6 +233,7 @@ void Engine::decide() {
     }
 }
 void Engine::trade(const Event& e) {
+    refresh_entry_event();
     if (!ready() || funding_guard() || !quote_side_ || e.time <= quote_since_) return;
     const double observed_basis = basis();
     if (entry_side(observed_basis) != quote_side_) return;
@@ -219,7 +241,8 @@ void Engine::trade(const Event& e) {
     const double gap = quote_side_ > 0 ? quote_price_-e.price : e.price-quote_price_;
     const double tolerance = config_.tick*1e-7;
     if (gap <= tolerance && !(config_.fill_at_touch && std::abs(gap) <= tolerance)) return;
-    const double q = quantity(std::min({remaining_,e.quantity*config_.participation,available_capacity()}));
+    const double event_capacity = config_.one_order_per_entry_event ? entry_event_remaining_ : config_.order_btc;
+    const double q = quantity(std::min({remaining_,e.quantity*config_.participation,available_capacity(),event_capacity}));
     if (q <= 0) return;
     const int direction = quote_side_;
     const double perp_price = quote_price_, spot_price = direction > 0 ? spot_bid_ : spot_ask_;
@@ -241,6 +264,11 @@ void Engine::trade(const Event& e) {
     cash_ += direction*q*(spot_price-perp_price);
     fees_ += perp_fee+spot_fee;
     remaining_ = quantity(remaining_-q);
+    if (config_.one_order_per_entry_event) {
+        entry_event_remaining_ = quantity(entry_event_remaining_-q);
+        entry_event_filled_ += q;
+        max_entry_event_btc_ = std::max(max_entry_event_btc_,entry_event_filled_);
+    }
     record_fill({now_,id,"PERP","MAKER",direction,perp_price,q,q*perp_price,perp_fee});
     record_fill({now_,id,"SPOT","TAKER",-direction,spot_price,q,q*spot_price,spot_fee});
     pairs_.push_back({id,now_,direction,q,perp_price,spot_price,(perp_price/spot_price-1)*bps,perp_fee+spot_fee});
@@ -394,8 +422,12 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         << "  \"entry_offset_bps\": " << c.entry_offset_bps << ",\n  \"entry_bid_basis_bps\": " << c.equilibrium_bps-c.entry_offset_bps
         << ",\n  \"entry_ask_basis_bps\": " << c.equilibrium_bps+c.entry_offset_bps << ",\n"
         << "  \"entry_signal\": \"10000 * (perp_mid / spot_mid - 1)\",\n  \"entry_band_violations\": " << entry_violations << ",\n"
+        << "  \"one_order_per_entry_event\": " << (c.one_order_per_entry_event ? "true" : "false") << ",\n"
+        << "  \"single_basis_position\": " << (c.single_basis_position ? "true" : "false") << ",\n"
+        << "  \"basis_position_limit_trades\": " << (c.single_basis_position ? 1 : 0) << ",\n"
+        << "  \"entry_events\": " << engine.entry_events() << ",\n  \"max_entry_event_btc\": " << engine.max_entry_event_btc() << ",\n"
         << "  \"exit_execution\": \"" << (c.exit_on_equilibrium ? "Equilibrium crossings and any enabled funding exits" : c.exit_before_funding ? "Any estimated funding payer during final pre-settlement window, including flat funding region" : "No exits") << "\",\n"
-        << "  \"capacity_rule\": \"" << (c.max_gross_perp_btc == 0 ? "Unlimited concurrent entry capacity" : (c.exit_on_equilibrium || c.exit_before_funding) ? "Open gross perp BTC; exits release capacity" : "Cumulative gross perp BTC; capacity not recycled") << "\",\n"
+        << "  \"capacity_rule\": \"" << (c.single_basis_position ? "One signed order-sized basis position; no opposite entries until flat" : c.max_gross_perp_btc == 0 ? "Unlimited concurrent entry capacity" : (c.exit_on_equilibrium || c.exit_before_funding) ? "Open gross perp BTC; exits release capacity" : "Cumulative gross perp BTC; capacity not recycled") << "\",\n"
         << "  \"funding_assumption\": \"" << (c.funding_cashflows ? "Recorded settlement cash flows on held positions" : "Zero funding cash flows") << "\",\n  \"funding_cancel_seconds\": " << c.funding_cancel_ms/1000.0 << ",\n"
         << "  \"perp_maker_bps\": " << c.perp_maker_bps << ",\n  \"perp_taker_bps\": " << c.perp_taker_bps << ",\n  \"spot_taker_bps\": " << c.spot_taker_bps << ",\n"
         << "  \"cycle_fee_bps\": " << c.perp_maker_bps+c.perp_taker_bps+2*c.spot_taker_bps << ",\n"

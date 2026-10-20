@@ -1,17 +1,23 @@
 # BTC basis strategy
 
-The configured midpoint-basis target is **−5 bps versus spot**, with a **1.5 bp entry offset**. Quote the
-Binance BTCUSDT perp bid at or below **−6.5 bps**, or its ask at or above
-**−3.5 bps**. Quote neither side inside that band. The signal is
+The active midpoint-basis target is **−5 bps versus spot**, with a **1.25 bp entry offset**. Quote the
+Binance BTCUSDT perp bid at or below **−6.25 bps**, or its ask at or above
+**−3.75 bps**. Quote neither side inside that band. The signal is
 `10000 * (perp_mid / spot_mid - 1)`; boundaries are inclusive and are rechecked
 at each fill. Every partial fill immediately gets an opposite **equal-BTC spot hedge**.
-Quotes are 0.01 BTC; concurrent pairs and position size are uncapped by default.
-**Maker fees are 0 bps; taker fees are 0.5 bps per fill on both markets.
-Convergence never closes a position.** A completed cycle has one free perp maker
-entry and three taker fills, totaling a nominal **1.5 bps**. Actual fees use each
+Each fresh crossing of an entry threshold creates **one 0.01 BTC order budget**.
+Partial fills and quote repricing share that budget. Staying beyond the same
+threshold does not replenish it; moving back inside the band and crossing again
+creates a new event. The signed basis position is limited to **−1 / +1 trade**,
+where one trade is **0.01 BTC per leg**. Partial fills may complete that position,
+but total open gross perp size cannot exceed 0.01 BTC. An opposite-direction
+entry waits until the existing position closes under the funding-only exit rule.
+**Maker fees are 0.5 bps; taker fees are 2 bps per fill on both markets.
+Convergence never closes a position.** A completed cycle has one perp maker
+entry and three taker fills, totaling a nominal **6.5 bps**. Actual fees use each
 fill's executed notional. Open pairs pay only fees on fills already executed;
 future exit fees are not charged early.
-The 1.5 bp entry offset is a midpoint cushion, not guaranteed profit: executable
+The 1.25 bp entry offset is a midpoint cushion, not guaranteed profit: executable
 spreads also cost money, and funding exits may occur before basis convergence.
 
 ## Funding-only exits
@@ -81,10 +87,19 @@ The profit curve is [results/result.png](results/result.png), also available as
 [results/trials.png](results/trials.png) and [results/trials.json](results/trials.json).
 `build/current/` retains the summary, sampled equity, daily feed coverage and
 input hashes so the charts can be reproduced without another replay.
+The active presentation exports are **3840 × 2160 (16:9)**. This run has
+its accounting, exposure and statistical results retained in `build/current/`
+and `results/trials.json`. The previous uncapped event-based run is preserved
+under `results/hypotheses/event-uncapped/`.
+The capped run earns **17.97 USDT net marked PnL**: **18.88 USDT funding** less
+**0.91 USDT price losses and executed fees**. One short basis position was filled
+in three parts and held through the window; there were no long-side entries.
+The complete capped replay is retained under `results/position-limit-one/`.
 
 The PNG separates **long-perp/short-spot** pairs from **short-perp/long-spot**
-pairs. It shows cumulative price PnL (realized plus unrealized) and unrealized
-price PnL on still-open pairs, with funding cash in a separate final table.
+pairs. It shows one cumulative net PnL curve per side, including funding and
+executed fees. Each side's final PnL and contribution to the total are labeled;
+the header separates portfolio price PnL after fees from funding cash.
 The two direction panels use separate, explicitly labeled vertical scales.
 Both legs and executed fees are included in each direction. An exited pair's
 price result moves from unrealized to realized; it does not disappear when its
@@ -105,11 +120,11 @@ eight-hour funding illustration alongside the report.
 
 ## Hypothesis comparison
 
-The **−5 bp target** remains the default and its completed run is preserved under
+The previous **−5 bp target / 1.5 bp offset** run with 0 / 0.5 bp maker/taker fees is preserved under
 `results/hypotheses/equilibrium-minus-5/`. That folder includes the original
 graphs, equity, summary, validation, input provenance and daily statistics;
-`preservation.json` records their SHA-256 hashes. The original root reports and
-`build/current/` also continue to show that baseline.
+`preservation.json` records their SHA-256 hashes. The root reports and
+`build/current/` show the latest active settings above.
 
 The **0 bp target** is a separate experiment with entries at **−1.5 / +1.5 bps**.
 It uses the same December–February source data, execution assumptions, fees,
@@ -117,7 +132,7 @@ unlimited inventory and any-payer pre-funding exits. Run it without replacing
 the baseline:
 
 ```bash
-Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_archive_backtest.py --equilibrium-bps 0 --entry-offset-bps 1.5 --output Primary-Market-Model/results/hypotheses/equilibrium-0 --report-dir Primary-Market-Model/results/hypotheses/equilibrium-0
+Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_archive_backtest.py --equilibrium-bps 0 --entry-offset-bps 1.5 --perp-maker-bps 0 --perp-taker-bps 0.5 --spot-taker-bps 0.5 --one-order-per-entry-event 0 --single-basis-position 0 --output Primary-Market-Model/results/hypotheses/equilibrium-0 --report-dir Primary-Market-Model/results/hypotheses/equilibrium-0
 Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/compare_hypotheses.py Primary-Market-Model/results/hypotheses/equilibrium-minus-5 Primary-Market-Model/results/hypotheses/equilibrium-0 --output Primary-Market-Model/results/hypotheses/comparison.png
 ```
 
@@ -127,6 +142,29 @@ separates price PnL after fees from funding. Different inventory paths mean the
 dollar PnLs are not returns on equal capital. This is an exploratory comparison
 on previously inspected history, not proof that either target is the market's
 equilibrium.
+
+### 2 bp entry offset around the −5 bp target
+
+The wider-band experiment uses the same continuous December–February replay,
+with long-perp/short-spot entries at or below **−7 bps** and
+short-perp/long-spot entries at or above **−3 bps**. Fees, fill assumptions,
+funding-only exits and unlimited inventory are unchanged. Its reports are saved
+separately under `results/hypotheses/equilibrium-minus-5-offset-2/`.
+
+```bash
+Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_archive_backtest.py --equilibrium-bps -5 --entry-offset-bps 2 --perp-maker-bps 0 --perp-taker-bps 0.5 --spot-taker-bps 0.5 --one-order-per-entry-event 0 --single-basis-position 0 --output Primary-Market-Model/results/hypotheses/equilibrium-minus-5-offset-2 --report-dir Primary-Market-Model/results/hypotheses/equilibrium-minus-5-offset-2
+Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/compare_hypotheses.py Primary-Market-Model/results/hypotheses/equilibrium-minus-5 Primary-Market-Model/results/hypotheses/equilibrium-minus-5-offset-2 --output Primary-Market-Model/results/hypotheses/equilibrium-minus-5-offset-2/comparison.png
+```
+
+The comparison permits different entry targets or offsets while continuing to
+require identical source data, observation clocks, coverage and execution rules.
+The completed 2 bp replay has **77.13 million USDT net marked PnL**:
+**−4.32 million** price PnL after fees plus **81.45 million** funding, versus
+79.13 million net for the 1.5 bp offset. Inventory is unlimited, so these dollar
+results are not returns on equal capital. See the
+[entry-offset comparison](results/hypotheses/equilibrium-minus-5-offset-2/comparison.png)
+and the [Victoria branch review](results/hypotheses/equilibrium-minus-5-offset-2/victoria-review/comparison.md)
+for the reproduced convergence tests, controlled exit comparison and limitations.
 
 ## Archive inputs
 
@@ -182,7 +220,7 @@ configured fee. Maker entries allow touch prints, at most 10% of observed
 aggressor quantity, rounded down to 0.001 BTC. A quote cannot fill at its creation
 timestamp. Queue priority, depth, impact, borrowing costs, capital, margin and
 liquidation are not modeled. Equal BTC removes common price moves; basis risk
-remains. Profits are USD amounts under unlimited inventory, not returns on a
+remains. Profits are USD amounts under the configured position limit, not returns on a
 fixed capital allocation.
 
 The graph samples minute equity and exact observed day-end marks. Maximum

@@ -152,12 +152,25 @@ int main(int argc,char** argv) {
                 if (used!=key.size()) throw std::runtime_error("Invalid reorder window");
                 continue;
             }
-            if (key!="--equilibrium-bps" && key!="--entry-offset-bps") throw std::runtime_error("Unknown option: "+key);
+            if (key!="--equilibrium-bps" && key!="--entry-offset-bps" && key!="--perp-maker-bps" &&
+                key!="--perp-taker-bps" && key!="--spot-taker-bps" && key!="--one-order-per-entry-event" &&
+                key!="--single-basis-position") throw std::runtime_error("Unknown option: "+key);
             if (++i>=argc) throw std::runtime_error("Missing value for "+key);
             const std::string value=argv[i]; std::size_t used=0; const double number=std::stod(value,&used);
             if (used!=value.size() || !std::isfinite(number)) throw std::runtime_error("Invalid value for "+key);
             if (key=="--equilibrium-bps") config.equilibrium_bps=number;
-            else config.entry_offset_bps=number;
+            else if (key=="--entry-offset-bps") config.entry_offset_bps=number;
+            else if (key=="--perp-maker-bps") config.perp_maker_bps=number;
+            else if (key=="--perp-taker-bps") config.perp_taker_bps=number;
+            else if (key=="--one-order-per-entry-event") {
+                if (number!=0 && number!=1) throw std::runtime_error("Entry event mode must be 0 or 1");
+                config.one_order_per_entry_event=number==1;
+            }
+            else if (key=="--single-basis-position") {
+                if (number!=0 && number!=1) throw std::runtime_error("Single basis position mode must be 0 or 1");
+                config.single_basis_position=number==1;
+            }
+            else config.spot_taker_bps=number;
         }
         if (window < 0) throw std::runtime_error("Negative reorder window");
         std::ifstream manifest(argv[1]);

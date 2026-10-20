@@ -14,6 +14,8 @@ struct Config {
     double perp_min_notional = 100, spot_min_notional = 5;
     Millis funding_cancel_ms = 60000, max_spot_age_ms = 90000, max_perp_age_ms = 10000;
     bool fill_at_touch = true; // Joining best bid/ask: participation approximates queue allocation.
+    bool one_order_per_entry_event = false; // One order budget per fresh threshold crossing.
+    bool single_basis_position = false; // At most one signed order-sized position; opposite entries wait until flat.
     bool exit_on_equilibrium = false;
     bool retain_decisions = true; // Large archive replays need only the latest quote decision.
     bool retain_fills = true; // Aggregate accounting remains exact without the optional fill ledger.
@@ -84,6 +86,8 @@ public:
     double final_perp_mid() const { return (perp_bid_+perp_ask_)/2; }
     double final_spot_mid() const { return (spot_bid_+spot_ask_)/2; }
     bool premium_ready() const;
+    std::size_t entry_events() const { return entry_events_; }
+    double max_entry_event_btc() const { return max_entry_event_btc_; }
     double average_premium_bps() const;
     double estimated_funding_bps() const;
 private:
@@ -95,6 +99,7 @@ private:
     void close_before_funding();
     void close_pair(Pair& pair, const std::string& reason);
     void record_fill(Fill fill);
+    void refresh_entry_event();
     double used_capacity() const;
     double available_capacity() const;
     double basis() const;
@@ -105,6 +110,9 @@ private:
     double spot_bid_ = 0, spot_ask_ = 0, perp_bid_ = 0, perp_ask_ = 0;
     double quote_price_ = 0, remaining_ = 0;
     int quote_side_ = 0;
+    int entry_event_side_ = 0;
+    double entry_event_remaining_ = 0, entry_event_filled_ = 0, max_entry_event_btc_ = 0;
+    std::size_t entry_events_ = 0;
     Millis quote_since_ = -1;
     double perp_btc_ = 0, spot_btc_ = 0, gross_btc_ = 0, cash_ = 0, fees_ = 0, peak_ = 0, drawdown_ = 0;
     double open_gross_btc_ = 0, realized_pnl_ = 0;

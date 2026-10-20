@@ -52,77 +52,8 @@ def render_report(directory, output):
 
 
 def render_direction_png(summary, rows, output):
-    """Compare complete hedged pairs by direction; funding is separate cash."""
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as dates
-    from matplotlib.ticker import FuncFormatter
-    times=[datetime.fromtimestamp(int(row['time_ms'])/1000,timezone.utc) for row in rows]
-    names=('long_perp_short_spot','short_perp_long_spot')
-    labels=('Long perp / short spot','Short perp / long spot')
-    colors=('#08765f','#b33b4c')
-    sides=[summary['basis_sides'][name] for name in names]
-    plt.rcParams.update({'font.family':'DejaVu Sans','font.size':10,
-                         'axes.spines.top':False,'axes.spines.right':False,
-                         'axes.spines.left':False,'axes.spines.bottom':False})
-    fig,axes=plt.subplots(2,1,figsize=(12,11.5),dpi=170,facecolor='#fafbfc')
-    fig.subplots_adjust(left=.115,right=.96,top=.735,bottom=.255,hspace=.46)
-    fig.text(.075,.954,f'BTC basis: {summary["equilibrium_bps"]:g} bp target',fontsize=24,fontweight='bold')
-    fig.text(.075,.921,f'Binance BTCUSDT | {times[0]:%Y-%m-%d} to {times[-1]:%Y-%m-%d} UTC | Entry band {summary["entry_bid_basis_bps"]:g} / {summary["entry_ask_basis_bps"]:g} bps | Zero latency',fontsize=9.5,color='#52656e')
-    fig.text(.075,.898,f'Maker {summary["perp_maker_bps"]:g} / perp taker {summary["perp_taker_bps"]:g} / spot taker {summary["spot_taker_bps"]:g} bps per fill. Each direction includes its equal-BTC spot hedge.',fontsize=9,color='#52656e')
-    if 'funding_paid_usdt' in summary:
-        fig.text(.075,.877,f'Funding cash audit: paid {summary["funding_paid_usdt"]:,.2f} USDT; received {summary["funding_received_usdt"]:,.2f} USDT. Exit signals use a causal estimate.',fontsize=8.5,color='#52656e')
-    for xpos,label,value in [(.075,'PRICE PNL AFTER FEES',summary['price_pnl']-summary['fees']),
-                             (.39,'FUNDING CASH',summary['funding_pnl']),(.705,'TOTAL NET PNL',summary['net_pnl'])]:
-        fig.text(xpos,.86,label+' · USDT',fontsize=9,color='#52656e')
-        fig.text(xpos,.824,f'{value:+,.2f}',fontsize=21,fontweight='bold')
-    fig.text(.075,.79,'Funding is excluded from both price charts. Each direction has its own vertical scale; both include executed fees.',fontsize=9,color='#52656e')
-    for ax,name,title,color in zip(axes,names,labels,colors):
-        ax.set_facecolor('#fafbfc')
-        magnitude=0
-        for include_realized,label,style in [(True,'Realized + unrealized price PnL','-'),
-                                            (False,'Unrealized price PnL','--')]:
-            values=[float(row[name+'_unrealized_pnl'])+
-                    (float(row[name+'_realized_price_pnl']) if include_realized else 0) for row in rows]
-            expected=(summary['basis_sides'][name]['unrealized_pnl']+
-                      (summary['basis_sides'][name]['realized_price_pnl'] if include_realized else 0))
-            if not math.isclose(values[-1],expected,abs_tol=1e-5): raise ValueError('Direction PNG final point does not reconcile')
-            magnitude=max(magnitude,max(abs(value) for value in values))
-            ax.plot(times,values,label=label,color=color if include_realized else '#77889b',lw=1.3,ls=style)
-        side=summary['basis_sides'][name]
-        ax.set_title(title,loc='left',fontsize=12,pad=23,fontweight='bold',color=color)
-        ax.text(0,1.025,f'Final price PnL: {side["realized_price_pnl"]+side["unrealized_pnl"]:+,.2f} USDT | Unrealized: {side["unrealized_pnl"]:+,.2f} USDT',
-                transform=ax.transAxes,fontsize=8.5,color='#52656e')
-        ax.axhline(0,color='#aab8bf',lw=.7);ax.grid(axis='y',color='#dce4e8',lw=.7)
-        divisor=1e6 if magnitude>=1e6 else 1
-        ax.set_ylabel('USDT · millions' if divisor==1e6 else 'USDT',labelpad=12)
-        ax.yaxis.set_major_formatter(FuncFormatter(lambda value,pos,d=divisor:f'{value/d:,.1f}' if d>1 else f'{value:,.2f}'))
-        ax.xaxis.set_major_locator(dates.AutoDateLocator(minticks=4,maxticks=6))
-        ax.xaxis.set_major_formatter(dates.DateFormatter('%b %d',tz=timezone.utc))
-        ax.tick_params(axis='both',length=0,pad=8)
-        if times[0]==times[-1]:
-            from datetime import timedelta
-            ax.set_xlim(times[0]-timedelta(seconds=1),times[-1]+timedelta(seconds=1))
-        else: ax.set_xlim(times[0],times[-1])
-        ax.margins(y=.16);ax.legend(loc='best',frameon=False,ncol=2,fontsize=9)
-    table_ax=fig.add_axes([.075,.115,.885,.09]);table_ax.axis('off')
-    table=table_ax.table(cellText=[[label]+[f'{side[key]:+,.2f}' for key in ('realized_price_pnl','unrealized_pnl','funding_pnl','net_pnl')]
-                                    for label,side in zip(labels,sides)],
-                        colLabels=['Hedged pair direction','Realized price','Unrealized price','Funding cash','Net PnL'],
-                        colWidths=[.26,.18,.19,.19,.18],cellLoc='right',loc='center')
-    table.auto_set_font_size(False);table.set_fontsize(9);table.scale(1,1.55)
-    for (row,column),cell in table.get_celld().items():
-        cell.set_edgecolor('#dce4e8');cell.set_linewidth(.5)
-        cell.set_facecolor('#edf2f5' if row==0 else '#fafbfc')
-        if row==0:cell.set_text_props(weight='bold')
-        if column==0:cell.set_text_props(ha='left',color=colors[row-1] if row else '#18262d')
-    fig.text(.075,.215,'FINAL BREAKDOWN · USDT · Price columns include executed fees; funding is realized separately.',fontsize=9,color='#52656e')
-    fig.text(.075,.084,f'Open BTC per leg: long-perp pairs {sides[0]["open_btc"]:,.3f}; short-perp pairs {sides[1]["open_btc"]:,.3f}. No terminal liquidation.',fontsize=9,color='#52656e')
-    exit_note='Exit any expected funding payer, including flat rates.' if summary.get('funding_exit_flat_region_exempt',True) is False else 'Funding payers exit only outside the flat region.'
-    fig.text(.075,.06,exit_note+' Unlimited inventory. Minute marks. Spot trade-price proxy; 1 bp full spread.',fontsize=9,color='#52656e')
-    gap=f'Quote gaps up to {summary["max_quote_gap_ms"]/60000:.1f} min; stale marks can distort interim PnL. ' if summary.get('max_quote_gap_ms',0)>10000 else ''
-    fig.text(.075,.036,gap+'Queue, borrow, impact, depth, margin and liquidation omitted.',fontsize=8.5,color='#52656e')
-    output.parent.mkdir(parents=True,exist_ok=True)
-    fig.savefig(output,facecolor=fig.get_facecolor());plt.close(fig)
+    from presentation import render_directions
+    return render_directions(summary, rows, output)
 
 
 def render_funding_curve(output):
