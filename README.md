@@ -51,19 +51,32 @@ This builds the engine and runs every test. Expect two `PASS:` lines and three `
 make -C Primary-Market-Model sweep
 ```
 
-About 30 seconds. It converts the Coinbase recording, runs the strategy on
-Coinbase (2026-10-19) and Binance (2026-10-01) at entry offsets of 0.5-2 bp, and
-writes `Primary-Market-Model/results/pitch/`:
+About 2-5 minutes. It runs the strategy on **every** recorded day: each Coinbase
+recording in `data/live/` (converted first if new or updated) and each Binance day
+in `data/binance/tardis/`, at entry offsets of 0.5-4 bp. Fees are Shreev's (perp
+maker 0.5 bp, every taker fill 2 bp, so 6.5 bp per round trip) and latency is zero.
+Each day starts and ends flat. It writes `Primary-Market-Model/results/pitch/`:
 
 | File | Contents |
 |---|---|
-| `summary.md` | basis stats and the net-bps table (fees and hedge delay) |
-| `sweep.csv` | every venue x offset x fee x latency row |
+| `summary.md` | basis stats, the pooled results table and net USD per day |
+| `sweep.csv` | one row per venue and entry offset, pooled over days |
+| `days.csv` | one row per venue, day and offset, with that day's basis stats |
 | `markouts.csv` | how far the basis reverts after a deviation, by horizon |
-| `basis-coinbase.png`, `basis-binance.png` | the basis over the day |
-| `markouts.png`, `fees.png`, `latency.png` | the pitch charts |
+| `basis-binance.png` | the Binance basis on each day against -5 bp |
+| `basis-coinbase.png` | the Coinbase basis over the longer recordings |
+| `fees.png`, `offsets.png`, `binance-days.png`, `markouts.png` | the pitch charts |
 
-To use other days: `make -C Primary-Market-Model sweep COINBASE_DAY=2026-10-20 BINANCE_DAY=2026-11-01`.
+Options go in `SWEEP_ARGS`, for example:
+
+```bash
+make -C Primary-Market-Model sweep SWEEP_ARGS="--binance-day 2026-10-01 --binance-day 2026-09-01"
+make -C Primary-Market-Model sweep SWEEP_ARGS="--perp-maker-bps 0 --latencies 0,50,250"
+```
+
+`--coinbase-day`/`--binance-day` (repeatable) pick days, `--perp-maker-bps`,
+`--perp-taker-bps` and `--spot-taker-bps` change fees, and `--latencies` adds
+`latency.png` with the hedge and exits repriced that many ms later.
 
 ## Get more data
 

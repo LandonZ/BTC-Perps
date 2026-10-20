@@ -277,32 +277,42 @@ engine options this needs (all off by default, so the runs above are unchanged):
 `tools/coinbase_basis_events.py` turns a Coinbase recording into the same event
 format (BIP book `Q`, BIP trades `T` in BTC, BTC-USD book `S`, hourly `F` at the
 published rate). Coinbase's trade `side` is the maker's side, so a BUY print hits
-the bid. `tools/basis_sweep.py` runs both venues at entry offsets of 0.5-2 bp and
-writes `results/pitch/`: `summary.md`, `sweep.csv`, `markouts.csv` and charts.
+the bid. `tools/basis_sweep.py` replays every recorded day of both venues at entry
+offsets of 0.5-4 bp and writes `results/pitch/` (see the top-level README).
 
 ```bash
 make -C Primary-Market-Model sweep
 ```
 
-What the recorded days show (0.01 BTC lots, at most 0.1 BTC open):
+Assumptions agreed with Shreev: fees per fill are **perp maker 0.5 bp, perp taker
+2 bp, spot taker 2 bp (6.5 bp per round trip)**, and **zero latency**, since
+reversion toward fair value plays out over hours. 0.01 BTC lots, at most 0.1 BTC
+open, each day replayed from flat to flat.
 
-- **The basis mean-reverts.** Binance BTCUSDT averaged **-4.69 bp** to spot on
-  2026-10-01 (std 0.75), right at the -5 bp funding equilibrium. Coinbase BIP
-  traded **+2.8 bp rich** on 2026-10-19 and drifted, so its fair value is an EMA.
-  A 1-1.5 bp deviation moves about 0.5-0.8 bp back within a minute on both venues
-  (`markouts.png`).
-- **Gross edge is real but small**: +1.0 to +2.8 bp per round trip, rising with the
-  entry offset while the number of trips falls. Holds average 3-30 seconds and no
-  funding was paid.
-- **Fees decide it.** At a Virtu-tier ~2 bp per cycle, only a ±2 bp entry stays
-  positive (about +0.7 bp per trip on both venues). Retail fees (10+ bp) lose on
-  every setting (`fees.png`).
-- **Speed matters as much.** Hedging and exiting 50 ms late costs 0.1-0.9 bp per
-  trip and turns every setting negative at 2 bp fees (`latency.png`).
+What 13 Binance days (first of each month, 2025-10 to 2026-10) and 18.7 hours of
+Coinbase (2026-10-15 to 10-20) show:
 
-Limits: one Binance day and 10.7 hours of Coinbase, so these are illustrations,
-not significance tests. The replay has zero latency; the latency rows only reprice
-the hedge and exit legs later and do not change decisions. Maker fills assume
-we were at the front of the queue (Binance: 10% of each print at our price;
-Coinbase: whole prints through our price only). Spot shorting assumes BTC is held
-or borrowed. Fee levels are swept rather than taken from a specific account tier.
+- **Binance sits near -5 bp.** Daily mean basis ranged from -5.13 to -3.87 bp
+  (average -4.50) against the -5 bp funding equilibrium (`basis-binance.png`).
+  Coinbase BIP traded **+1.7 to +3.3 bp rich** and drifted, so its fair value is a
+  10-minute EMA (`basis-coinbase.png`).
+- **The basis mean-reverts, and wider gaps revert more.** Gross profit per round
+  trip rises from about +1 bp at a ±0.5 bp entry to +6.4 bp (Binance) at ±4 bp.
+  Median holds are seconds, and almost no funding was paid.
+- **At 6.5 bp fees nothing pays.** Every entry offset loses on both venues. The
+  closest is Binance at ±4 bp: -0.13 bp per round trip (-$22 over 13 days), and
+  only 2 of the 13 days were positive (`fees.png`, `binance-days.png`). Wider
+  entries earn more per trip but trade far less: about 425 round trips a day at
+  ±4 bp against 55,000 at ±0.5 bp (`offsets.png`).
+- **Where it would pay** (`fees.png`): at 3.5 bp per round trip Binance ±3 bp and
+  ±4 bp net +0.9 and +2.9 bp; at about 2 bp (the Virtu-scale cost Shreev quoted)
+  every offset from ±2 bp up is positive. Fees, not the signal, decide the trade.
+- **Coinbase is too thin to judge.** Only 13 round trips at ±3 bp and 3 at ±4 bp in
+  18.7 hours.
+
+Limits: 13 single days and under a day of Coinbase are illustrations, not
+significance tests. The wide-entry profits come from brief dislocations that close
+within about a second, which is where zero latency is most generous;
+`--latencies 0,50,250` shows the cost of acting late. Maker fills assume we were at
+the front of the queue (Binance: 10% of each print at our price; Coinbase: whole
+prints through our price only). Spot shorting assumes BTC is held or borrowed.
