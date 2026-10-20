@@ -1,0 +1,61 @@
+{
+  "day": "2025-11-01",
+  "symbol": "BTCUSDT",
+  "sources": {
+    "perp_quotes": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/book_ticker/2025/11/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_book_ticker_BTCUSDT.csv.gz",
+      "bytes": 100736378,
+      "sha256": "b6283e1fece1c619fb8dbcfd60bb20d45f24f505ba645d4694fa5b9f3b181ee2"
+    },
+    "perp_trades": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/trades/2025/11/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_trades_BTCUSDT.csv.gz",
+      "bytes": 13102116,
+      "sha256": "d1fa060ffe4aa6937bcd6754dc7aeed8480a0f163b233210e871c0fb238248b3"
+    },
+    "perp_ticker": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/derivative_ticker/2025/11/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_derivative_ticker_BTCUSDT.csv.gz",
+      "bytes": 1660887,
+      "sha256": "8f87f93bfd9a670ad27fe88488659a7c1861c340bc7fbb3be14702cf87fa1ed4"
+    },
+    "spot_quotes": {
+      "url": "https://datasets.tardis.dev/v1/binance/book_ticker/2025/11/01/BTCUSDT.csv.gz",
+      "file": "binance_book_ticker_BTCUSDT.csv.gz",
+      "bytes": 94807084,
+      "sha256": "9a34c39c1bb9d9226db3bf24af8275745a05717f36d480407561385c71dcabd4"
+    },
+    "premium": {
+      "url": "https://data.binance.vision/data/futures/um/daily/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2025-11-01.zip",
+      "file": "BTCUSDT-premiumIndex-1m-2025-11-01.zip",
+      "bytes": 27494,
+      "sha256": "173c2b6db482b1a8d7915db9a7a478d48ff1103828e4f5ff51d855e2d740e0b8"
+    }
+  },
+  "rows": {
+    "F": 3,
+    "Q": 119014,
+    "T": 1492868,
+    "S": 86540,
+    "P": 1440
+  },
+  "first_utc": "2025-11-01T00:00:00.000Z",
+  "last_utc": "2025-11-01T23:59:59.843Z",
+  "timing": {
+    "perp_quotes": {
+      "late": 0
+    },
+    "perp_trades": {
+      "late": 0
+    },
+    "spot_quotes": {
+      "late": 0
+    },
+    "perp_ticker": {
+      "late": 0,
+      "settlements": 2,
+      "day_start": "F"
+    }
+  }
+}

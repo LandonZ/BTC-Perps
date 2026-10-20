@@ -1,0 +1,61 @@
+{
+  "day": "2026-08-01",
+  "symbol": "BTCUSDT",
+  "sources": {
+    "perp_quotes": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/book_ticker/2026/08/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_book_ticker_BTCUSDT.csv.gz",
+      "bytes": 62159986,
+      "sha256": "feabdecef50632bfcaf55e086b92e7c1606d34171cca883b7087b0d55d4ddecc"
+    },
+    "perp_trades": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/trades/2026/08/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_trades_BTCUSDT.csv.gz",
+      "bytes": 8954358,
+      "sha256": "27622702d5e33e6d374ec3d6f9040e8d7550ca9229641bccb6289d64256e4afe"
+    },
+    "perp_ticker": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/derivative_ticker/2026/08/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_derivative_ticker_BTCUSDT.csv.gz",
+      "bytes": 1422904,
+      "sha256": "a9887d7699f05df661f061f28e05e145957e71218c7a0162e4092c9264874422"
+    },
+    "spot_quotes": {
+      "url": "https://datasets.tardis.dev/v1/binance/book_ticker/2026/08/01/BTCUSDT.csv.gz",
+      "file": "binance_book_ticker_BTCUSDT.csv.gz",
+      "bytes": 25736696,
+      "sha256": "162fa7ec0f68da5a8de95ca266b0c79a165e6917bb4a9860471897f6f9691eae"
+    },
+    "premium": {
+      "url": "https://data.binance.vision/data/futures/um/daily/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2026-08-01.zip",
+      "file": "BTCUSDT-premiumIndex-1m-2026-08-01.zip",
+      "bytes": 26679,
+      "sha256": "dd246ae0185c9609ebfa47a29d8c484d822699b5f68a87acbcd0c369a939e643"
+    }
+  },
+  "rows": {
+    "F": 3,
+    "Q": 55774,
+    "S": 29127,
+    "T": 1073872,
+    "P": 1440
+  },
+  "first_utc": "2026-08-01T00:00:00.000Z",
+  "last_utc": "2026-08-01T23:59:59.912Z",
+  "timing": {
+    "perp_quotes": {
+      "late": 0
+    },
+    "perp_trades": {
+      "late": 0
+    },
+    "spot_quotes": {
+      "late": 0
+    },
+    "perp_ticker": {
+      "late": 0,
+      "settlements": 2,
+      "day_start": "F"
+    }
+  }
+}

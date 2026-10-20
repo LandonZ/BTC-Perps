@@ -1,0 +1,61 @@
+{
+  "day": "2026-02-01",
+  "symbol": "BTCUSDT",
+  "sources": {
+    "perp_quotes": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/book_ticker/2026/02/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_book_ticker_BTCUSDT.csv.gz",
+      "bytes": 290843557,
+      "sha256": "c2870b881dd07599b23bf3b76228ed5d1b9bd6ca59681a032e35f31bbc4016db"
+    },
+    "perp_trades": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/trades/2026/02/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_trades_BTCUSDT.csv.gz",
+      "bytes": 57631972,
+      "sha256": "dfd19ab53abbc90118ce3c861521ecb17dbed6ce7bcc7410c07f296460454508"
+    },
+    "perp_ticker": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/derivative_ticker/2026/02/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_derivative_ticker_BTCUSDT.csv.gz",
+      "bytes": 2116072,
+      "sha256": "a482ca6d73ae1b32649870a4b7eb0fa61f43203e540bf0f2fb2557a59f4a9da8"
+    },
+    "spot_quotes": {
+      "url": "https://datasets.tardis.dev/v1/binance/book_ticker/2026/02/01/BTCUSDT.csv.gz",
+      "file": "binance_book_ticker_BTCUSDT.csv.gz",
+      "bytes": 126507042,
+      "sha256": "2c3c2ea463ddd27bb0cc6b67d80d91551b2822619531fdedba1484e092e4b8e9"
+    },
+    "premium": {
+      "url": "https://data.binance.vision/data/futures/um/daily/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2026-02-01.zip",
+      "file": "BTCUSDT-premiumIndex-1m-2026-02-01.zip",
+      "bytes": 28868,
+      "sha256": "4d8c2af256eeecee0f6cabad1707453a8f4ecd8f24e641bd27050f9eb9f3f9b5"
+    }
+  },
+  "rows": {
+    "F": 3,
+    "S": 659548,
+    "Q": 1264151,
+    "T": 6759515,
+    "P": 1440
+  },
+  "first_utc": "2026-02-01T00:00:00.000Z",
+  "last_utc": "2026-02-01T23:59:59.820Z",
+  "timing": {
+    "perp_quotes": {
+      "late": 0
+    },
+    "perp_trades": {
+      "late": 0
+    },
+    "spot_quotes": {
+      "late": 0
+    },
+    "perp_ticker": {
+      "late": 0,
+      "settlements": 2,
+      "day_start": "F"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "day": "2026-03-01",
+  "symbol": "BTCUSDT",
+  "sources": {
+    "perp_quotes": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/book_ticker/2026/03/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_book_ticker_BTCUSDT.csv.gz",
+      "bytes": 257265450,
+      "sha256": "3a854dd9e9c88342518daf17a178ec7b63f7e8fda0899a1bf628a2ff72dcee04"
+    },
+    "perp_trades": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/trades/2026/03/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_trades_BTCUSDT.csv.gz",
+      "bytes": 50842755,
+      "sha256": "50d3762a883f3f1cddc6869bbc2dbaaacf5bb52637ac0b51b85ae4dfcafdcb50"
+    },
+    "perp_ticker": {
+      "url": "https://datasets.tardis.dev/v1/binance-futures/derivative_ticker/2026/03/01/BTCUSDT.csv.gz",
+      "file": "binance-futures_derivative_ticker_BTCUSDT.csv.gz",
+      "bytes": 2012760,
+      "sha256": "b028ec11ddd9a3418053313398d99050a27c8cde47ca497b19905fc77d4963ec"
+    },
+    "spot_quotes": {
+      "url": "https://datasets.tardis.dev/v1/binance/book_ticker/2026/03/01/BTCUSDT.csv.gz",
+      "file": "binance_book_ticker_BTCUSDT.csv.gz",
+      "bytes": 91973690,
+      "sha256": "2e16025849349e5e152f4641c9a67649607c54b0c1f943b6f174393d6f3d8790"
+    },
+    "premium": {
+      "url": "https://data.binance.vision/data/futures/um/daily/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2026-03-01.zip",
+      "file": "BTCUSDT-premiumIndex-1m-2026-03-01.zip",
+      "bytes": 28826,
+      "sha256": "f8f4a2fc179a4b4c9e85c5dfe31b1a7dfda2a629ff90ddd39def3753089dc074"
+    }
+  },
+  "rows": {
+    "Q": 832403,
+    "F": 3,
+    "S": 594115,
+    "T": 5961363,
+    "P": 1440
+  },
+  "first_utc": "2026-02-28T23:59:59.998Z",
+  "last_utc": "2026-03-01T23:59:59.851Z",
+  "timing": {
+    "perp_quotes": {
+      "late": 0
+    },
+    "perp_trades": {
+      "late": 0
+    },
+    "spot_quotes": {
+      "late": 0
+    },
+    "perp_ticker": {
+      "late": 0,
+      "settlements": 2,
+      "day_start": "F"
+    }
+  }
+}
