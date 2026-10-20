@@ -1,0 +1,115 @@
+{
+  "marked_net_pnl": 1029.7203366086,
+  "liquidated_net_pnl": 1013.0159669994,
+  "net_improvement": 16.704369609200057,
+  "saved_exit_fees": 14.812188127400077,
+  "saved_crossing_spread": 1.8921814810000797,
+  "realized_pnl": 1043.8378628801,
+  "signed_unrealized_pnl": -14.1175262716,
+  "funding_received": 12.3940876132,
+  "funding_paid": 0,
+  "fees": 1318.2372625451999,
+  "long_basis_net": 434.0450952435,
+  "short_basis_net": 595.6752413647,
+  "statistics": {
+    "n": 91,
+    "total": 1029.7203366086,
+    "mean": 11.3156080946,
+    "median": 0.2628217457,
+    "std": 38.18005231476262,
+    "positive": 62,
+    "minimum": -2.9450859863,
+    "maximum": 219.7216933892,
+    "lag1_correlation": 0.26492607818618136,
+    "dependence_diagnostics": {
+      "acf": {
+        "1": 0.2646998430670757,
+        "2": 0.1023431623397314,
+        "3": 0.04808686631292782,
+        "4": 0.10180653523543971,
+        "5": 0.0961109971057023,
+        "6": 0.19737068776386812,
+        "7": 0.12610743427904814,
+        "8": -0.05504468407859628,
+        "9": -0.06170865479895099,
+        "10": -0.05644457573317368,
+        "11": -0.07010166914939979,
+        "12": -0.05078021642216559,
+        "13": -0.057557951318880377,
+        "14": -0.052941855722893186
+      },
+      "ljung_box": {
+        "3": {
+          "effective_lags": 3,
+          "statistic": 7.80690278593171,
+          "p_value": 0.050175651680277183
+        },
+        "7": {
+          "effective_lags": 7,
+          "statistic": 15.204940118787876,
+          "p_value": 0.03346028767107742
+        },
+        "14": {
+          "effective_lags": 14,
+          "statistic": 17.703382899620667,
+          "p_value": 0.22062597477749646
+        }
+      },
+      "acf_definition": "Demeaned autocovariance divided by full-sample sum of squared residuals",
+      "interpretation": "Ljung-Box tests zero autocorrelation through each lag; failure to reject does not establish independence or stationarity."
+    },
+    "t_test": {
+      "statistic": 2.8272360813754336,
+      "df": 90,
+      "p_one_sided": 0.002892806343238273,
+      "standard_error": 4.002356990681523,
+      "ci95_two_sided": [
+        3.3642273584052695,
+        19.26698883079473
+      ]
+    },
+    "hac": {
+      "3": {
+        "effective_lags": 3,
+        "standard_error": 4.940011743639094,
+        "statistic": 2.2906034806840925,
+        "p_one_sided": 0.01099317872358649,
+        "ci95_asymptotic": [
+          1.6333629938624625,
+          20.997853195337537
+        ]
+      },
+      "7": {
+        "effective_lags": 7,
+        "standard_error": 5.633166449498919,
+        "statistic": 2.0087473352765115,
+        "p_one_sided": 0.022281967986309187,
+        "ci95_asymptotic": [
+          0.2748047346627498,
+          22.356411454537252
+        ]
+      }
+    },
+    "block_bootstrap": {
+      "3": {
+        "samples": 20000,
+        "seed": 20261021,
+        "p_one_sided_centered": 0.018049097545122742,
+        "ci95_basic": [
+          0.850573646981573,
+          19.203528779532938
+        ]
+      },
+      "7": {
+        "samples": 20000,
+        "seed": 20261025,
+        "p_one_sided_centered": 0.030598470076496177,
+        "ci95_basic": [
+          -0.5863496445539678,
+          20.398073859920245
+        ]
+      }
+    }
+  },
+  "trials_ending_open": 83
+}

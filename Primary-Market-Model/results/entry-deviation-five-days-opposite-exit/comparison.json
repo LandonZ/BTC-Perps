@@ -1,0 +1,75 @@
+{
+  "baseline_sweep_sha256": "cbf4a491793577bbc84e62cff9e31cad6f53f3b6156da74e5fedb2222d5f9d42",
+  "matched_days_ticks_and_coverage": true,
+  "validated_runs": 85,
+  "count_note": "Closed-pair counts are partial-fill lots; they are not whole position cycles. Position limit uses the sum of their BTC sizes.",
+  "at_1_25_bps": [
+    {
+      "day": "2023-12-14",
+      "deviation_bps": 1.25,
+      "previous_net_pnl_usdt": -0.0664073697,
+      "opposite_exit_net_pnl_usdt": 70.6992227114,
+      "change_usdt": 70.7656300811,
+      "previous_fees_usdt": 0.1071807389,
+      "opposite_exit_fees_usdt": 95.5538362768,
+      "previous_entry_volume_btc": 0.01,
+      "opposite_exit_entry_volume_btc": 3.508,
+      "opposite_exit_closed_partial_pairs": 586,
+      "max_position_units": 1.0
+    },
+    {
+      "day": "2024-01-02",
+      "deviation_bps": 1.25,
+      "previous_net_pnl_usdt": 0.5050166123,
+      "opposite_exit_net_pnl_usdt": 0.7655321088,
+      "change_usdt": 0.26051549650000005,
+      "previous_fees_usdt": 0.1104675674,
+      "opposite_exit_fees_usdt": 0.4062126188,
+      "previous_entry_volume_btc": 0.01,
+      "opposite_exit_entry_volume_btc": 0.02,
+      "opposite_exit_closed_partial_pairs": 1,
+      "max_position_units": 1.0
+    },
+    {
+      "day": "2024-02-12",
+      "deviation_bps": 1.25,
+      "previous_net_pnl_usdt": -0.2481429951,
+      "opposite_exit_net_pnl_usdt": -0.6664081626,
+      "change_usdt": -0.4182651675,
+      "previous_fees_usdt": 0.1215964495,
+      "opposite_exit_fees_usdt": 5.7299258663,
+      "previous_entry_volume_btc": 0.01,
+      "opposite_exit_entry_volume_btc": 0.187,
+      "opposite_exit_closed_partial_pairs": 30,
+      "max_position_units": 1.0
+    },
+    {
+      "day": "2024-02-13",
+      "deviation_bps": 1.25,
+      "previous_net_pnl_usdt": 0.2436592661,
+      "opposite_exit_net_pnl_usdt": -2.8888335239,
+      "change_usdt": -3.1324927899999997,
+      "previous_fees_usdt": 0.1248113397,
+      "opposite_exit_fees_usdt": 15.8187196473,
+      "previous_entry_volume_btc": 0.01,
+      "opposite_exit_entry_volume_btc": 0.506,
+      "opposite_exit_closed_partial_pairs": 78,
+      "max_position_units": 1.0
+    },
+    {
+      "day": "2024-02-27",
+      "deviation_bps": 1.25,
+      "previous_net_pnl_usdt": 0.3244307385,
+      "opposite_exit_net_pnl_usdt": 0.8870022704,
+      "change_usdt": 0.5625715319,
+      "previous_fees_usdt": 0.1225928319,
+      "opposite_exit_fees_usdt": 1.1923765716,
+      "previous_entry_volume_btc": 0.009,
+      "opposite_exit_entry_volume_btc": 0.038,
+      "opposite_exit_closed_partial_pairs": 6,
+      "max_position_units": 1.0
+    }
+  ],
+  "total_previous_net_pnl_usdt": 0.7585562520999999,
+  "total_opposite_exit_net_pnl_usdt": 68.79651540409999
+}

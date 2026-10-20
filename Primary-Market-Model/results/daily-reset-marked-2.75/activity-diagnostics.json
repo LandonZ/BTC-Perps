@@ -1,0 +1,2476 @@
+[
+  {
+    "date": "2023-12-01",
+    "pnl": -0.2356868373,
+    "trades": 14,
+    "signal_episodes": 5429,
+    "closed": 14,
+    "hold_ms_median": 5728560.0,
+    "hold_ms_p90": 11850587.700000001,
+    "under_100ms": 0,
+    "under_1s": 1,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9940159143518519,
+    "median_flat_ms": 72.0,
+    "max_hour": [
+      [
+        17,
+        3
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        12,
+        2
+      ]
+    ],
+    "net_under_1s": -0.007090644899999908
+  },
+  {
+    "date": "2023-12-02",
+    "pnl": 1.5391268079,
+    "trades": 20,
+    "signal_episodes": 2074,
+    "closed": 19,
+    "hold_ms_median": 1753235.0,
+    "hold_ms_p90": 5311521.8,
+    "under_100ms": 0,
+    "under_1s": 2,
+    "under_10s": 3,
+    "zero_duration": 0,
+    "occupied_fraction": 0.6047643055555556,
+    "median_flat_ms": 210.0,
+    "max_hour": [
+      [
+        19,
+        9
+      ],
+      [
+        18,
+        2
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0.3263751780999297
+  },
+  {
+    "date": "2023-12-03",
+    "pnl": -0.2625404757,
+    "trades": 7,
+    "signal_episodes": 2753,
+    "closed": 6,
+    "hold_ms_median": 6504646.0,
+    "hold_ms_p90": 34043356.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9989018634259259,
+    "median_flat_ms": 266.0,
+    "max_hour": [
+      [
+        22,
+        2
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        14,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-04",
+    "pnl": -0.7402103583,
+    "trades": 39,
+    "signal_episodes": 892,
+    "closed": 38,
+    "hold_ms_median": 11792.0,
+    "hold_ms_p90": 3864805.400000011,
+    "under_100ms": 2,
+    "under_1s": 7,
+    "under_10s": 18,
+    "zero_duration": 0,
+    "occupied_fraction": 0.99895,
+    "median_flat_ms": 134.0,
+    "max_hour": [
+      [
+        15,
+        13
+      ],
+      [
+        11,
+        10
+      ],
+      [
+        12,
+        8
+      ]
+    ],
+    "net_under_1s": -0.10760581460008078
+  },
+  {
+    "date": "2023-12-05",
+    "pnl": 0.3541592996,
+    "trades": 10,
+    "signal_episodes": 1004,
+    "closed": 9,
+    "hold_ms_median": 3215780.0,
+    "hold_ms_p90": 23328045.600000005,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999918287037037,
+    "median_flat_ms": 36.0,
+    "max_hour": [
+      [
+        15,
+        3
+      ],
+      [
+        14,
+        2
+      ],
+      [
+        17,
+        2
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-06",
+    "pnl": -0.0653079779,
+    "trades": 7,
+    "signal_episodes": 83,
+    "closed": 6,
+    "hold_ms_median": 11420052.0,
+    "hold_ms_p90": 24963988.5,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999912731481482,
+    "median_flat_ms": 93.0,
+    "max_hour": [
+      [
+        0,
+        1
+      ],
+      [
+        8,
+        1
+      ],
+      [
+        9,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-07",
+    "pnl": 0.9217693168,
+    "trades": 9,
+    "signal_episodes": 129,
+    "closed": 8,
+    "hold_ms_median": 3697.5,
+    "hold_ms_p90": 10482048.599999994,
+    "under_100ms": 2,
+    "under_1s": 4,
+    "under_10s": 5,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999916898148148,
+    "median_flat_ms": 24.0,
+    "max_hour": [
+      [
+        9,
+        7
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0.8384034995001006
+  },
+  {
+    "date": "2023-12-08",
+    "pnl": 0.1183454032,
+    "trades": 3,
+    "signal_episodes": 19,
+    "closed": 2,
+    "hold_ms_median": 13309670.0,
+    "hold_ms_p90": 23956393.2,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 1,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999635416666667,
+    "median_flat_ms": 51.0,
+    "max_hour": [
+      [
+        0,
+        1
+      ],
+      [
+        7,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-09",
+    "pnl": 0.8898954801,
+    "trades": 5,
+    "signal_episodes": 62,
+    "closed": 4,
+    "hold_ms_median": 419.0,
+    "hold_ms_p90": 59358541.30000001,
+    "under_100ms": 1,
+    "under_1s": 3,
+    "under_10s": 3,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999593981481482,
+    "median_flat_ms": 136.0,
+    "max_hour": [
+      [
+        23,
+        3
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0.5168428549999649
+  },
+  {
+    "date": "2023-12-10",
+    "pnl": 0.0989322776,
+    "trades": 2,
+    "signal_episodes": 7,
+    "closed": 1,
+    "hold_ms_median": 83894807.0,
+    "hold_ms_p90": 83894807.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999599537037037,
+    "median_flat_ms": null,
+    "max_hour": [
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-11",
+    "pnl": 146.8755059241,
+    "trades": 403,
+    "signal_episodes": 3945,
+    "closed": 402,
+    "hold_ms_median": 46.0,
+    "hold_ms_p90": 1496.4000000000005,
+    "under_100ms": 249,
+    "under_1s": 350,
+    "under_10s": 382,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9997073611111111,
+    "median_flat_ms": 33.0,
+    "max_hour": [
+      [
+        2,
+        385
+      ],
+      [
+        1,
+        7
+      ],
+      [
+        11,
+        5
+      ]
+    ],
+    "net_under_1s": 128.84756301120038
+  },
+  {
+    "date": "2023-12-12",
+    "pnl": 0.4241293604,
+    "trades": 4,
+    "signal_episodes": 33,
+    "closed": 3,
+    "hold_ms_median": 21394074.0,
+    "hold_ms_p90": 29666474.8,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999685185185185,
+    "median_flat_ms": 21.0,
+    "max_hour": [
+      [
+        0,
+        1
+      ],
+      [
+        8,
+        1
+      ],
+      [
+        14,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-13",
+    "pnl": 0.933548496,
+    "trades": 9,
+    "signal_episodes": 85,
+    "closed": 8,
+    "hold_ms_median": 296306.5,
+    "hold_ms_p90": 27197620.59999999,
+    "under_100ms": 3,
+    "under_1s": 4,
+    "under_10s": 4,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9975760532407407,
+    "median_flat_ms": 59.0,
+    "max_hour": [
+      [
+        2,
+        3
+      ],
+      [
+        21,
+        2
+      ],
+      [
+        22,
+        2
+      ]
+    ],
+    "net_under_1s": 0.638842493099999
+  },
+  {
+    "date": "2023-12-14",
+    "pnl": 81.4067350057,
+    "trades": 295,
+    "signal_episodes": 2451,
+    "closed": 294,
+    "hold_ms_median": 45.0,
+    "hold_ms_p90": 1648.9999999999977,
+    "under_100ms": 191,
+    "under_1s": 259,
+    "under_10s": 278,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9997828356481482,
+    "median_flat_ms": 35.0,
+    "max_hour": [
+      [
+        13,
+        281
+      ],
+      [
+        17,
+        8
+      ],
+      [
+        20,
+        2
+      ]
+    ],
+    "net_under_1s": 80.62405178669968
+  },
+  {
+    "date": "2023-12-15",
+    "pnl": 1.8989886692,
+    "trades": 10,
+    "signal_episodes": 64,
+    "closed": 9,
+    "hold_ms_median": 172.0,
+    "hold_ms_p90": 2357115.800000002,
+    "under_100ms": 4,
+    "under_1s": 7,
+    "under_10s": 8,
+    "zero_duration": 0,
+    "occupied_fraction": 0.999958287037037,
+    "median_flat_ms": 16.0,
+    "max_hour": [
+      [
+        3,
+        8
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 1.5094903753000912
+  },
+  {
+    "date": "2023-12-16",
+    "pnl": 0.5536010592,
+    "trades": 3,
+    "signal_episodes": 29,
+    "closed": 2,
+    "hold_ms_median": 1324897.5,
+    "hold_ms_p90": 2149461.1,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999642939814815,
+    "median_flat_ms": 53.0,
+    "max_hour": [
+      [
+        0,
+        2
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-17",
+    "pnl": 0.2398203553,
+    "trades": 11,
+    "signal_episodes": 68,
+    "closed": 10,
+    "hold_ms_median": 25.0,
+    "hold_ms_p90": 34273639.599999994,
+    "under_100ms": 6,
+    "under_1s": 7,
+    "under_10s": 7,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999490162037037,
+    "median_flat_ms": 33.0,
+    "max_hour": [
+      [
+        14,
+        5
+      ],
+      [
+        23,
+        4
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": -0.09789732829982914
+  },
+  {
+    "date": "2023-12-18",
+    "pnl": 0.2839311707,
+    "trades": 7,
+    "signal_episodes": 77,
+    "closed": 6,
+    "hold_ms_median": 887.0,
+    "hold_ms_p90": 18791077.0,
+    "under_100ms": 2,
+    "under_1s": 3,
+    "under_10s": 4,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999851388888888,
+    "median_flat_ms": 51.0,
+    "max_hour": [
+      [
+        10,
+        3
+      ],
+      [
+        9,
+        2
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": -0.07506523930003298
+  },
+  {
+    "date": "2023-12-19",
+    "pnl": 0.1631150632,
+    "trades": 6,
+    "signal_episodes": 37,
+    "closed": 5,
+    "hold_ms_median": 612163.0,
+    "hold_ms_p90": 34929734.0,
+    "under_100ms": 1,
+    "under_1s": 2,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999960185185185,
+    "median_flat_ms": 72.5,
+    "max_hour": [
+      [
+        0,
+        2
+      ],
+      [
+        14,
+        2
+      ],
+      [
+        17,
+        1
+      ]
+    ],
+    "net_under_1s": -0.016110310300012226
+  },
+  {
+    "date": "2023-12-20",
+    "pnl": 1.4027753012,
+    "trades": 8,
+    "signal_episodes": 59,
+    "closed": 7,
+    "hold_ms_median": 1490459.0,
+    "hold_ms_p90": 22359031.000000007,
+    "under_100ms": 0,
+    "under_1s": 1,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999612268518518,
+    "median_flat_ms": 66.0,
+    "max_hour": [
+      [
+        4,
+        2
+      ],
+      [
+        13,
+        2
+      ],
+      [
+        14,
+        2
+      ]
+    ],
+    "net_under_1s": -0.0018416738000320843
+  },
+  {
+    "date": "2023-12-21",
+    "pnl": 0.1684566215,
+    "trades": 1,
+    "signal_episodes": 3,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999657523148148,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-22",
+    "pnl": 0.1201370892,
+    "trades": 1,
+    "signal_episodes": 2,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999989699074074,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-23",
+    "pnl": 0.0395289577,
+    "trades": 1,
+    "signal_episodes": 5,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999648611111112,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-24",
+    "pnl": 12.2940468462,
+    "trades": 106,
+    "signal_episodes": 924,
+    "closed": 105,
+    "hold_ms_median": 48.0,
+    "hold_ms_p90": 2336.2000000000025,
+    "under_100ms": 59,
+    "under_1s": 87,
+    "under_10s": 100,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9998893055555556,
+    "median_flat_ms": 37.0,
+    "max_hour": [
+      [
+        22,
+        104
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 10.199399370000837
+  },
+  {
+    "date": "2023-12-25",
+    "pnl": -0.1054527915,
+    "trades": 1,
+    "signal_episodes": 1,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999635879629629,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-26",
+    "pnl": 12.2763324021,
+    "trades": 77,
+    "signal_episodes": 618,
+    "closed": 76,
+    "hold_ms_median": 93.0,
+    "hold_ms_p90": 97608.0,
+    "under_100ms": 41,
+    "under_1s": 60,
+    "under_10s": 67,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9998921990740741,
+    "median_flat_ms": 36.0,
+    "max_hour": [
+      [
+        9,
+        38
+      ],
+      [
+        17,
+        29
+      ],
+      [
+        5,
+        7
+      ]
+    ],
+    "net_under_1s": 11.176210718499648
+  },
+  {
+    "date": "2023-12-27",
+    "pnl": 0.337013955,
+    "trades": 2,
+    "signal_episodes": 7,
+    "closed": 1,
+    "hold_ms_median": 53238245.0,
+    "hold_ms_p90": 53238245.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999993865740741,
+    "median_flat_ms": null,
+    "max_hour": [
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-28",
+    "pnl": 0.2331069073,
+    "trades": 2,
+    "signal_episodes": 16,
+    "closed": 1,
+    "hold_ms_median": 58211408.0,
+    "hold_ms_p90": 58211408.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999626736111111,
+    "median_flat_ms": null,
+    "max_hour": [
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-29",
+    "pnl": 2.8777561355,
+    "trades": 30,
+    "signal_episodes": 380,
+    "closed": 29,
+    "hold_ms_median": 361.0,
+    "hold_ms_p90": 821398.1999999974,
+    "under_100ms": 12,
+    "under_1s": 20,
+    "under_10s": 25,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999138425925926,
+    "median_flat_ms": 45.5,
+    "max_hour": [
+      [
+        22,
+        21
+      ],
+      [
+        16,
+        6
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 1.5584921789002064
+  },
+  {
+    "date": "2023-12-30",
+    "pnl": 0.1363235356,
+    "trades": 1,
+    "signal_episodes": 7,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999627199074074,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2023-12-31",
+    "pnl": 0.1999670983,
+    "trades": 1,
+    "signal_episodes": 2,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999615972222222,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-01",
+    "pnl": -0.070096359,
+    "trades": 1,
+    "signal_episodes": 1,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999632523148149,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-02",
+    "pnl": 0.7655321088,
+    "trades": 2,
+    "signal_episodes": 16,
+    "closed": 1,
+    "hold_ms_median": 48026925.0,
+    "hold_ms_p90": 48026925.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999717824074074,
+    "median_flat_ms": null,
+    "max_hour": [
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-03",
+    "pnl": 150.6311790007,
+    "trades": 575,
+    "signal_episodes": 4479,
+    "closed": 574,
+    "hold_ms_median": 36.0,
+    "hold_ms_p90": 1880.4000000000037,
+    "under_100ms": 390,
+    "under_1s": 506,
+    "under_10s": 539,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9893754282407408,
+    "median_flat_ms": 34.0,
+    "max_hour": [
+      [
+        12,
+        451
+      ],
+      [
+        18,
+        51
+      ],
+      [
+        11,
+        39
+      ]
+    ],
+    "net_under_1s": 140.56921991799993
+  },
+  {
+    "date": "2024-01-04",
+    "pnl": 12.9279030446,
+    "trades": 39,
+    "signal_episodes": 1567,
+    "closed": 38,
+    "hold_ms_median": 65.5,
+    "hold_ms_p90": 4096661.6000000136,
+    "under_100ms": 20,
+    "under_1s": 26,
+    "under_10s": 28,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999502430555556,
+    "median_flat_ms": 25.0,
+    "max_hour": [
+      [
+        21,
+        16
+      ],
+      [
+        7,
+        9
+      ],
+      [
+        20,
+        7
+      ]
+    ],
+    "net_under_1s": 9.76745309009991
+  },
+  {
+    "date": "2024-01-05",
+    "pnl": 106.6094837834,
+    "trades": 358,
+    "signal_episodes": 13931,
+    "closed": 357,
+    "hold_ms_median": 65.0,
+    "hold_ms_p90": 7588.80000000001,
+    "under_100ms": 213,
+    "under_1s": 291,
+    "under_10s": 324,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9996615740740741,
+    "median_flat_ms": 38.5,
+    "max_hour": [
+      [
+        1,
+        196
+      ],
+      [
+        14,
+        67
+      ],
+      [
+        2,
+        40
+      ]
+    ],
+    "net_under_1s": 97.79705479410006
+  },
+  {
+    "date": "2024-01-06",
+    "pnl": 0.4547228944,
+    "trades": 8,
+    "signal_episodes": 1871,
+    "closed": 7,
+    "hold_ms_median": 242.0,
+    "hold_ms_p90": 32029665.60000001,
+    "under_100ms": 1,
+    "under_1s": 4,
+    "under_10s": 4,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999449421296296,
+    "median_flat_ms": 169.0,
+    "max_hour": [
+      [
+        20,
+        4
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        6,
+        1
+      ]
+    ],
+    "net_under_1s": 0.09911217659996596
+  },
+  {
+    "date": "2024-01-07",
+    "pnl": -0.5627752607,
+    "trades": 28,
+    "signal_episodes": 5431,
+    "closed": 27,
+    "hold_ms_median": 217503.0,
+    "hold_ms_p90": 7612118.6000000015,
+    "under_100ms": 4,
+    "under_1s": 6,
+    "under_10s": 8,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9833536226851852,
+    "median_flat_ms": 228.5,
+    "max_hour": [
+      [
+        17,
+        5
+      ],
+      [
+        23,
+        5
+      ],
+      [
+        15,
+        4
+      ]
+    ],
+    "net_under_1s": 0.2797205996000913
+  },
+  {
+    "date": "2024-01-08",
+    "pnl": 11.4334300845,
+    "trades": 80,
+    "signal_episodes": 7792,
+    "closed": 79,
+    "hold_ms_median": 206.0,
+    "hold_ms_p90": 1081610.6000000024,
+    "under_100ms": 32,
+    "under_1s": 51,
+    "under_10s": 56,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9938589236111111,
+    "median_flat_ms": 50.5,
+    "max_hour": [
+      [
+        12,
+        35
+      ],
+      [
+        15,
+        18
+      ],
+      [
+        2,
+        10
+      ]
+    ],
+    "net_under_1s": 10.217637467000033
+  },
+  {
+    "date": "2024-01-09",
+    "pnl": 219.7216933892,
+    "trades": 788,
+    "signal_episodes": 7211,
+    "closed": 787,
+    "hold_ms_median": 45.0,
+    "hold_ms_p90": 1851.9999999999998,
+    "under_100ms": 496,
+    "under_1s": 693,
+    "under_10s": 745,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9994708680555555,
+    "median_flat_ms": 33.0,
+    "max_hour": [
+      [
+        21,
+        627
+      ],
+      [
+        12,
+        122
+      ],
+      [
+        15,
+        25
+      ]
+    ],
+    "net_under_1s": 203.38635972700058
+  },
+  {
+    "date": "2024-01-10",
+    "pnl": 169.5641549926,
+    "trades": 816,
+    "signal_episodes": 9426,
+    "closed": 815,
+    "hold_ms_median": 73.0,
+    "hold_ms_p90": 12953.400000000007,
+    "under_100ms": 449,
+    "under_1s": 678,
+    "under_10s": 730,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9993511689814815,
+    "median_flat_ms": 41.0,
+    "max_hour": [
+      [
+        20,
+        600
+      ],
+      [
+        12,
+        49
+      ],
+      [
+        21,
+        48
+      ]
+    ],
+    "net_under_1s": 146.75710078320023
+  },
+  {
+    "date": "2024-01-11",
+    "pnl": 14.7668196738,
+    "trades": 98,
+    "signal_episodes": 3485,
+    "closed": 97,
+    "hold_ms_median": 296.0,
+    "hold_ms_p90": 712700.4000000013,
+    "under_100ms": 42,
+    "under_1s": 52,
+    "under_10s": 61,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9998848726851852,
+    "median_flat_ms": 40.5,
+    "max_hour": [
+      [
+        3,
+        29
+      ],
+      [
+        14,
+        20
+      ],
+      [
+        13,
+        17
+      ]
+    ],
+    "net_under_1s": 6.227425962499921
+  },
+  {
+    "date": "2024-01-12",
+    "pnl": 18.1095723432,
+    "trades": 246,
+    "signal_episodes": 3382,
+    "closed": 245,
+    "hold_ms_median": 95.0,
+    "hold_ms_p90": 5470.399999999997,
+    "under_100ms": 124,
+    "under_1s": 201,
+    "under_10s": 226,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9997330902777778,
+    "median_flat_ms": 39.0,
+    "max_hour": [
+      [
+        22,
+        224
+      ],
+      [
+        16,
+        8
+      ],
+      [
+        0,
+        4
+      ]
+    ],
+    "net_under_1s": 14.15285736120053
+  },
+  {
+    "date": "2024-01-13",
+    "pnl": 0.5140298574,
+    "trades": 11,
+    "signal_episodes": 267,
+    "closed": 10,
+    "hold_ms_median": 42673.5,
+    "hold_ms_p90": 15468514.899999987,
+    "under_100ms": 2,
+    "under_1s": 3,
+    "under_10s": 3,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999926620370371,
+    "median_flat_ms": 40.0,
+    "max_hour": [
+      [
+        16,
+        6
+      ],
+      [
+        13,
+        2
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": -0.10613367370007326
+  },
+  {
+    "date": "2024-01-14",
+    "pnl": 3.2906446197,
+    "trades": 53,
+    "signal_episodes": 675,
+    "closed": 52,
+    "hold_ms_median": 126.5,
+    "hold_ms_p90": 206837.9999999998,
+    "under_100ms": 23,
+    "under_1s": 39,
+    "under_10s": 43,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999062962962963,
+    "median_flat_ms": 52.0,
+    "max_hour": [
+      [
+        20,
+        36
+      ],
+      [
+        21,
+        10
+      ],
+      [
+        23,
+        5
+      ]
+    ],
+    "net_under_1s": 3.2166933699998697
+  },
+  {
+    "date": "2024-01-15",
+    "pnl": 1.4197038217,
+    "trades": 29,
+    "signal_episodes": 758,
+    "closed": 28,
+    "hold_ms_median": 485.5,
+    "hold_ms_p90": 4420248.800000008,
+    "under_100ms": 8,
+    "under_1s": 15,
+    "under_10s": 16,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9989490625,
+    "median_flat_ms": 70.0,
+    "max_hour": [
+      [
+        14,
+        17
+      ],
+      [
+        18,
+        7
+      ],
+      [
+        15,
+        2
+      ]
+    ],
+    "net_under_1s": 1.7313035486000332
+  },
+  {
+    "date": "2024-01-16",
+    "pnl": 0.1289531593,
+    "trades": 14,
+    "signal_episodes": 2079,
+    "closed": 13,
+    "hold_ms_median": 275224.0,
+    "hold_ms_p90": 9887487.800000003,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 1,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999098148148148,
+    "median_flat_ms": 212.0,
+    "max_hour": [
+      [
+        14,
+        6
+      ],
+      [
+        16,
+        3
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-17",
+    "pnl": 0.5284015452,
+    "trades": 15,
+    "signal_episodes": 1266,
+    "closed": 14,
+    "hold_ms_median": 896106.0,
+    "hold_ms_p90": 18217007.6,
+    "under_100ms": 0,
+    "under_1s": 6,
+    "under_10s": 6,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999482523148148,
+    "median_flat_ms": 75.0,
+    "max_hour": [
+      [
+        12,
+        7
+      ],
+      [
+        14,
+        3
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0.2700970167999003
+  },
+  {
+    "date": "2024-01-18",
+    "pnl": 0.2260243275,
+    "trades": 79,
+    "signal_episodes": 3425,
+    "closed": 78,
+    "hold_ms_median": 1401.0,
+    "hold_ms_p90": 886633.199999999,
+    "under_100ms": 17,
+    "under_1s": 36,
+    "under_10s": 54,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9995289120370371,
+    "median_flat_ms": 75.0,
+    "max_hour": [
+      [
+        19,
+        36
+      ],
+      [
+        16,
+        34
+      ],
+      [
+        17,
+        5
+      ]
+    ],
+    "net_under_1s": 1.016997369499879
+  },
+  {
+    "date": "2024-01-19",
+    "pnl": 1.0513537952,
+    "trades": 13,
+    "signal_episodes": 2907,
+    "closed": 12,
+    "hold_ms_median": 1438402.0,
+    "hold_ms_p90": 12371833.100000001,
+    "under_100ms": 3,
+    "under_1s": 4,
+    "under_10s": 5,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999732060185185,
+    "median_flat_ms": 72.0,
+    "max_hour": [
+      [
+        17,
+        4
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        15,
+        2
+      ]
+    ],
+    "net_under_1s": 0.539487479599934
+  },
+  {
+    "date": "2024-01-20",
+    "pnl": 0.182699298,
+    "trades": 5,
+    "signal_episodes": 337,
+    "closed": 4,
+    "hold_ms_median": 757966.5,
+    "hold_ms_p90": 22094649.400000006,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999933680555556,
+    "median_flat_ms": 56.0,
+    "max_hour": [
+      [
+        8,
+        2
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        9,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-21",
+    "pnl": 0.0557992372,
+    "trades": 2,
+    "signal_episodes": 540,
+    "closed": 1,
+    "hold_ms_median": 12684368.0,
+    "hold_ms_p90": 12684368.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999988078703703,
+    "median_flat_ms": null,
+    "max_hour": [
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-22",
+    "pnl": 5.301270561,
+    "trades": 136,
+    "signal_episodes": 9357,
+    "closed": 135,
+    "hold_ms_median": 570.0,
+    "hold_ms_p90": 1362864.8000000024,
+    "under_100ms": 32,
+    "under_1s": 73,
+    "under_10s": 104,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9988939467592592,
+    "median_flat_ms": 96.0,
+    "max_hour": [
+      [
+        19,
+        75
+      ],
+      [
+        18,
+        25
+      ],
+      [
+        9,
+        8
+      ]
+    ],
+    "net_under_1s": 4.911629879199628
+  },
+  {
+    "date": "2024-01-23",
+    "pnl": -0.143566569,
+    "trades": 10,
+    "signal_episodes": 4769,
+    "closed": 9,
+    "hold_ms_median": 2815410.0,
+    "hold_ms_p90": 20241902.200000003,
+    "under_100ms": 1,
+    "under_1s": 1,
+    "under_10s": 3,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999431712962963,
+    "median_flat_ms": 118.5,
+    "max_hour": [
+      [
+        8,
+        3
+      ],
+      [
+        9,
+        2
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": -0.006316259799980226
+  },
+  {
+    "date": "2024-01-24",
+    "pnl": 0.0530892511,
+    "trades": 10,
+    "signal_episodes": 10436,
+    "closed": 9,
+    "hold_ms_median": 4874191.0,
+    "hold_ms_p90": 17541520.000000007,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9958634143518519,
+    "median_flat_ms": 4266.0,
+    "max_hour": [
+      [
+        1,
+        5
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        14,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-25",
+    "pnl": -0.5574383023,
+    "trades": 10,
+    "signal_episodes": 8027,
+    "closed": 9,
+    "hold_ms_median": 695058.0,
+    "hold_ms_p90": 16334181.400000006,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9970749768518519,
+    "median_flat_ms": 4818.5,
+    "max_hour": [
+      [
+        14,
+        3
+      ],
+      [
+        13,
+        2
+      ],
+      [
+        18,
+        2
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-26",
+    "pnl": -2.9450859863,
+    "trades": 75,
+    "signal_episodes": 5157,
+    "closed": 75,
+    "hold_ms_median": 130328.0,
+    "hold_ms_p90": 2169591.0000000005,
+    "under_100ms": 6,
+    "under_1s": 15,
+    "under_10s": 23,
+    "zero_duration": 0,
+    "occupied_fraction": 0.8044854861111111,
+    "median_flat_ms": 42222.5,
+    "max_hour": [
+      [
+        11,
+        14
+      ],
+      [
+        16,
+        10
+      ],
+      [
+        10,
+        9
+      ]
+    ],
+    "net_under_1s": 0.10441421139990369
+  },
+  {
+    "date": "2024-01-27",
+    "pnl": -0.3312570505,
+    "trades": 7,
+    "signal_episodes": 1631,
+    "closed": 7,
+    "hold_ms_median": 4219938.0,
+    "hold_ms_p90": 30442629.400000002,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.8566544907407407,
+    "median_flat_ms": 849227.0,
+    "max_hour": [
+      [
+        8,
+        2
+      ],
+      [
+        23,
+        2
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-01-28",
+    "pnl": -0.2872722751,
+    "trades": 29,
+    "signal_episodes": 2674,
+    "closed": 28,
+    "hold_ms_median": 510950.0,
+    "hold_ms_p90": 6063095.500000001,
+    "under_100ms": 0,
+    "under_1s": 4,
+    "under_10s": 7,
+    "zero_duration": 0,
+    "occupied_fraction": 0.727140300925926,
+    "median_flat_ms": 528940.0,
+    "max_hour": [
+      [
+        4,
+        7
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        1,
+        3
+      ]
+    ],
+    "net_under_1s": 0.24268632589998063
+  },
+  {
+    "date": "2024-01-29",
+    "pnl": -1.5930548341,
+    "trades": 33,
+    "signal_episodes": 3537,
+    "closed": 32,
+    "hold_ms_median": 977561.5,
+    "hold_ms_p90": 5564972.3,
+    "under_100ms": 1,
+    "under_1s": 4,
+    "under_10s": 4,
+    "zero_duration": 0,
+    "occupied_fraction": 0.7434740972222222,
+    "median_flat_ms": 58515.0,
+    "max_hour": [
+      [
+        16,
+        7
+      ],
+      [
+        23,
+        4
+      ],
+      [
+        13,
+        3
+      ]
+    ],
+    "net_under_1s": -0.041972840300076725
+  },
+  {
+    "date": "2024-01-30",
+    "pnl": -0.979106083,
+    "trades": 41,
+    "signal_episodes": 2006,
+    "closed": 41,
+    "hold_ms_median": 117233.0,
+    "hold_ms_p90": 3800754.0,
+    "under_100ms": 3,
+    "under_1s": 6,
+    "under_10s": 9,
+    "zero_duration": 0,
+    "occupied_fraction": 0.5949919328703703,
+    "median_flat_ms": 37833.0,
+    "max_hour": [
+      [
+        12,
+        12
+      ],
+      [
+        23,
+        7
+      ],
+      [
+        1,
+        4
+      ]
+    ],
+    "net_under_1s": 0.06680348980010845
+  },
+  {
+    "date": "2024-01-31",
+    "pnl": -2.3886668909,
+    "trades": 46,
+    "signal_episodes": 8078,
+    "closed": 45,
+    "hold_ms_median": 211886.0,
+    "hold_ms_p90": 5589828.200000001,
+    "under_100ms": 4,
+    "under_1s": 7,
+    "under_10s": 14,
+    "zero_duration": 0,
+    "occupied_fraction": 0.8831740162037037,
+    "median_flat_ms": 11458.0,
+    "max_hour": [
+      [
+        20,
+        17
+      ],
+      [
+        21,
+        6
+      ],
+      [
+        15,
+        4
+      ]
+    ],
+    "net_under_1s": -0.0820569113998481
+  },
+  {
+    "date": "2024-02-01",
+    "pnl": -0.987947073,
+    "trades": 36,
+    "signal_episodes": 5549,
+    "closed": 35,
+    "hold_ms_median": 614264.0,
+    "hold_ms_p90": 3657257.000000001,
+    "under_100ms": 0,
+    "under_1s": 1,
+    "under_10s": 3,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9260133449074074,
+    "median_flat_ms": 33534.0,
+    "max_hour": [
+      [
+        15,
+        7
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        16,
+        4
+      ]
+    ],
+    "net_under_1s": -0.04231304670000857
+  },
+  {
+    "date": "2024-02-02",
+    "pnl": -1.0557618789,
+    "trades": 28,
+    "signal_episodes": 2402,
+    "closed": 27,
+    "hold_ms_median": 70602.0,
+    "hold_ms_p90": 6283462.600000007,
+    "under_100ms": 0,
+    "under_1s": 4,
+    "under_10s": 10,
+    "zero_duration": 0,
+    "occupied_fraction": 0.6602549537037037,
+    "median_flat_ms": 69904.0,
+    "max_hour": [
+      [
+        13,
+        10
+      ],
+      [
+        15,
+        2
+      ],
+      [
+        18,
+        2
+      ]
+    ],
+    "net_under_1s": -0.049360636100062194
+  },
+  {
+    "date": "2024-02-03",
+    "pnl": -0.2008899995,
+    "trades": 9,
+    "signal_episodes": 464,
+    "closed": 9,
+    "hold_ms_median": 8699691.0,
+    "hold_ms_p90": 17960207.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.8990735069444444,
+    "median_flat_ms": 523624.5,
+    "max_hour": [
+      [
+        0,
+        2
+      ],
+      [
+        15,
+        2
+      ],
+      [
+        18,
+        2
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-04",
+    "pnl": 0.3073280253,
+    "trades": 27,
+    "signal_episodes": 1089,
+    "closed": 27,
+    "hold_ms_median": 3003.0,
+    "hold_ms_p90": 8084741.400000005,
+    "under_100ms": 5,
+    "under_1s": 11,
+    "under_10s": 14,
+    "zero_duration": 0,
+    "occupied_fraction": 0.8008878587962963,
+    "median_flat_ms": 207.5,
+    "max_hour": [
+      [
+        22,
+        13
+      ],
+      [
+        19,
+        4
+      ],
+      [
+        0,
+        2
+      ]
+    ],
+    "net_under_1s": 0.45961315580009626
+  },
+  {
+    "date": "2024-02-05",
+    "pnl": -1.2905246759,
+    "trades": 22,
+    "signal_episodes": 5574,
+    "closed": 21,
+    "hold_ms_median": 1737156.0,
+    "hold_ms_p90": 9704583.0,
+    "under_100ms": 0,
+    "under_1s": 2,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9477288078703704,
+    "median_flat_ms": 6326.0,
+    "max_hour": [
+      [
+        20,
+        5
+      ],
+      [
+        15,
+        4
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "net_under_1s": 0.1171694264999163
+  },
+  {
+    "date": "2024-02-06",
+    "pnl": -0.1734653589,
+    "trades": 10,
+    "signal_episodes": 2453,
+    "closed": 10,
+    "hold_ms_median": 7626984.5,
+    "hold_ms_p90": 16118938.4,
+    "under_100ms": 0,
+    "under_1s": 1,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.8538318055555556,
+    "median_flat_ms": 30796.0,
+    "max_hour": [
+      [
+        10,
+        2
+      ],
+      [
+        15,
+        2
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": -0.07490309839999834
+  },
+  {
+    "date": "2024-02-07",
+    "pnl": -0.6808492088,
+    "trades": 17,
+    "signal_episodes": 3224,
+    "closed": 16,
+    "hold_ms_median": 1812335.0,
+    "hold_ms_p90": 5704194.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.7402382870370371,
+    "median_flat_ms": 27350.0,
+    "max_hour": [
+      [
+        14,
+        4
+      ],
+      [
+        21,
+        3
+      ],
+      [
+        18,
+        2
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-08",
+    "pnl": -1.0874522025,
+    "trades": 37,
+    "signal_episodes": 1932,
+    "closed": 37,
+    "hold_ms_median": 682445.0,
+    "hold_ms_p90": 4336161.3999999985,
+    "under_100ms": 2,
+    "under_1s": 5,
+    "under_10s": 10,
+    "zero_duration": 0,
+    "occupied_fraction": 0.5773883101851852,
+    "median_flat_ms": 31183.0,
+    "max_hour": [
+      [
+        14,
+        8
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        0,
+        4
+      ]
+    ],
+    "net_under_1s": 0.06873744509993093
+  },
+  {
+    "date": "2024-02-09",
+    "pnl": 0.2628217457,
+    "trades": 130,
+    "signal_episodes": 8815,
+    "closed": 129,
+    "hold_ms_median": 17879.0,
+    "hold_ms_p90": 939224.2000000001,
+    "under_100ms": 28,
+    "under_1s": 52,
+    "under_10s": 62,
+    "zero_duration": 0,
+    "occupied_fraction": 0.5627447800925925,
+    "median_flat_ms": 108.5,
+    "max_hour": [
+      [
+        12,
+        35
+      ],
+      [
+        14,
+        22
+      ],
+      [
+        18,
+        18
+      ]
+    ],
+    "net_under_1s": 3.464934788400397
+  },
+  {
+    "date": "2024-02-10",
+    "pnl": -0.1300874551,
+    "trades": 17,
+    "signal_episodes": 3671,
+    "closed": 16,
+    "hold_ms_median": 2732286.5,
+    "hold_ms_p90": 11697677.0,
+    "under_100ms": 0,
+    "under_1s": 2,
+    "under_10s": 3,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9590626388888889,
+    "median_flat_ms": 959.0,
+    "max_hour": [
+      [
+        5,
+        3
+      ],
+      [
+        19,
+        3
+      ],
+      [
+        11,
+        2
+      ]
+    ],
+    "net_under_1s": -0.032115302200004414
+  },
+  {
+    "date": "2024-02-11",
+    "pnl": -0.9623577567,
+    "trades": 9,
+    "signal_episodes": 5119,
+    "closed": 8,
+    "hold_ms_median": 10745163.5,
+    "hold_ms_p90": 17177290.799999997,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 1,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9998298032407408,
+    "median_flat_ms": 196.0,
+    "max_hour": [
+      [
+        3,
+        3
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        5,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-12",
+    "pnl": 0.8227206152,
+    "trades": 13,
+    "signal_episodes": 887,
+    "closed": 12,
+    "hold_ms_median": 2707008.5,
+    "hold_ms_p90": 18731729.6,
+    "under_100ms": 2,
+    "under_1s": 3,
+    "under_10s": 4,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999801273148148,
+    "median_flat_ms": 55.0,
+    "max_hour": [
+      [
+        6,
+        5
+      ],
+      [
+        15,
+        3
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0.02417813620010334
+  },
+  {
+    "date": "2024-02-13",
+    "pnl": 1.8607451975,
+    "trades": 29,
+    "signal_episodes": 518,
+    "closed": 28,
+    "hold_ms_median": 1501.5,
+    "hold_ms_p90": 3326900.8000000045,
+    "under_100ms": 8,
+    "under_1s": 12,
+    "under_10s": 20,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999754976851852,
+    "median_flat_ms": 36.0,
+    "max_hour": [
+      [
+        14,
+        24
+      ],
+      [
+        15,
+        2
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0.40207885429994694
+  },
+  {
+    "date": "2024-02-14",
+    "pnl": 0.2142096324,
+    "trades": 5,
+    "signal_episodes": 83,
+    "closed": 4,
+    "hold_ms_median": 1761815.0,
+    "hold_ms_p90": 23721494.200000003,
+    "under_100ms": 1,
+    "under_1s": 1,
+    "under_10s": 1,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999966203703704,
+    "median_flat_ms": 20.0,
+    "max_hour": [
+      [
+        9,
+        3
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": -0.028879023300024065
+  },
+  {
+    "date": "2024-02-15",
+    "pnl": 1.0413269777,
+    "trades": 11,
+    "signal_episodes": 115,
+    "closed": 10,
+    "hold_ms_median": 92.5,
+    "hold_ms_p90": 9395529.099999975,
+    "under_100ms": 5,
+    "under_1s": 7,
+    "under_10s": 7,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999607407407407,
+    "median_flat_ms": 24.0,
+    "max_hour": [
+      [
+        19,
+        8
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        20,
+        1
+      ]
+    ],
+    "net_under_1s": 0.6223096715999195
+  },
+  {
+    "date": "2024-02-16",
+    "pnl": -0.1124635629,
+    "trades": 1,
+    "signal_episodes": 7,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999634490740741,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-17",
+    "pnl": 0.3337345602,
+    "trades": 5,
+    "signal_episodes": 52,
+    "closed": 4,
+    "hold_ms_median": 1771121.5,
+    "hold_ms_p90": 35225769.50000001,
+    "under_100ms": 0,
+    "under_1s": 1,
+    "under_10s": 2,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999941898148148,
+    "median_flat_ms": 71.0,
+    "max_hour": [
+      [
+        14,
+        2
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        13,
+        1
+      ]
+    ],
+    "net_under_1s": 0.2145049980999803
+  },
+  {
+    "date": "2024-02-18",
+    "pnl": -0.0005407089,
+    "trades": 1,
+    "signal_episodes": 2,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999996643518518,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-19",
+    "pnl": -0.0001077832,
+    "trades": 1,
+    "signal_episodes": 1,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999996180555556,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-20",
+    "pnl": 2.3891079049,
+    "trades": 6,
+    "signal_episodes": 56,
+    "closed": 5,
+    "hold_ms_median": 1829.0,
+    "hold_ms_p90": 35657077.2,
+    "under_100ms": 2,
+    "under_1s": 2,
+    "under_10s": 3,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999577314814815,
+    "median_flat_ms": 64.5,
+    "max_hour": [
+      [
+        17,
+        3
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        15,
+        1
+      ]
+    ],
+    "net_under_1s": 0.8699987783000063
+  },
+  {
+    "date": "2024-02-21",
+    "pnl": 1.901458145,
+    "trades": 7,
+    "signal_episodes": 111,
+    "closed": 6,
+    "hold_ms_median": 30524.5,
+    "hold_ms_p90": 34220699.0,
+    "under_100ms": 2,
+    "under_1s": 2,
+    "under_10s": 3,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999556944444444,
+    "median_flat_ms": 63.0,
+    "max_hour": [
+      [
+        12,
+        3
+      ],
+      [
+        19,
+        2
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0.21972075750000003
+  },
+  {
+    "date": "2024-02-22",
+    "pnl": 2.7768961515,
+    "trades": 15,
+    "signal_episodes": 87,
+    "closed": 14,
+    "hold_ms_median": 8.5,
+    "hold_ms_p90": 1234.5000000000016,
+    "under_100ms": 11,
+    "under_1s": 12,
+    "under_10s": 13,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999521064814815,
+    "median_flat_ms": 13.0,
+    "max_hour": [
+      [
+        22,
+        13
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 2.832668996000012
+  },
+  {
+    "date": "2024-02-23",
+    "pnl": 0.3792138127,
+    "trades": 2,
+    "signal_episodes": 4,
+    "closed": 1,
+    "hold_ms_median": 2885426.0,
+    "hold_ms_p90": 2885426.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999982291666667,
+    "median_flat_ms": null,
+    "max_hour": [
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-24",
+    "pnl": -0.0502164205,
+    "trades": 1,
+    "signal_episodes": 1,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999605092592593,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-25",
+    "pnl": -0.035541269,
+    "trades": 1,
+    "signal_episodes": 1,
+    "closed": 0,
+    "hold_ms_median": null,
+    "hold_ms_p90": null,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.999950787037037,
+    "median_flat_ms": null,
+    "max_hour": [],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-26",
+    "pnl": 0.5009456292,
+    "trades": 2,
+    "signal_episodes": 4,
+    "closed": 1,
+    "hold_ms_median": 59560274.0,
+    "hold_ms_p90": 59560274.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999951851851852,
+    "median_flat_ms": null,
+    "max_hour": [
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-27",
+    "pnl": 1.0392282672,
+    "trades": 2,
+    "signal_episodes": 13,
+    "closed": 1,
+    "hold_ms_median": 7931808.0,
+    "hold_ms_p90": 7931808.0,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999993981481482,
+    "median_flat_ms": null,
+    "max_hour": [
+      [
+        0,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  },
+  {
+    "date": "2024-02-28",
+    "pnl": 47.9685249486,
+    "trades": 41,
+    "signal_episodes": 143,
+    "closed": 40,
+    "hold_ms_median": 25.0,
+    "hold_ms_p90": 61052.70000000046,
+    "under_100ms": 28,
+    "under_1s": 35,
+    "under_10s": 35,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9701476967592593,
+    "median_flat_ms": 15.0,
+    "max_hour": [
+      [
+        17,
+        37
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        8,
+        1
+      ]
+    ],
+    "net_under_1s": 42.950385595000135
+  },
+  {
+    "date": "2024-02-29",
+    "pnl": 1.4342890738,
+    "trades": 4,
+    "signal_episodes": 14,
+    "closed": 3,
+    "hold_ms_median": 17346362.0,
+    "hold_ms_p90": 42403219.6,
+    "under_100ms": 0,
+    "under_1s": 0,
+    "under_10s": 0,
+    "zero_duration": 0,
+    "occupied_fraction": 0.9999972453703704,
+    "median_flat_ms": 87.5,
+    "max_hour": [
+      [
+        0,
+        1
+      ],
+      [
+        13,
+        1
+      ],
+      [
+        16,
+        1
+      ]
+    ],
+    "net_under_1s": 0
+  }
+]

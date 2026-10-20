@@ -5,7 +5,7 @@ HEADERS = backtester/events.h backtester/basis-maker.h
 ARGS ?=
 MONTH ?= 2024-02
 
-.PHONY: all run backtest basis-maker month test clean
+.PHONY: all run backtest daily-trials event-trials basis-maker month test clean
 all: build/basis-maker
 
 build:
@@ -25,6 +25,12 @@ build/archive-sort: backtester/archive-sort.cpp backtester/archive-format.h back
 
 run backtest: build/archive-replay
 	build/trial-venv/bin/python tools/run_archive_backtest.py $(ARGS)
+
+daily-trials: build/archive-replay
+	build/trial-venv/bin/python tools/run_daily_archive_trials.py $(ARGS)
+
+event-trials: build/archive-replay
+	build/trial-venv/bin/python tools/run_continuous_event_trials.py $(ARGS)
 
 basis-maker: build/basis-maker
 	python3 tools/run_backtest.py $(ARGS)

@@ -28,6 +28,7 @@ int main(int argc,char** argv) {
                     << "  --equilibrium-bps -5 --entry-offset-bps 1.5 --order-btc 0.01 --max-gross-perp-btc 0 (unlimited)\n"
                     << "  --one-order-per-entry-event 0|1 (1: at most one order per fresh threshold crossing)\n"
                     << "  --single-basis-position 0|1 (1: signed position limited to one order-sized trade)\n"
+                    << "  --exit-on-opposite-signal 0|1 (1: opposite entry band closes to flat and consumes the signal)\n"
                     << "  --premium-events FILE (required for pre-funding exits)\n"
                     << "  --exit-on-equilibrium 0 --exit-before-funding 1 --funding-cashflows 1\n"
                     << "  --funding-exit-payers-only 1 --funding-interest-bps 1 --funding-clamp-bps 5\n"
@@ -65,6 +66,10 @@ int main(int argc,char** argv) {
             else if (key == "--single-basis-position") {
                 if (value!="0" && value!="1") throw std::runtime_error("Single basis position mode must be 0 or 1");
                 c.single_basis_position=value=="1";
+            }
+            else if (key == "--exit-on-opposite-signal") {
+                if (value!="0" && value!="1") throw std::runtime_error("Opposite signal exit mode must be 0 or 1");
+                c.exit_on_opposite_signal=value=="1";
             }
             else if (key == "--order-btc") c.order_btc = number(value);
             else if (key == "--max-gross-perp-btc") c.max_gross_perp_btc = number(value);

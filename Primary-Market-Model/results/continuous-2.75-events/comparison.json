@@ -1,0 +1,52 @@
+{
+  "definition": "Continuous 2.75 bp minus daily-reset 2.75 bp",
+  "same_sources_and_dates": true,
+  "differences": {
+    "net_pnl": 32.24969092519996,
+    "price_pnl": 3.107726225300212,
+    "fees": -23.39649034390004,
+    "funding_pnl": 5.745474355799999
+  },
+  "daily_reset": {
+    "net_pnl": 1013.0159669994,
+    "long_net": 434.0450952435,
+    "short_net": 578.9708717559
+  },
+  "continuous": {
+    "net_marked_pnl": 1045.2656579246,
+    "completed_trade_net_pnl": 1046.134254433201,
+    "completed_trades": 5159,
+    "excluded_open_positions": [
+      {
+        "position_id": 5160,
+        "partial_fill_count": 1,
+        "btc": 0.01,
+        "marked_net_pnl": -0.8685965095999234,
+        "funding_pnl": 0.0
+      }
+    ],
+    "t_test": {
+      "statistic": 37.52288102241928,
+      "df": 5158,
+      "p_one_sided": 5.685857432494383e-273,
+      "standard_error": 0.005404129140092491,
+      "ci95_two_sided": [
+        0.19218411022654552,
+        0.2133728792804136
+      ]
+    },
+    "exit_day_cluster": {
+      "clusters": 91,
+      "standard_error": 0.02479397329159048,
+      "p_one_sided": 8.727185287963738e-13,
+      "note": "All calendar exit-day clusters, including zero-event days; t reference with G-1 df."
+    },
+    "exit_day_hac_7": {
+      "days": 91,
+      "standard_error": 0.03223403018132245,
+      "p_one_sided": 1.5789626138886257e-10,
+      "note": "Bartlett weights through seven calendar-day lags on exit-day cluster scores; asymptotic normal reference."
+    }
+  },
+  "note": "Different holding/exit horizons. Daily reset uses charged end-of-day exits. Continuous holds overnight and retains any terminal open position as marked PnL; only completed trades enter its t-test."
+}

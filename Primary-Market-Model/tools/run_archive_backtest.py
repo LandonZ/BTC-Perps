@@ -49,14 +49,18 @@ def continuous_statistics(directory, summary):
         increment['one_order_per_entry_event']=summary.get('one_order_per_entry_event',False)
         increment['order_btc']=summary.get('order_btc',.01)
         increment['single_basis_position']=summary.get('single_basis_position',False)
+        increment['exit_on_opposite_signal']=summary.get('exit_on_opposite_signal',False)
         trials.append(dict(date=datetime.fromtimestamp(day*86400,timezone.utc).strftime('%Y-%m-%d'),summary=increment))
     if not math.isclose(sum(t['summary']['net_pnl'] for t in trials),summary['net_pnl'],abs_tol=1e-6):
         raise ValueError('Daily equity changes do not reconcile')
-    return dict(continuous_inventory=True,
+    return dict(continuous_inventory=True,primary_inference='hac_7',
+        methods=dict(primary='One-sided mean test with Bartlett/Newey-West HAC standard error at 7 daily lags; asymptotic normal reference and 95% two-sided interval',
+                     robustness='HAC at 3 daily lags; centered circular block bootstrap with 3- and 7-day blocks, 20,000 resamples',
+                     descriptive_only='Ordinary one-sample t-test retained for comparison; its independence assumption is not established'),
         trial_definition='UTC daily changes in total marked equity from one continuous run; inventory carries across days and months',
         hypothesis='H0: mean daily marked equity change <= 0; H1: mean > 0',
         interpretation='Hypothesis tested on previously inspected history; dependent daily USD PnL, not fixed-capital returns or proof of live profitability',
-        sample_note='Hypothesis tested on previously inspected history. Carried inventory makes daily PnL dependent; tests are in-sample diagnostics.',
+        sample_note='Hypothesis tested on previously inspected history. Carried inventory can induce daily dependence; these are in-sample diagnostics, with 7-lag HAC selected before inspecting the new results.',
         limitations=['Queue, impact, depth, borrowing costs, margin and liquidation omitted.'+
                      (' Position limited to one signed trade.' if summary.get('single_basis_position') else ' Unlimited inventory.'),
                      'Spot last-trade midpoint proxy and assumed 1 bp full spread; zero latency.',
@@ -66,7 +70,7 @@ def continuous_statistics(directory, summary):
         price_only_statistics=analyze([t['summary']['price_pnl']-t['summary']['fees'] for t in trials]),trials=trials)
 
 
-def verify_funding(directory, manifests):
+def verify_funding(directory, manifests, start_ms=None, end_ms=None):
     """Independently reconcile each payment using held BTC and the source rate.
 
     Exact pre/post-settlement marks retain inventory after any exits that occur
@@ -78,7 +82,10 @@ def verify_funding(directory, manifests):
     for manifest in manifests:
         marks={millis(row[0]):float(row[1]) for row in rows(ROOT/manifest['sources']['mark']['path'])}
         for row in rows(ROOT/manifest['sources']['funding']['path']):
-            timestamp=millis(row[0]);index=bisect.bisect_left(times,timestamp)
+            timestamp=millis(row[0])
+            if start_ms is not None and timestamp<start_ms:continue
+            if end_ms is not None and timestamp>=end_ms:continue
+            index=bisect.bisect_left(times,timestamp)
             if index==len(points):raise ValueError('No equity observation after funding settlement')
             previous=points[index-1] if index else {}
             expected=-float(previous.get('perp_btc',0))*marks[timestamp//60000*60000]*float(row[2])
@@ -138,6 +145,9 @@ def main():
     parser.add_argument('--spot-taker-bps',type=float,default=2)
     parser.add_argument('--one-order-per-entry-event',type=int,choices=(0,1),default=1)
     parser.add_argument('--single-basis-position',type=int,choices=(0,1),default=1)
+    parser.add_argument('--exit-on-opposite-signal',type=int,choices=(0,1),default=1)
+    parser.add_argument('--daily-reset',type=int,choices=(0,1),default=0)
+    parser.add_argument('--close-at-day-end',type=int,choices=(0,1),default=0)
     parser.add_argument('--wait-for-inputs', action='store_true',help='Allow verified monthly downloads to finish while earlier months replay')
     parser.add_argument('--stream-source', nargs=3,help=argparse.SUPPRESS)
     args = parser.parse_args()
@@ -216,7 +226,10 @@ def main():
                             '--perp-taker-bps',str(args.perp_taker_bps),
                             '--spot-taker-bps',str(args.spot_taker_bps),
                             '--one-order-per-entry-event',str(args.one_order_per_entry_event),
-                            '--single-basis-position',str(args.single_basis_position)],check=True,
+                            '--single-basis-position',str(args.single_basis_position),
+                            '--exit-on-opposite-signal',str(args.exit_on_opposite_signal),
+                            '--daily-reset',str(args.daily_reset),
+                            '--close-at-day-end',str(args.close_at_day_end)],check=True,
                            pass_fds=tuple(p.stdout.fileno() for p in streams))
             for process in streams:
                 process.stdout.close()
@@ -228,6 +241,9 @@ def main():
                 process.wait()
     manifests=[json.loads((ROOT/'data/binance/maker'/month/'month-inputs.manifest.json').read_text()) for month in months]
     if any(m['status']!='checksum_verified' for m in manifests):raise ValueError('Monthly download did not complete validation')
+    if args.daily_reset:
+        from daily_archive_trials import finalize_daily_trials
+        return finalize_daily_trials(args,manifests)
     summary=json.loads((args.output/'summary.json').read_text())
     if summary['equilibrium_bps']!=args.equilibrium_bps or summary['entry_offset_bps']!=args.entry_offset_bps:
         raise ValueError('Replay used different hypothesis parameters than requested')
@@ -239,6 +255,8 @@ def main():
         raise ValueError('A threshold event exceeded its single-order BTC budget')
     if summary['single_basis_position']!=bool(args.single_basis_position):
         raise ValueError('Replay used a different position-limit rule')
+    if summary['exit_on_opposite_signal']!=bool(args.exit_on_opposite_signal):
+        raise ValueError('Replay used a different opposite-signal exit rule')
     if args.single_basis_position and summary['max_open_gross_perp_btc']>summary['order_btc']+1e-9:
         raise ValueError('Single basis position exceeded its one-trade limit')
     with (args.output/'coverage.csv').open() as handle:
@@ -269,6 +287,7 @@ def main():
     provenance=dict(months=months,start_ms=manifests[0]['start_ms'],end_ms=manifests[-1]['end_ms'],
                     hypothesis=dict(equilibrium_bps=args.equilibrium_bps,entry_offset_bps=args.entry_offset_bps,
                                     one_order_per_entry_event=bool(args.one_order_per_entry_event),
+                                    exit_on_opposite_signal=bool(args.exit_on_opposite_signal),
                                     single_basis_position=bool(args.single_basis_position)),
                     fees=dict(perp_maker_bps=args.perp_maker_bps,perp_taker_bps=args.perp_taker_bps,
                               spot_taker_bps=args.spot_taker_bps),

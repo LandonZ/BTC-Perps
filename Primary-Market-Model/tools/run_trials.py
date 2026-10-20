@@ -99,18 +99,31 @@ def analyze(values, bootstrap_samples=20000, seed=20261018):
     if np.std(x, ddof=1) == 0:
         raise ValueError('Zero variance: a t-test is undefined')
     mean = float(x.mean())
+    residual = x-mean
+    squared_residuals = float(residual @ residual)
+    acf = {str(k):float(residual[k:] @ residual[:-k])/squared_residuals
+           for k in range(1,min(14,n-1)+1)}
+    ljung_box = {}
+    for requested_lag in (3,7,14):
+        lag=min(requested_lag,n-1)
+        statistic=n*(n+2)*sum(acf[str(k)]**2/(n-k) for k in range(1,lag+1))
+        ljung_box[str(requested_lag)]=dict(effective_lags=lag,statistic=statistic,
+                                          p_value=float(stats.chi2.sf(statistic,lag)))
     se = float(stats.sem(x))
     test = stats.ttest_1samp(x, 0, alternative='greater')
     result = dict(n=n, total=float(x.sum()), mean=mean, median=float(np.median(x)),
                   std=float(x.std(ddof=1)), positive=int((x > 0).sum()),
                   minimum=float(x.min()), maximum=float(x.max()),
-                  lag1_correlation=float(np.corrcoef(x[:-1], x[1:])[0, 1]),
+                  lag1_correlation=(float(np.corrcoef(x[:-1], x[1:])[0, 1])
+                                    if np.std(x[:-1])>0 and np.std(x[1:])>0 else None),
+                  dependence_diagnostics=dict(acf=acf,ljung_box=ljung_box,
+                      acf_definition='Demeaned autocovariance divided by full-sample sum of squared residuals',
+                      interpretation='Ljung-Box tests zero autocorrelation through each lag; failure to reject does not establish independence or stationarity.'),
                   t_test=dict(statistic=float(test.statistic), df=n-1,
                               p_one_sided=float(test.pvalue), standard_error=se,
                               ci95_two_sided=[mean-float(stats.t.ppf(.975,n-1))*se,
                                               mean+float(stats.t.ppf(.975,n-1))*se]),
                   hac={}, block_bootstrap={})
-    residual = x-mean
     for requested_lag in (3, 7):
         lag = min(requested_lag, n-1)
         meat = float(residual @ residual)
@@ -136,6 +149,9 @@ def analyze(values, bootstrap_samples=20000, seed=20261018):
             seed=seed+length, p_one_sided_centered=p,
             ci95_basic=[mean-float(quantiles[1]), mean-float(quantiles[0])])
     return result
+
+
+from presentation import displayed_mean_test
 
 
 def render(report, output):

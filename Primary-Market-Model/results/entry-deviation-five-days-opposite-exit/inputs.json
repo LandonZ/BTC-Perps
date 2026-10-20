@@ -1,0 +1,346 @@
+{
+  "days": [
+    "2023-12-14",
+    "2024-01-02",
+    "2024-02-12",
+    "2024-02-13",
+    "2024-02-27"
+  ],
+  "seed": 4491175649663169372,
+  "candidates": [
+    "2023-12-01",
+    "2023-12-02",
+    "2023-12-03",
+    "2023-12-04",
+    "2023-12-05",
+    "2023-12-06",
+    "2023-12-07",
+    "2023-12-08",
+    "2023-12-09",
+    "2023-12-10",
+    "2023-12-11",
+    "2023-12-12",
+    "2023-12-13",
+    "2023-12-14",
+    "2023-12-15",
+    "2023-12-16",
+    "2023-12-17",
+    "2023-12-18",
+    "2023-12-19",
+    "2023-12-20",
+    "2023-12-21",
+    "2023-12-22",
+    "2023-12-23",
+    "2023-12-24",
+    "2023-12-25",
+    "2023-12-26",
+    "2023-12-27",
+    "2023-12-28",
+    "2023-12-29",
+    "2023-12-30",
+    "2023-12-31",
+    "2024-01-01",
+    "2024-01-02",
+    "2024-01-03",
+    "2024-01-04",
+    "2024-01-05",
+    "2024-01-06",
+    "2024-01-07",
+    "2024-01-08",
+    "2024-01-09",
+    "2024-01-10",
+    "2024-01-11",
+    "2024-01-12",
+    "2024-01-13",
+    "2024-01-14",
+    "2024-01-15",
+    "2024-01-16",
+    "2024-01-17",
+    "2024-01-18",
+    "2024-01-19",
+    "2024-01-20",
+    "2024-01-21",
+    "2024-01-22",
+    "2024-01-23",
+    "2024-01-24",
+    "2024-01-25",
+    "2024-01-26",
+    "2024-01-27",
+    "2024-01-28",
+    "2024-01-29",
+    "2024-01-30",
+    "2024-01-31",
+    "2024-02-01",
+    "2024-02-02",
+    "2024-02-03",
+    "2024-02-04",
+    "2024-02-05",
+    "2024-02-06",
+    "2024-02-07",
+    "2024-02-08",
+    "2024-02-09",
+    "2024-02-10",
+    "2024-02-11",
+    "2024-02-12",
+    "2024-02-13",
+    "2024-02-14",
+    "2024-02-15",
+    "2024-02-16",
+    "2024-02-17",
+    "2024-02-18",
+    "2024-02-19",
+    "2024-02-20",
+    "2024-02-21",
+    "2024-02-22",
+    "2024-02-23",
+    "2024-02-24",
+    "2024-02-25",
+    "2024-02-26",
+    "2024-02-27",
+    "2024-02-28",
+    "2024-02-29"
+  ],
+  "deviations_bps": [
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+    2.25,
+    2.5,
+    2.75,
+    3.0,
+    3.25,
+    3.5,
+    3.75,
+    4.0,
+    4.25,
+    4.5,
+    4.75,
+    5.0
+  ],
+  "selection": "Uniform random sample without replacement, chosen before inspecting PnL",
+  "sources": {
+    "2023-12": {
+      "symbol": "BTCUSDT",
+      "month": "2023-12",
+      "start_ms": 1701388800000,
+      "end_ms": 1704067200000,
+      "sources": {
+        "spot_trades": {
+          "url": "https://data.binance.vision/data/spot/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/spot_trades/BTCUSDT-aggTrades-2023-12.zip",
+          "sha256": "a5a890bdf2cc349435f61bb134c7726fef1dd9d88bea7356716d5975f2ee5ce7",
+          "bytes": 483390162
+        },
+        "mark": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/mark/BTCUSDT-1m-2023-12.zip",
+          "sha256": "6c5f2473e4cbb328b7ec271c075c2203ae9b3eb23b53a2cf36325bcb2d0e3741",
+          "bytes": 1057725
+        },
+        "funding": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/funding/BTCUSDT-fundingRate-2023-12.zip",
+          "sha256": "8f02fdd2a2da261bbf13ab301c74bdb57fae005f19d5088e9ece5f8824c1a2a7",
+          "bytes": 810
+        },
+        "trades": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/trades/BTCUSDT-aggTrades-2023-12.zip",
+          "sha256": "f56d85c15dc93b658f808c56688658d9f9aabe9797823b973830b3696642d03f",
+          "bytes": 431442108
+        },
+        "premium": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/premium/BTCUSDT-1m-2023-12.zip",
+          "sha256": "d246dba0425eb7c601366adda6539f9427f47b3744f0efb87ce2d59c27f7eb2b",
+          "bytes": 877059
+        },
+        "book": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/bookTicker/BTCUSDT/BTCUSDT-bookTicker-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/book/BTCUSDT-bookTicker-2023-12.zip",
+          "sha256": "f6b0a74101fdfd30c2ee0cd364470428e355d0eabc0621182c1a686da14a6c33",
+          "bytes": 5297950404
+        }
+      },
+      "status": "checksum_verified",
+      "usage": "Monthly source ZIPs for continuous archive replay or reference CSV conversion. Spot trades remain a midpoint proxy.",
+      "coverage_checks": {
+        "mark_minutes": 44640,
+        "funding_settlements": 93,
+        "premium_minutes": 44640,
+        "tick_coverage": "Every UTC day present; sorted source counts and maximum gaps checked in build/current/coverage.csv",
+        "source_rows": {
+          "Q": 478791247,
+          "S": 35370512,
+          "T": 32959424
+        },
+        "max_quote_gap_ms": 469904
+      },
+      "downloaded_bytes": 6214718268
+    },
+    "2024-01": {
+      "symbol": "BTCUSDT",
+      "month": "2024-01",
+      "start_ms": 1704067200000,
+      "end_ms": 1706745600000,
+      "sources": {
+        "trades": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/trades/BTCUSDT-aggTrades-2024-01.zip",
+          "sha256": "d752f50932091dd209803187ca2354a9eadbfe8e4b9c481c3581a1bbb1bd8282",
+          "bytes": 522743749
+        },
+        "mark": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/mark/BTCUSDT-1m-2024-01.zip",
+          "sha256": "1607b1522928d2a698592019fef7c3fcc9bee2cd01674c72a27e7fc028fd66ca",
+          "bytes": 1153812
+        },
+        "funding": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/funding/BTCUSDT-fundingRate-2024-01.zip",
+          "sha256": "3e0d30870672aa8f0f937881056e3cfd55913ae5c780cd50b33f2763aa0ba58e",
+          "bytes": 696
+        },
+        "premium": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/premium/BTCUSDT-1m-2024-01.zip",
+          "sha256": "e799edfbb6c25ef363613e9f70555c75514fbc01c90afc9546dc17419d9eba9a",
+          "bytes": 880055
+        },
+        "spot_trades": {
+          "url": "https://data.binance.vision/data/spot/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/spot_trades/BTCUSDT-aggTrades-2024-01.zip",
+          "sha256": "6713db84b8836aec43bb52471735b2e057ed2cd8b571d7bdc81672826d8c8a19",
+          "bytes": 566954365
+        },
+        "book": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/bookTicker/BTCUSDT/BTCUSDT-bookTicker-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/book/BTCUSDT-bookTicker-2024-01.zip",
+          "sha256": "05ab114597172885508f8ab78ecd9999d95a99803993549ba46eaeefd0587b95",
+          "bytes": 6952660870
+        }
+      },
+      "status": "checksum_verified",
+      "usage": "Monthly source ZIPs for continuous archive replay or reference CSV conversion. Spot trades remain a midpoint proxy.",
+      "coverage_checks": {
+        "mark_minutes": 44640,
+        "funding_settlements": 93,
+        "premium_minutes": 44640,
+        "tick_coverage": "Every UTC day present; sorted source counts and maximum gaps checked in build/current/coverage.csv",
+        "source_rows": {
+          "Q": 725011366,
+          "S": 41962464,
+          "T": 40294620
+        },
+        "max_quote_gap_ms": 826416
+      },
+      "downloaded_bytes": 8044393547
+    },
+    "2024-02": {
+      "symbol": "BTCUSDT",
+      "month": "2024-02",
+      "start_ms": 1706745600000,
+      "end_ms": 1709251200000,
+      "sources": {
+        "mark": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/mark/BTCUSDT-1m-2024-02.zip",
+          "sha256": "2e6f24f3bc92a7d241d5dbcfc79c54a0aa24b26ad12b4988f61a8c8d93e867fc",
+          "bytes": 990137
+        },
+        "trades": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/trades/BTCUSDT-aggTrades-2024-02.zip",
+          "sha256": "3c2426d3f2435ace18b0e9b3acf45144b1710dad08cb184487539d5d829ccef3",
+          "bytes": 472350747
+        },
+        "spot_trades": {
+          "url": "https://data.binance.vision/data/spot/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/spot_trades/BTCUSDT-aggTrades-2024-02.zip",
+          "sha256": "5134af82d946b46c2be160f71d94e3ef5b0f4e8565b4211869169092ea7e5ca5",
+          "bytes": 504930291
+        },
+        "funding": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/funding/BTCUSDT-fundingRate-2024-02.zip",
+          "sha256": "daf1e4901e3d6436d82ad60f90d007eb5300be8047cfef121007203a7212cde6",
+          "bytes": 776
+        },
+        "premium": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/premium/BTCUSDT-1m-2024-02.zip",
+          "sha256": "4d1cc8c4ea65ecbdb806b06eaade4ba76a2b551338d2110e39ecdbea3805d1ea",
+          "bytes": 817138
+        },
+        "book": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/bookTicker/BTCUSDT/BTCUSDT-bookTicker-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/book/BTCUSDT-bookTicker-2024-02.zip",
+          "sha256": "2aea15b4f9b9f9731bad294327e4e7e43b2a43bc9a2d2c6b04d0826e2bb7b397",
+          "bytes": 8270743447
+        }
+      },
+      "status": "checksum_verified",
+      "usage": "Monthly source ZIPs for continuous archive replay or reference CSV conversion. Spot trades remain a midpoint proxy.",
+      "coverage_checks": {
+        "mark_minutes": 41760,
+        "funding_settlements": 87,
+        "premium_minutes": 41760,
+        "tick_coverage": "Every UTC day present; sorted source counts and maximum gaps checked in build/current/coverage.csv",
+        "source_rows": {
+          "Q": 942461817,
+          "S": 37492760,
+          "T": 36317913
+        },
+        "max_quote_gap_ms": 2587922
+      },
+      "downloaded_bytes": 9249832536
+    }
+  },
+  "engine_sha256": "6e3a4e04c5fa1834b16178c89e0c2bcb3de4a7f93a85577154bba139b2860cc2",
+  "archive_sort_sha256": "49bae7d1915c492999b528c7c21b51d29f25d827381eeac60b23d756b49237ca",
+  "script_sha256": "f54cb0cf7fda7753f505d88f686737e4b2e7973ebb22e6d0c84bcee4ab4eefa5",
+  "single_day_script_sha256": "a9b0d6d1a21df8ab508d38c8ee201c04eb307ff0bb3887a47719e47f13037eeb",
+  "equilibrium_bps": -5,
+  "position_limit_trades": [
+    -1,
+    1
+  ],
+  "trade_btc": 0.01,
+  "fees_bps": {
+    "perp_maker": 0.5,
+    "perp_taker": 2,
+    "spot_taker": 2
+  },
+  "pnl_definition": "Final marked equity including funding and executed fees; independent flat starts; no terminal liquidation",
+  "exit_on_opposite_signal": true,
+  "exits": "Opposite entry band closes to flat at taker prices; consume that signal episode; anticipated funding payers also exit in the final 60 seconds before settlement using a causal premium forecast",
+  "sorted_selected_days_sha256": {
+    "2023-12": {
+      "Q": "075d4ef578613f404f733d30e81ca360156663cfd578fd3c8f78a16422dabb4e",
+      "T": "186c8e47d37511f1b8f5e729ece490febdfe3549736c14e01135671c064095e2",
+      "S": "d57672da9a95ed2666c89d2b8a6ea57a2effe9a79c54eb2277eb0ad33c4accd1"
+    },
+    "2024-01": {
+      "Q": "21aef28f7de72076b7552db3ecad15ecc1f3d066a9f08ae59166bb3a1dea9f67",
+      "T": "da2f5ea14de236bb3f3f628661e98479e1d1abc1f3aac91ab501e5575babe23e",
+      "S": "b9734ce0e2ba6168c55e1911b5b8e7e3e43f3dfed8b8f5e54ddfb224775fd16a"
+    },
+    "2024-02": {
+      "Q": "ab14d6b43916f3bf6818ad80df41613dce1c2309b4602016164129101bf42c37",
+      "T": "e75e7ca3e2449568a2071fa0c1f13deb2a4842b8c5dae8e5aa5e4a5902d28115",
+      "S": "595d1c60a390c9acd41167741d457b71661a20160c2fe58533d89ca9834d3007"
+    }
+  },
+  "funding_premium_sha256": {
+    "2023-12-14": "46f1d538ebde23bed3ac91703ba783bdb423cffb1839beacbbaed1cac4f06786",
+    "2024-01-02": "0149463eb6f401ce9749a156fa9888dbe23a3ebcdb2ff79f3e56eb578260b804",
+    "2024-02-12": "b06cb46eeab3fb64fe61d8492a2849c791db8c99a8592830e6890639c31694d8",
+    "2024-02-13": "52a5206e309df4b5f153e6129cf0437612394947c9d4f5e1ce2b8a276939346e",
+    "2024-02-27": "1dde3bb443fc75daea1d642f0282d7056b43c9f135473124025a0cc4e2039f73"
+  },
+  "plot_renderer_sha256": "18f772611f20e22a3f9886707bc738f4f3707c0f9620c881f819ea5889093370",
+  "plot_sha256": "72363259998ddae6f4fbe0b44fc3b887e6d6aee5b17e40d564eda5a4457cf606"
+}

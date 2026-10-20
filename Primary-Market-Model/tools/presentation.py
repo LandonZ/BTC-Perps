@@ -71,12 +71,19 @@ def render_directions(summary, rows, output):
     times = [datetime.fromtimestamp(int(row['time_ms'])/1000, timezone.utc) for row in rows]
     fig = plt.figure(figsize=(16, 9), dpi=240, facecolor=SURFACE)
     header(fig, 'BTC basis strategy',
-           f'Binance BTCUSDT   ·   {times[0]:%d %b %Y} – {times[-1]:%d %b %Y} UTC',
+           f'Binance BTCUSDT   ·   {times[0]:%d %b %Y} – {times[-1]:%d %b %Y} UTC'+
+           (f'   ·   {summary["trial_count"]} daily trials' if summary.get('daily_resets') else ''),
            settings_line(summary),
            [(.07, 'NET PNL · USDT', compact(summary['net_pnl'], True), INK),
             (.39, 'FUNDING · USDT', compact(summary['funding_pnl'], True), GREEN),
             (.71, 'PRICE PNL AFTER FEES · USDT', compact(summary['price_pnl']-summary['fees'], True),
              GREEN if summary['price_pnl']-summary['fees'] >= 0 else RED)])
+    if summary.get('exit_on_opposite_signal'):
+        text=('Fresh daily start   ·   Opposite-signal and funding exits   ·   Day-end liquidation with fees'
+              if summary.get('close_at_day_end') else
+              'Fresh daily start   ·   Open positions marked at day-end   ·   No day-end exit fees' if summary.get('daily_resets') else
+              'Opposite entry signal → flat   ·   Funding-payer exits retained')
+        fig.text(.07,.813,text,fontsize=10,color=MUTED)
     for left, name, title, color in [(.09, 'long_perp_short_spot', 'Long perp / short spot', GREEN),
                                       (.58, 'short_perp_long_spot', 'Short perp / long spot', '#3568a8')]:
         ax = fig.add_axes([left, .14, .37, .465])
@@ -90,7 +97,8 @@ def render_directions(summary, rows, output):
             ax.text(.5,.62,'No entries',transform=ax.transAxes,ha='center',fontsize=13,color=MUTED)
         money_axis(ax, total)
         ax.set_title(title, loc='left', fontsize=16, weight='bold', color=color, pad=34)
-        share=f'   ·   {100*side["net_pnl"]/summary["net_pnl"]:.2f}% of total' if abs(summary['net_pnl'])>1e-8 else ''
+        show_share=summary['net_pnl']>1e-8 and all(value['net_pnl']>=0 for value in summary['basis_sides'].values())
+        share=f'   ·   {100*side["net_pnl"]/summary["net_pnl"]:.2f}% of total' if show_share else ''
         ax.text(0, 1.035, f'Net PnL  {side["net_pnl"]:+,.2f} USDT'+share,
                 transform=ax.transAxes, fontsize=11, color=MUTED)
         ax.xaxis.set_major_locator(dates.AutoDateLocator(minticks=3, maxticks=4))
@@ -100,10 +108,29 @@ def render_directions(summary, rows, output):
     fig.savefig(output, facecolor=SURFACE); plt.close(fig)
 
 
+def displayed_mean_test(report):
+    """One inference method per plot, chosen before inspecting its p-value."""
+    method=report.get('primary_inference','hac_7' if report.get('continuous_inventory') else 't_test')
+    statistics=report['statistics']
+    if method=='hac_7':
+        test=statistics['hac']['7']
+        return dict(method=method,p_value=test['p_one_sided'],interval=test['ci95_asymptotic'],
+                    p_label='NEWEY–WEST p · ONE-SIDED',interval_label='Newey–West',
+                    interval_description='95% interval · 7 daily lags')
+    if method=='t_test':
+        test=statistics['t_test']
+        return dict(method=method,p_value=test['p_one_sided'],interval=test['ci95_two_sided'],
+                    p_label='ONE-SIDED t-TEST p-VALUE',interval_label='t-test',
+                    interval_description='95% confidence interval')
+    raise ValueError(f'Unknown primary inference method: {method}')
+
+
+
 def render_trials(report, output):
     plt = setup()
     import matplotlib.dates as dates
     trials, stats = report['trials'], report['statistics']
+    mean_test=displayed_mean_test(report)
     s = trials[0]['summary']
     pnl = [r['summary']['net_pnl'] for r in trials]
     days = [datetime.strptime(r['date'], '%Y-%m-%d').replace(tzinfo=timezone.utc) for r in trials]
@@ -113,7 +140,13 @@ def render_trials(report, output):
            settings_line(s),
            [(.07, 'MEAN DAILY PNL · USDT', compact(stats['mean'], True), INK),
             (.39, 'POSITIVE DAYS', f'{stats["positive"]} / {stats["n"]}', GREEN),
-            (.71, 'ONE-SIDED t-TEST p-VALUE', f'{stats["t_test"]["p_one_sided"]:.2g}', INK)])
+            (.71, mean_test['p_label'], f'{mean_test["p_value"]:.2g}', INK)])
+    if s.get('exit_on_opposite_signal'):
+        text=('Fresh daily start   ·   Opposite-signal and funding exits   ·   Day-end liquidation with fees'
+              if s.get('close_at_day_end') else
+              'Fresh daily start   ·   Open positions marked at day-end   ·   No day-end exit fees' if s.get('daily_reset') else
+              'Opposite entry signal → flat   ·   Funding-payer exits retained')
+        fig.text(.07,.813,text,fontsize=10,color=MUTED)
     ax=fig.add_axes([.09,.16,.50,.44]); style_axis(ax)
     ax.set_title('Daily net PnL, including funding',loc='left',fontsize=16,weight='bold',pad=24)
     ax.bar(days,pnl,width=.77,color=[GREEN if p>=0 else RED for p in pnl])
@@ -124,15 +157,15 @@ def render_trials(report, output):
     ax.set_xlim(days[0]-timedelta(days=.6),days[-1]+timedelta(days=.6))
     ci_ax=fig.add_axes([.77,.22,.19,.35]); ci_ax.set_facecolor(SURFACE)
     ci_ax.set_title('Mean daily PnL',loc='left',fontsize=16,weight='bold',pad=30)
-    intervals=[stats['t_test']['ci95_two_sided']]
+    intervals=[mean_test['interval']]
     for i,bounds in enumerate(intervals):
         color=GREEN if bounds[0]>0 else RED if bounds[1]<0 else MUTED
         ci_ax.plot(bounds,[i,i],color=color,lw=3,solid_capstyle='round')
         ci_ax.scatter([stats['mean']],[i],s=34,color=INK,zorder=3)
-    ci_ax.set_yticks([0],['t-test'],fontsize=10)
+    ci_ax.set_yticks([0],[mean_test['interval_label']],fontsize=10)
     ci_ax.set_ylim(.8,-.8); ci_ax.axvline(0,color='#aab8c8',lw=.8)
     ci_ax.tick_params(length=0,pad=9,labelsize=10)
     money_axis(ci_ax,[v for bounds in intervals for v in bounds],horizontal=True)
-    ci_ax.text(0,1.035,'95% confidence interval',transform=ci_ax.transAxes,fontsize=10,color=MUTED)
+    ci_ax.text(0,1.035,mean_test['interval_description'],transform=ci_ax.transAxes,fontsize=10,color=MUTED)
     output.parent.mkdir(parents=True,exist_ok=True)
     fig.savefig(output,facecolor=SURFACE);plt.close(fig)

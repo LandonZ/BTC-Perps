@@ -17,6 +17,7 @@ struct Config {
     bool one_order_per_entry_event = false; // One order budget per fresh threshold crossing.
     bool single_basis_position = false; // At most one signed order-sized position; opposite entries wait until flat.
     bool exit_on_equilibrium = false;
+    bool exit_on_opposite_signal = false; // Opposite entry band closes inventory to flat, consuming that signal episode.
     bool retain_decisions = true; // Large archive replays need only the latest quote decision.
     bool retain_fills = true; // Aggregate accounting remains exact without the optional fill ledger.
     bool exit_before_funding = true, funding_exit_payers_only = true, funding_cashflows = true;
@@ -41,6 +42,7 @@ struct Pair {
     double funding_pnl = 0;
     std::string exit_reason = "";
     double signal_basis_bps = 0; // Midpoint basis used to allow the entry, before executable spot spread.
+    std::size_t position_id = 0; // All partial fills between a flat start and the next flat exit.
 };
 struct Decision {
     Millis time;
@@ -70,7 +72,7 @@ class Engine {
 public:
     explicit Engine(Config config = {});
     void on_event(const Event& event, bool decide = true);
-    void finish();
+    void finish(bool close_positions = false, Millis terminal_time = -1);
     void mark_equity(); // Record a day-end mark without changing resting quotes or inventory.
     Totals totals() const;
     std::array<SideTotals,2> side_totals() const;
@@ -96,6 +98,7 @@ private:
     void decide();
     void trade(const Event& event);
     void close_converged();
+    void close_opposite_signal();
     void close_before_funding();
     void close_pair(Pair& pair, const std::string& reason);
     void record_fill(Fill fill);
@@ -111,8 +114,10 @@ private:
     double quote_price_ = 0, remaining_ = 0;
     int quote_side_ = 0;
     int entry_event_side_ = 0;
+    int consumed_exit_signal_ = 0;
     double entry_event_remaining_ = 0, entry_event_filled_ = 0, max_entry_event_btc_ = 0;
     std::size_t entry_events_ = 0;
+    std::size_t position_id_ = 0;
     Millis quote_since_ = -1;
     double perp_btc_ = 0, spot_btc_ = 0, gross_btc_ = 0, cash_ = 0, fees_ = 0, peak_ = 0, drawdown_ = 0;
     double open_gross_btc_ = 0, realized_pnl_ = 0;

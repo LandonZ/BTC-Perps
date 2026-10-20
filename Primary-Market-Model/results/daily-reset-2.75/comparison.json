@@ -1,0 +1,15 @@
+{
+  "previous": {
+    "entry_offset_bps": 1.25,
+    "daily_reset": false,
+    "net_pnl_usdt": -131.4887080027
+  },
+  "current": {
+    "entry_offset_bps": 2.75,
+    "daily_reset": true,
+    "close_at_day_end": true,
+    "net_pnl_usdt": 1013.0159669994
+  },
+  "note": "Both entry threshold and trial horizon changed, so the difference cannot be attributed to either change alone.",
+  "matched_source_coverage": true
+}

@@ -8,7 +8,9 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -139,11 +141,17 @@ int priority(char kind) {
     if (kind == 'Q') return 3;
     return 4;
 }
+std::string date_string(Millis day) {
+    const std::time_t seconds=static_cast<std::time_t>(day*86400);
+    std::ostringstream result;result<<std::put_time(std::gmtime(&seconds),"%Y-%m-%d");
+    return result.str();
+}
 }
 int main(int argc,char** argv) {
     try {
         if (argc < 4) throw std::runtime_error("Usage: archive-replay SOURCES_TSV FUNDING_AND_PREMIUM_CSV OUTPUT_DIR [REORDER_MS] [--equilibrium-bps VALUE] [--entry-offset-bps VALUE]");
         Millis window = 1000;
+        bool daily_reset=false,close_at_day_end=false;
         btc::basis_maker::Config config; config.retain_decisions = false; config.retain_fills = false;
         for (int i=4;i<argc;++i) {
             const std::string key = argv[i];
@@ -154,7 +162,8 @@ int main(int argc,char** argv) {
             }
             if (key!="--equilibrium-bps" && key!="--entry-offset-bps" && key!="--perp-maker-bps" &&
                 key!="--perp-taker-bps" && key!="--spot-taker-bps" && key!="--one-order-per-entry-event" &&
-                key!="--single-basis-position") throw std::runtime_error("Unknown option: "+key);
+                key!="--single-basis-position" && key!="--exit-on-opposite-signal" &&
+                key!="--daily-reset" && key!="--close-at-day-end") throw std::runtime_error("Unknown option: "+key);
             if (++i>=argc) throw std::runtime_error("Missing value for "+key);
             const std::string value=argv[i]; std::size_t used=0; const double number=std::stod(value,&used);
             if (used!=value.size() || !std::isfinite(number)) throw std::runtime_error("Invalid value for "+key);
@@ -170,9 +179,18 @@ int main(int argc,char** argv) {
                 if (number!=0 && number!=1) throw std::runtime_error("Single basis position mode must be 0 or 1");
                 config.single_basis_position=number==1;
             }
+            else if (key=="--exit-on-opposite-signal") {
+                if (number!=0 && number!=1) throw std::runtime_error("Opposite signal exit mode must be 0 or 1");
+                config.exit_on_opposite_signal=number==1;
+            }
+            else if (key=="--daily-reset" || key=="--close-at-day-end") {
+                if (number!=0 && number!=1) throw std::runtime_error("Daily trial mode must be 0 or 1");
+                if (key=="--daily-reset") daily_reset=number==1;else close_at_day_end=number==1;
+            }
             else config.spot_taker_bps=number;
         }
         if (window < 0) throw std::runtime_error("Negative reorder window");
+        if (close_at_day_end && !daily_reset) throw std::runtime_error("Day-end closing requires daily-reset trials");
         std::ifstream manifest(argv[1]);
         std::vector<std::unique_ptr<Source>> sources;
         std::string line;
@@ -187,6 +205,8 @@ int main(int argc,char** argv) {
             sources.push_back(std::make_unique<Source>(kind,path,start,stop,window,format=="BINARY"));
         }
         if (sources.empty()) throw std::runtime_error("No archive sources");
+        if (daily_reset && (first%86400000 || end%86400000))
+            throw std::runtime_error("Daily reset windows must start and end at UTC midnight");
         std::vector<Event> small;
         btc::events::read(argv[2],[&](const Event& event,bool) {
             if (event.kind != 'P' && event.kind != 'F' && event.kind != 'R')
@@ -197,6 +217,32 @@ int main(int argc,char** argv) {
             return a.time != b.time ? a.time < b.time : priority(a.kind) < priority(b.kind);
         });
         btc::basis_maker::Engine engine(config);
+        Millis active_day=-1;
+        std::vector<Millis> finished_days;
+        double total_trial_pnl=0;
+        double combined_peak=0,combined_drawdown=0;
+        auto mark_combined=[&] {
+            const double net=total_trial_pnl+engine.totals().net();
+            combined_peak=std::max(combined_peak,net);
+            combined_drawdown=std::max(combined_drawdown,combined_peak-net);
+        };
+        auto finish_day=[&] {
+            if (active_day<0) return;
+            engine.finish(close_at_day_end,(active_day+1)*86400000-1);
+            mark_combined();
+            const auto directory=std::string(argv[3])+"/days/"+date_string(active_day);
+            btc::basis_maker::write_results(engine,directory);
+            std::ofstream coverage(directory+"/coverage.csv");
+            coverage<<"utc_day,kind,count,first_ms,last_ms,max_gap_ms\n";
+            for (const auto& source:sources) {
+                const auto found=source->daily.find(active_day);
+                if(found==source->daily.end()) continue;
+                const auto& day=found->second;
+                coverage<<active_day<<','<<source->kind<<','<<day.count<<','<<day.first<<','<<day.last<<','<<day.gap<<'\n';
+            }
+            finished_days.push_back(active_day);total_trial_pnl+=engine.totals().net();
+            std::cerr<<"Completed flat-start trial "<<date_string(active_day)<<" net="<<engine.totals().net()<<'\n';
+        };
         std::size_t index = 0;
         Millis previous_time = -1,progress = -1;
         const auto started = std::chrono::steady_clock::now();
@@ -212,13 +258,21 @@ int main(int argc,char** argv) {
             if (!use_small && !chosen->initialized) { chosen->initialized = true; chosen->advance(); continue; }
             const Event event = use_small ? small[index++] : chosen->head;
             if (!use_small) chosen->advance();
+            if (daily_reset && event.time<first) continue; // Replace the shared schedule seed with a fresh seed per trial.
             if (event.time < previous_time) throw std::runtime_error("Merged archive clock moved backwards");
-            if (previous_time >= first && event.time/86400000 != previous_time/86400000) engine.mark_equity();
+            if (daily_reset && event.time/86400000!=active_day) {
+                finish_day();active_day=event.time/86400000;
+                engine=btc::basis_maker::Engine(config);
+                Event schedule;schedule.kind='R';schedule.time=active_day*86400000-8*3600000;
+                schedule.funding_rate=0;schedule.interval_hours=8;engine.on_event(schedule);
+            }
+            if (!daily_reset && previous_time >= first && event.time/86400000 != previous_time/86400000) engine.mark_equity();
             previous_time = event.time; ++count;
             // Retain exact settlement inventory after any exits that occurred
             // later than the first sampled mark of the blackout minute.
             if (event.kind == 'F' && !engine.equity().empty()) engine.mark_equity();
             engine.on_event(event);
+            if (daily_reset) mark_combined();
             if (event.kind == 'F') engine.mark_equity();
             if (event.time/86400000 != progress) {
                 progress = event.time/86400000;
@@ -227,7 +281,7 @@ int main(int argc,char** argv) {
                           << " net=" << engine.totals().net() << '\n';
             }
         }
-        engine.finish();
+        if (daily_reset) finish_day();else engine.finish();
         // A successful archive checksum is not sufficient: require every
         // requested day in every market stream before publishing the result.
         std::map<std::pair<Millis,char>,Daily> days;
@@ -238,12 +292,23 @@ int main(int argc,char** argv) {
         }
         for (Millis day = first/86400000;day < end/86400000;++day) for (char kind : {'S','Q','T'})
             if (!days[{day,kind}].count) throw std::runtime_error("Missing full market day in archive inputs");
-        btc::basis_maker::write_results(engine,argv[3]);
+        if (!daily_reset) btc::basis_maker::write_results(engine,argv[3]);
+        else {
+            if(finished_days.size()!=static_cast<std::size_t>((end-first)/86400000))
+                throw std::runtime_error("Daily trial count does not match requested date window");
+            std::ofstream trial_manifest(std::string(argv[3])+"/daily-trials.json");
+            trial_manifest<<"{\"daily_reset\":true,\"close_at_day_end\":"<<(close_at_day_end?"true":"false")
+                          <<",\"dates\":[";
+            for(std::size_t i=0;i<finished_days.size();++i)
+                trial_manifest<<(i?",":"")<<'\"'<<date_string(finished_days[i])<<'\"';
+            trial_manifest<<"],\"total_net_pnl\":"<<std::setprecision(17)<<total_trial_pnl
+                          <<",\"max_drawdown\":"<<combined_drawdown<<"}\n";
+        }
         std::ofstream coverage(std::string(argv[3])+"/coverage.csv");
         coverage << "utc_day,kind,count,first_ms,last_ms,max_gap_ms\n";
         for (const auto& item : days) coverage << item.first.first << ',' << item.first.second << ',' << item.second.count
             << ',' << item.second.first << ',' << item.second.last << ',' << item.second.gap << '\n';
-        std::cout << "Completed archive replay: " << count << " source events; net=" << engine.totals().net() << '\n';
+        std::cout << "Completed archive replay: " << count << " source events; net=" << (daily_reset?total_trial_pnl:engine.totals().net()) << '\n';
     } catch (const std::exception& error) {
         std::cerr << "archive replay error: " << error.what() << '\n'; return 1;
     }

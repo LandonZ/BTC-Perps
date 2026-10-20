@@ -73,7 +73,7 @@ std::array<SideTotals,2> Engine::side_totals() const {
     return result;
 }
 double Engine::used_capacity() const {
-    return (config_.exit_on_equilibrium || config_.exit_before_funding) ? open_gross_btc_ : gross_btc_;
+    return (config_.exit_on_equilibrium || config_.exit_on_opposite_signal || config_.exit_before_funding) ? open_gross_btc_ : gross_btc_;
 }
 double Engine::available_capacity() const {
     double capacity = config_.max_gross_perp_btc > 0 ? config_.max_gross_perp_btc-used_capacity() : config_.order_btc;
@@ -118,6 +118,28 @@ void Engine::close_converged() {
     if (std::abs(open_gross_btc_) < 1e-10) open_gross_btc_ = 0;
     if (std::abs(perp_btc_) < 1e-10) perp_btc_ = 0;
     if (std::abs(spot_btc_) < 1e-10) spot_btc_ = 0;
+}
+void Engine::close_opposite_signal() {
+    if (!config_.exit_on_opposite_signal || open_pairs_.empty() || !ready()) return;
+    const int signal = entry_side(basis());
+    if (!signal || (signal>0 ? open_short_btc_ : open_long_btc_)<1e-10) return;
+    refresh_entry_event();
+    auto keep = open_pairs_.begin();
+    for (auto index : open_pairs_) {
+        auto& p = pairs_[index];
+        if (p.direction == signal) { *keep++ = index; continue; }
+        close_pair(p,"OPPOSITE_SIGNAL");
+    }
+    open_pairs_.erase(keep,open_pairs_.end());
+    if (signal>0) open_short_btc_=0; else open_long_btc_=0;
+    if (std::abs(open_gross_btc_)<1e-10) open_gross_btc_=0;
+    if (std::abs(perp_btc_)<1e-10) perp_btc_=0;
+    if (std::abs(spot_btc_)<1e-10) spot_btc_=0;
+    // The opposing order reduces the held trade to flat. It must not also
+    // reverse inventory on the next tick in this same outside-band episode.
+    consumed_exit_signal_=signal;
+    entry_event_remaining_=0;
+    quote_side_=0;remaining_=0;
 }
 void Engine::close_pair(Pair& p, const std::string& reason) {
     // Both reduce-only legs cross the current executable side, even in the
@@ -196,16 +218,19 @@ void Engine::refresh_entry_event() {
 }
 void Engine::decide() {
     refresh_entry_event();
+    if (ready() && consumed_exit_signal_ && entry_side(basis())!=consumed_exit_signal_) consumed_exit_signal_=0;
     int side = 0;
     double price = 0, size = 0, observed_basis = 0;
     const char* reason = "MISSING_OR_STALE_MARKET";
     if (ready()) {
         observed_basis = basis();
         if (funding_guard()) reason = "PRE_FUNDING_CANCEL";
+        else if (consumed_exit_signal_ && entry_side(observed_basis)==consumed_exit_signal_)
+            reason = "OPPOSITE_SIGNAL_CONSUMED";
         else if (config_.one_order_per_entry_event && entry_event_side_ && entry_event_remaining_ < config_.quantity_step)
             reason = "ENTRY_EVENT_FILLED";
         else if (quantity(available_capacity()) < config_.quantity_step)
-            reason = (config_.exit_on_equilibrium || config_.exit_before_funding) ? "OPEN_POSITION_CAP" : "GROSS_POSITION_CAP";
+            reason = (config_.exit_on_equilibrium || config_.exit_on_opposite_signal || config_.exit_before_funding) ? "OPEN_POSITION_CAP" : "GROSS_POSITION_CAP";
         else {
             side = entry_side(observed_basis);
             if (side) price = side > 0 ? perp_bid_ : perp_ask_;
@@ -258,6 +283,7 @@ void Engine::trade(const Event& e) {
     // Equal BTC is hedged immediately, including every partial perp fill.
     // Principal notionals differ by q*(perp_price-spot_price), as requested
     // after the user clarified that BTC, rather than dollars, should match.
+    if (open_gross_btc_ < 1e-10) ++position_id_;
     perp_btc_ += direction*q; spot_btc_ -= direction*q;
     gross_btc_ += q; open_gross_btc_ += q;
     (direction > 0 ? open_long_btc_ : open_short_btc_) += q;
@@ -273,6 +299,7 @@ void Engine::trade(const Event& e) {
     record_fill({now_,id,"SPOT","TAKER",-direction,spot_price,q,q*spot_price,spot_fee});
     pairs_.push_back({id,now_,direction,q,perp_price,spot_price,(perp_price/spot_price-1)*bps,perp_fee+spot_fee});
     pairs_.back().signal_basis_bps = observed_basis;
+    pairs_.back().position_id = position_id_;
     open_pairs_.push_back(pairs_.size()-1);
 }
 void Engine::on_event(const Event& e, bool) {
@@ -330,6 +357,7 @@ void Engine::on_event(const Event& e, bool) {
         premium_weighted_ = 0; premium_weight_ = 0; premium_complete_ = true;
     } else throw std::runtime_error("Unknown basis event");
     close_converged();
+    close_opposite_signal();
     close_before_funding();
     decide(); // Zero latency: references, exits and entry cancellations apply immediately.
     const auto t = totals();
@@ -338,9 +366,20 @@ void Engine::on_event(const Event& e, bool) {
         equity_.push_back({now_,t,side_totals()}); last_equity_ = now_;
     }
 }
-void Engine::finish() {
+void Engine::finish(bool close_positions, Millis terminal_time) {
     quote_side_ = 0; remaining_ = 0;
-    mark_equity(); // No exit or artificial closing fill.
+    if (terminal_time>=0) {
+        if (terminal_time<now_) throw std::runtime_error("Trial end precedes latest event");
+        now_=terminal_time;
+    }
+    if (close_positions && !open_pairs_.empty()) {
+        if (!ready()) throw std::runtime_error("Cannot close daily trial using stale market references");
+        for (auto index:open_pairs_) close_pair(pairs_[index],"DAILY_TRIAL_END");
+        open_pairs_.clear();open_gross_btc_=0;open_long_btc_=0;open_short_btc_=0;
+        perp_btc_=0;spot_btc_=0;
+    }
+    const double net=totals().net();peak_=std::max(peak_,net);drawdown_=std::max(drawdown_,peak_-net);
+    mark_equity(); // Default mode retains the historical marked-only finish.
 }
 void Engine::mark_equity() {
     if (now_ >= 0) equity_.push_back({now_,totals(),side_totals()});
@@ -375,18 +414,21 @@ void replay_files(Engine& engine, const std::vector<std::string>& paths, const s
 void write_results(const Engine& engine, const std::string& directory, bool details) {
     std::filesystem::create_directories(directory);
     std::ofstream fills,pairs,quotes,equity(directory+"/equity.csv");
-    if (details) { fills.open(directory+"/fills.csv"); pairs.open(directory+"/pairs.csv"); quotes.open(directory+"/quotes.csv"); }
+    pairs.open(directory+"/pairs.csv"); // Small lot ledger also supports archive event-level inference.
+    if (details) { fills.open(directory+"/fills.csv"); quotes.open(directory+"/quotes.csv"); }
     for (auto* stream : {&fills,&pairs,&quotes,&equity}) *stream << std::fixed << std::setprecision(10);
     if (details) {
     fills << "time_ms,pair_id,leg,liquidity,side,price,btc,notional,fee,phase\n";
     for (const auto& f : engine.fills()) fills << f.time << ',' << f.pair_id << ',' << f.leg << ',' << f.liquidity << ','
         << (f.side > 0 ? "BUY" : "SELL") << ',' << f.price << ',' << f.btc << ',' << f.notional << ',' << f.fee << ',' << f.phase << '\n';
-    pairs << "pair_id,time_ms,direction,perp_btc,spot_btc,perp_price,spot_price,perp_notional,spot_notional,notional_difference,entry_basis_bps,entry_fees,status,exit_time_ms,exit_perp_price,exit_spot_price,exit_fees,realized_pnl,funding_pnl,exit_reason,signal_basis_bps\n";
+    }
+    pairs << "pair_id,time_ms,direction,perp_btc,spot_btc,perp_price,spot_price,perp_notional,spot_notional,notional_difference,entry_basis_bps,entry_fees,status,exit_time_ms,exit_perp_price,exit_spot_price,exit_fees,realized_pnl,funding_pnl,exit_reason,signal_basis_bps,position_id\n";
     for (const auto& p : engine.pairs()) pairs << p.id << ',' << p.time << ',' << (p.direction > 0 ? "LONG_PERP_SHORT_SPOT" : "SHORT_PERP_LONG_SPOT") << ','
         << p.btc << ',' << p.btc << ',' << p.perp_price << ',' << p.spot_price << ',' << p.btc*p.perp_price << ',' << p.btc*p.spot_price << ','
         << p.btc*(p.perp_price-p.spot_price) << ',' << p.entry_basis_bps << ',' << p.fees << ','
         << (p.closed ? "CLOSED" : "OPEN") << ',' << p.exit_time << ',' << p.exit_perp_price << ',' << p.exit_spot_price
-        << ',' << p.exit_fees << ',' << p.realized_pnl << ',' << p.funding_pnl << ',' << p.exit_reason << ',' << p.signal_basis_bps << '\n';
+        << ',' << p.exit_fees << ',' << p.realized_pnl << ',' << p.funding_pnl << ',' << p.exit_reason << ',' << p.signal_basis_bps << ',' << p.position_id << '\n';
+    if (details) {
     quotes << "time_ms,status,side,perp_mid_basis_bps,price,remaining_btc\n";
     for (const auto& q : engine.decisions()) quotes << q.time << ',' << q.reason << ',' << q.side << ',' << q.perp_mid_basis_bps << ',' << q.price << ',' << q.remaining << '\n';
     }
@@ -402,7 +444,7 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         equity << '\n';
     }
     const auto& c = engine.config(); const auto t = engine.totals();
-    std::size_t closed = 0, wins = 0, losses = 0, funding_closed = 0, convergence_closed = 0, entry_violations = 0;
+    std::size_t closed = 0, wins = 0, losses = 0, funding_closed = 0, convergence_closed = 0, opposite_closed = 0, daily_closed = 0, entry_violations = 0;
     for (const auto& p : engine.pairs()) {
         const auto& config = engine.config();
         entry_violations += p.direction > 0 ? p.signal_basis_bps > config.equilibrium_bps-config.entry_offset_bps+1e-9
@@ -410,6 +452,8 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         if (p.closed) {
             ++closed; wins += p.realized_pnl > 1e-10; losses += p.realized_pnl < -1e-10;
             funding_closed += p.exit_reason == "PRE_FUNDING_PAYER"; convergence_closed += p.exit_reason == "EQUILIBRIUM";
+            opposite_closed += p.exit_reason == "OPPOSITE_SIGNAL";
+            daily_closed += p.exit_reason == "DAILY_TRIAL_END";
         }
     }
     const auto& stats = engine.fill_stats();
@@ -418,7 +462,7 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
     std::ofstream summary(directory+"/summary.json");
     summary << std::fixed << std::setprecision(10) << "{\n"
         << "  \"strategy\": \"passive perp basis entry, immediate equal-BTC spot hedge\",\n"
-        << "  \"equilibrium_bps\": " << c.equilibrium_bps << ",\n  \"latency_ms\": 0,\n  \"exits_enabled\": " << ((c.exit_on_equilibrium || c.exit_before_funding) ? "true" : "false") << ",\n"
+        << "  \"equilibrium_bps\": " << c.equilibrium_bps << ",\n  \"latency_ms\": 0,\n  \"exits_enabled\": " << ((c.exit_on_equilibrium || c.exit_on_opposite_signal || c.exit_before_funding) ? "true" : "false") << ",\n"
         << "  \"entry_offset_bps\": " << c.entry_offset_bps << ",\n  \"entry_bid_basis_bps\": " << c.equilibrium_bps-c.entry_offset_bps
         << ",\n  \"entry_ask_basis_bps\": " << c.equilibrium_bps+c.entry_offset_bps << ",\n"
         << "  \"entry_signal\": \"10000 * (perp_mid / spot_mid - 1)\",\n  \"entry_band_violations\": " << entry_violations << ",\n"
@@ -426,18 +470,21 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
         << "  \"single_basis_position\": " << (c.single_basis_position ? "true" : "false") << ",\n"
         << "  \"basis_position_limit_trades\": " << (c.single_basis_position ? 1 : 0) << ",\n"
         << "  \"entry_events\": " << engine.entry_events() << ",\n  \"max_entry_event_btc\": " << engine.max_entry_event_btc() << ",\n"
-        << "  \"exit_execution\": \"" << (c.exit_on_equilibrium ? "Equilibrium crossings and any enabled funding exits" : c.exit_before_funding ? "Any estimated funding payer during final pre-settlement window, including flat funding region" : "No exits") << "\",\n"
+        << "  \"exit_execution\": \"" << (c.exit_on_opposite_signal ? "Opposite entry threshold closes both legs to flat at taker prices; that signal episode cannot reopen; any enabled funding exits remain active" : c.exit_on_equilibrium ? "Equilibrium crossings and any enabled funding exits" : c.exit_before_funding ? "Any estimated funding payer during final pre-settlement window, including flat funding region" : "No exits") << "\",\n"
         << "  \"capacity_rule\": \"" << (c.single_basis_position ? "One signed order-sized basis position; no opposite entries until flat" : c.max_gross_perp_btc == 0 ? "Unlimited concurrent entry capacity" : (c.exit_on_equilibrium || c.exit_before_funding) ? "Open gross perp BTC; exits release capacity" : "Cumulative gross perp BTC; capacity not recycled") << "\",\n"
         << "  \"funding_assumption\": \"" << (c.funding_cashflows ? "Recorded settlement cash flows on held positions" : "Zero funding cash flows") << "\",\n  \"funding_cancel_seconds\": " << c.funding_cancel_ms/1000.0 << ",\n"
         << "  \"perp_maker_bps\": " << c.perp_maker_bps << ",\n  \"perp_taker_bps\": " << c.perp_taker_bps << ",\n  \"spot_taker_bps\": " << c.spot_taker_bps << ",\n"
         << "  \"cycle_fee_bps\": " << c.perp_maker_bps+c.perp_taker_bps+2*c.spot_taker_bps << ",\n"
         << "  \"exit_on_equilibrium\": " << (c.exit_on_equilibrium ? "true" : "false") << ",\n"
+        << "  \"exit_on_opposite_signal\": " << (c.exit_on_opposite_signal ? "true" : "false") << ",\n"
         << "  \"exit_before_funding\": " << (c.exit_before_funding ? "true" : "false") << ",\n"
         << "  \"funding_exit_payers_only\": " << (c.funding_exit_payers_only ? "true" : "false") << ",\n"
         << "  \"funding_exit_flat_region_exempt\": false,\n"
         << "  \"funding_cashflows\": " << (c.funding_cashflows ? "true" : "false") << ",\n"
         << "  \"funding_interest_bps\": " << c.funding_interest_bps << ",\n  \"funding_clamp_bps\": " << c.funding_clamp_bps << ",\n"
         << "  \"funding_exit_pairs\": " << funding_closed << ",\n  \"convergence_exit_pairs\": " << convergence_closed << ",\n"
+        << "  \"opposite_signal_exit_pairs\": " << opposite_closed << ",\n"
+        << "  \"daily_trial_exit_pairs\": " << daily_closed << ",\n"
         << "  \"funding_signal\": \"Causal weighted average of completed 1m premium-index CLOSE proxies; not exact exchange forecast\",\n"
         << "  \"order_btc\": " << c.order_btc << ",\n  \"max_gross_perp_btc\": " << c.max_gross_perp_btc << ",\n"
         << "  \"participation\": " << c.participation << ",\n  \"fill_at_touch\": " << (c.fill_at_touch ? "true" : "false") << ",\n"
@@ -466,6 +513,6 @@ void write_results(const Engine& engine, const std::string& directory, bool deta
             << '}' << (i+1<sides.size() ? "," : "") << '\n';
     }
     summary << "  }\n}\n";
-    if ((details && (!fills || !pairs || !quotes)) || !equity || !summary) throw std::runtime_error("Failed writing paired basis results");
+    if ((details && (!fills || !quotes)) || !pairs || !equity || !summary) throw std::runtime_error("Failed writing paired basis results");
 }
 } // namespace btc::basis_maker

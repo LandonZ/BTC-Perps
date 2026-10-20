@@ -1,0 +1,244 @@
+{
+  "definition": "1.25 bp minus 2.75 bp, both fresh daily trials with charged day-end exits",
+  "checks": {
+    "same_dates": true,
+    "same_input_sources": true,
+    "same_replay_binary": true,
+    "same_feed_coverage": true,
+    "same_other_settings": true,
+    "all_days_flat_at_both_ends": true,
+    "terminal_exit_fees_included": true
+  },
+  "variants": {
+    "1.25": {
+      "net_pnl": -164.17147311739998,
+      "price_pnl": 2853.2812477644998,
+      "fees": 3029.8196390591997,
+      "funding_received": 12.3669181782,
+      "funding_paid": 0,
+      "max_drawdown": 865.6441446833622,
+      "gross_perp_btc": 106.898,
+      "long_basis_net_pnl": 180.1476585882,
+      "short_basis_net_pnl": -344.319131705,
+      "statistics": {
+        "n": 91,
+        "total": -164.1714731174,
+        "mean": -1.804082122169231,
+        "median": -0.3794774215,
+        "std": 39.92445843109143,
+        "positive": 28,
+        "minimum": -127.0927437507,
+        "maximum": 184.4070035446,
+        "lag1_correlation": 0.37799177641051773,
+        "dependence_diagnostics": {
+          "acf": {
+            "1": 0.3778713416877015,
+            "2": 0.21835131138857888,
+            "3": 0.19086642030634415,
+            "4": 0.2657295304048048,
+            "5": 0.19750369182194913,
+            "6": 0.3111366627893292,
+            "7": 0.2406664516164794,
+            "8": 0.14052272625144133,
+            "9": 0.09044379509146257,
+            "10": 0.1308874764440037,
+            "11": 0.09968723243171833,
+            "12": 0.04838962366435119,
+            "13": 0.015137692790578515,
+            "14": 0.10398021598598767
+          },
+          "ljung_box": {
+            "3": {
+              "effective_lags": 3,
+              "statistic": 21.46383151809654,
+              "p_value": 8.432579480319283e-05
+            },
+            "7": {
+              "effective_lags": 7,
+              "statistic": 47.645260715790954,
+              "p_value": 4.176795949114363e-08
+            },
+            "14": {
+              "effective_lags": 14,
+              "statistic": 54.80817388106166,
+              "p_value": 9.340007631136254e-07
+            }
+          },
+          "acf_definition": "Demeaned autocovariance divided by full-sample sum of squared residuals",
+          "interpretation": "Ljung-Box tests zero autocorrelation through each lag; failure to reject does not establish independence or stationarity."
+        },
+        "t_test": {
+          "statistic": -0.4310602388966852,
+          "df": 90,
+          "p_one_sided": 0.6662723659343697,
+          "standard_error": 4.18522043876477,
+          "ci95_two_sided": [
+            -10.118753015096251,
+            6.51058877075779
+          ]
+        },
+        "hac": {
+          "3": {
+            "effective_lags": 3,
+            "standard_error": 5.7393878750167415,
+            "statistic": -0.31433354243617284,
+            "p_one_sided": 0.6233661374323325,
+            "ci95_asymptotic": [
+              -13.053075650507918,
+              9.444911406169457
+            ]
+          },
+          "7": {
+            "effective_lags": 7,
+            "standard_error": 7.074108490644067,
+            "statistic": -0.2550260749542133,
+            "p_one_sided": 0.6006485199834063,
+            "ci95_asymptotic": [
+              -15.669079986560604,
+              12.060915742222143
+            ]
+          }
+        },
+        "block_bootstrap": {
+          "3": {
+            "samples": 20000,
+            "seed": 20261021,
+            "p_one_sided_centered": 0.6314684265786711,
+            "ci95_basic": [
+              -12.409099916113043,
+              8.548243501379174
+            ]
+          },
+          "7": {
+            "samples": 20000,
+            "seed": 20261025,
+            "p_one_sided_centered": 0.6091195440227989,
+            "ci95_basic": [
+              -14.981607238953647,
+              11.445389452865413
+            ]
+          }
+        }
+      }
+    },
+    "2.75": {
+      "net_pnl": 1013.0159669994,
+      "price_pnl": 2333.671330059,
+      "fees": 1333.0494506726,
+      "funding_received": 12.3940876132,
+      "funding_paid": 0,
+      "max_drawdown": 21.47456930968383,
+      "gross_perp_btc": 46.726,
+      "long_basis_net_pnl": 434.0450952435,
+      "short_basis_net_pnl": 578.9708717559,
+      "statistics": {
+        "n": 91,
+        "total": 1013.0159669994,
+        "mean": 11.1320435934,
+        "median": 0.0530946677,
+        "std": 38.17386107139353,
+        "positive": 51,
+        "minimum": -2.9450859863,
+        "maximum": 219.5136952002,
+        "lag1_correlation": 0.2647473850524416,
+        "dependence_diagnostics": {
+          "acf": {
+            "1": 0.2645235976140585,
+            "2": 0.10226603407002914,
+            "3": 0.04788195564718612,
+            "4": 0.10161947691419745,
+            "5": 0.09596790130524448,
+            "6": 0.19725440265765282,
+            "7": 0.1259528428976975,
+            "8": -0.055188097161295316,
+            "9": -0.061887005199370695,
+            "10": -0.0564274903939882,
+            "11": -0.07022831551846492,
+            "12": -0.05089390823852771,
+            "13": -0.0575541210817025,
+            "14": -0.05308804230804203
+          },
+          "ljung_box": {
+            "3": {
+              "effective_lags": 3,
+              "statistic": 7.794740170203184,
+              "p_value": 0.05044986013830916
+            },
+            "7": {
+              "effective_lags": 7,
+              "statistic": 15.177876341285785,
+              "p_value": 0.03378569795335702
+            },
+            "14": {
+              "effective_lags": 14,
+              "statistic": 17.6847787817876,
+              "p_value": 0.22151684381416514
+            }
+          },
+          "acf_definition": "Demeaned autocovariance divided by full-sample sum of squared residuals",
+          "interpretation": "Ljung-Box tests zero autocorrelation through each lag; failure to reject does not establish independence or stationarity."
+        },
+        "t_test": {
+          "statistic": 2.7818230793490355,
+          "df": 90,
+          "p_one_sided": 0.0032923074994274278,
+          "standard_error": 4.001707972027096,
+          "ci95_two_sided": [
+            3.1819522460424627,
+            19.082134940757538
+          ]
+        },
+        "hac": {
+          "3": {
+            "effective_lags": 3,
+            "standard_error": 4.938490943932956,
+            "statistic": 2.2541387075086083,
+            "p_one_sided": 0.012093721621468902,
+            "ci95_asymptotic": [
+              1.452779205314192,
+              20.81130798148581
+            ]
+          },
+          "7": {
+            "effective_lags": 7,
+            "standard_error": 5.630729623842212,
+            "statistic": 1.977016183882025,
+            "p_one_sided": 0.02401990043803021,
+            "ci95_asymptotic": [
+              0.09601632398649862,
+              22.1680708628135
+            ]
+          }
+        },
+        "block_bootstrap": {
+          "3": {
+            "samples": 20000,
+            "seed": 20261021,
+            "p_one_sided_centered": 0.019349032548372582,
+            "ci95_basic": [
+              0.6664030477422447,
+              19.015294714817585
+            ]
+          },
+          "7": {
+            "samples": 20000,
+            "seed": 20261025,
+            "p_one_sided_centered": 0.03259837008149592,
+            "ci95_basic": [
+              -0.7665516567308597,
+              20.22056486974124
+            ]
+          }
+        }
+      }
+    }
+  },
+  "difference": {
+    "net_pnl": -1177.1874401168,
+    "price_pnl": 519.6099177054998,
+    "fees": 1696.7701883865998,
+    "funding_pnl": -0.027169434999999353
+  },
+  "days_higher_at_1_25": 1,
+  "note": "Matched historical comparison. Daily inventory resets do not guarantee statistical independence; threshold selection is in-sample."
+}

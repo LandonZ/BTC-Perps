@@ -1,0 +1,1051 @@
+{
+  "full_daily_statistics": {
+    "n": 91,
+    "total": 1029.7203366086,
+    "mean": 11.3156080946,
+    "median": 0.2628217457,
+    "std": 38.18005231476262,
+    "positive": 62,
+    "minimum": -2.9450859863,
+    "maximum": 219.7216933892,
+    "lag1_correlation": 0.26492607818618136,
+    "dependence_diagnostics": {
+      "acf": {
+        "1": 0.2646998430670757,
+        "2": 0.1023431623397314,
+        "3": 0.04808686631292782,
+        "4": 0.10180653523543971,
+        "5": 0.0961109971057023,
+        "6": 0.19737068776386812,
+        "7": 0.12610743427904814,
+        "8": -0.05504468407859628,
+        "9": -0.06170865479895099,
+        "10": -0.05644457573317368,
+        "11": -0.07010166914939979,
+        "12": -0.05078021642216559,
+        "13": -0.057557951318880377,
+        "14": -0.052941855722893186
+      },
+      "ljung_box": {
+        "3": {
+          "effective_lags": 3,
+          "statistic": 7.80690278593171,
+          "p_value": 0.050175651680277183
+        },
+        "7": {
+          "effective_lags": 7,
+          "statistic": 15.204940118787876,
+          "p_value": 0.03346028767107742
+        },
+        "14": {
+          "effective_lags": 14,
+          "statistic": 17.703382899620667,
+          "p_value": 0.22062597477749646
+        }
+      },
+      "acf_definition": "Demeaned autocovariance divided by full-sample sum of squared residuals",
+      "interpretation": "Ljung-Box tests zero autocorrelation through each lag; failure to reject does not establish independence or stationarity."
+    },
+    "t_test": {
+      "statistic": 2.8272360813754336,
+      "df": 90,
+      "p_one_sided": 0.002892806343238273,
+      "standard_error": 4.002356990681523,
+      "ci95_two_sided": [
+        3.3642273584052695,
+        19.26698883079473
+      ]
+    },
+    "hac": {
+      "3": {
+        "effective_lags": 3,
+        "standard_error": 4.940011743639094,
+        "statistic": 2.2906034806840925,
+        "p_one_sided": 0.01099317872358649,
+        "ci95_asymptotic": [
+          1.6333629938624625,
+          20.997853195337537
+        ]
+      },
+      "7": {
+        "effective_lags": 7,
+        "standard_error": 5.633166449498919,
+        "statistic": 2.0087473352765115,
+        "p_one_sided": 0.022281967986309187,
+        "ci95_asymptotic": [
+          0.2748047346627498,
+          22.356411454537252
+        ]
+      }
+    },
+    "block_bootstrap": {
+      "3": {
+        "samples": 20000,
+        "seed": 20261021,
+        "p_one_sided_centered": 0.018049097545122742,
+        "ci95_basic": [
+          0.850573646981573,
+          19.203528779532938
+        ]
+      },
+      "7": {
+        "samples": 20000,
+        "seed": 20261025,
+        "p_one_sided_centered": 0.030598470076496177,
+        "ci95_basic": [
+          -0.5863496445539678,
+          20.398073859920245
+        ]
+      }
+    }
+  },
+  "distribution": {
+    "negative_days": 29,
+    "zero_days": 0,
+    "win_rate": 0.6813186813186813,
+    "gross_winning_daily_pnl": 1047.756060014,
+    "gross_losing_daily_pnl": -18.035723405400002,
+    "average_winning_day": 16.899291290548387,
+    "average_losing_day": -0.6219214967379311,
+    "daily_profit_factor": 58.09337593302721,
+    "percentiles": {
+      "5": -1.0716070407,
+      "10": -0.7402103583,
+      "25": -0.08777457525,
+      "50": 0.2628217457,
+      "75": 1.4269964477500001,
+      "90": 12.9279030446,
+      "95": 94.00810939454999
+    },
+    "sample_skewness": 3.9522975091973027,
+    "sample_excess_kurtosis": 15.552541744085836,
+    "streaks": {
+      "winning": 18,
+      "losing": 10
+    }
+  },
+  "monthly": {
+    "2023-12": {
+      "days": 31.0,
+      "positive": 26.0,
+      "net_pnl": 265.3778500979,
+      "price_pnl": 522.5331207555001,
+      "fees": 262.08205549129997,
+      "funding_pnl": 4.9267848334,
+      "long_perp_short_spot": 124.488582533,
+      "short_perp_long_spot": 140.8892675646
+    },
+    "2024-01": {
+      "days": 31.0,
+      "positive": 21.0,
+      "net_pnl": 707.8781411775998,
+      "price_pnl": 1622.5969093624994,
+      "fees": 917.7018085487002,
+      "funding_pnl": 2.9830403636,
+      "long_perp_short_spot": 301.39255668980013,
+      "short_perp_long_spot": 406.4855844879
+    },
+    "2024-02": {
+      "days": 29.0,
+      "positive": 15.0,
+      "net_pnl": 56.4643453331,
+      "price_pnl": 190.433481422,
+      "fees": 138.45339850520003,
+      "funding_pnl": 4.4842624162,
+      "long_perp_short_spot": 8.1639560207,
+      "short_perp_long_spot": 48.300389312200004
+    }
+  },
+  "top_days": [
+    {
+      "date": "2024-01-09",
+      "pnl": 219.7216933892
+    },
+    {
+      "date": "2024-01-10",
+      "pnl": 169.5641549926
+    },
+    {
+      "date": "2024-01-03",
+      "pnl": 150.6311790007
+    },
+    {
+      "date": "2023-12-11",
+      "pnl": 146.8755059241
+    },
+    {
+      "date": "2024-01-05",
+      "pnl": 106.6094837834
+    },
+    {
+      "date": "2023-12-14",
+      "pnl": 81.4067350057
+    },
+    {
+      "date": "2024-02-28",
+      "pnl": 47.9685249486
+    },
+    {
+      "date": "2024-01-12",
+      "pnl": 18.1095723432
+    },
+    {
+      "date": "2024-01-11",
+      "pnl": 14.7668196738
+    },
+    {
+      "date": "2024-01-04",
+      "pnl": 12.9279030446
+    }
+  ],
+  "worst_days": [
+    {
+      "date": "2024-01-26",
+      "pnl": -2.9450859863
+    },
+    {
+      "date": "2024-01-31",
+      "pnl": -2.3886668909
+    },
+    {
+      "date": "2024-01-29",
+      "pnl": -1.5930548341
+    },
+    {
+      "date": "2024-02-05",
+      "pnl": -1.2905246759
+    },
+    {
+      "date": "2024-02-08",
+      "pnl": -1.0874522025
+    }
+  ],
+  "concentration": {
+    "1": {
+      "total": 219.7216933892,
+      "fraction_of_total": 0.2133799688883069
+    },
+    "3": {
+      "total": 539.9170273825,
+      "fraction_of_total": 0.524333654670476
+    },
+    "5": {
+      "total": 793.4020170900001,
+      "fraction_of_total": 0.7705024256421719
+    },
+    "10": {
+      "total": 968.5815721059,
+      "fraction_of_total": 0.9406258550704538
+    }
+  },
+  "excluding_top_five": {
+    "n": 86,
+    "total": 236.3183195186,
+    "mean": 2.7478874362627908,
+    "median": 0.2295656174,
+    "std": 10.593914789839992,
+    "positive": 57,
+    "negative": 29,
+    "minimum": -2.9450859863,
+    "maximum": 81.4067350057,
+    "t_stat": 2.4054242702523925,
+    "df": 85,
+    "p_one_sided": 0.009161566592533409,
+    "ci95": [
+      0.47654741926533317,
+      5.019227453260248
+    ],
+    "note": "Post-hoc exclusion of the five best observed days; t-test is only a sensitivity diagnostic. No HAC/bootstrap on a compressed, gapped calendar."
+  },
+  "position_counts": {
+    "completed_flat_to_flat_positions": 5158,
+    "winning_completed_positions": 3646,
+    "losing_completed_positions": 1512,
+    "marked_day_end_positions": 83,
+    "completed_position_pnl": 1039.5759547627008,
+    "open_position_pnl_including_funding": -9.855618155199952
+  },
+  "trade_counts_by_day": [
+    {
+      "date": "2023-12-01",
+      "net_pnl": -0.2356868373,
+      "trades_opened": 14,
+      "completed_trades": 14,
+      "marked_end_positions": 0,
+      "paired_partial_fills": 26
+    },
+    {
+      "date": "2023-12-02",
+      "net_pnl": 1.5391268079,
+      "trades_opened": 20,
+      "completed_trades": 19,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 30
+    },
+    {
+      "date": "2023-12-03",
+      "net_pnl": -0.2625404757,
+      "trades_opened": 7,
+      "completed_trades": 6,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 13
+    },
+    {
+      "date": "2023-12-04",
+      "net_pnl": -0.7402103583,
+      "trades_opened": 39,
+      "completed_trades": 38,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 55
+    },
+    {
+      "date": "2023-12-05",
+      "net_pnl": 0.3541592996,
+      "trades_opened": 10,
+      "completed_trades": 9,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 15
+    },
+    {
+      "date": "2023-12-06",
+      "net_pnl": -0.0653079779,
+      "trades_opened": 7,
+      "completed_trades": 6,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 12
+    },
+    {
+      "date": "2023-12-07",
+      "net_pnl": 0.9217693168,
+      "trades_opened": 9,
+      "completed_trades": 8,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 14
+    },
+    {
+      "date": "2023-12-08",
+      "net_pnl": 0.1183454032,
+      "trades_opened": 3,
+      "completed_trades": 2,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 5
+    },
+    {
+      "date": "2023-12-09",
+      "net_pnl": 0.8898954801,
+      "trades_opened": 5,
+      "completed_trades": 4,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 5
+    },
+    {
+      "date": "2023-12-10",
+      "net_pnl": 0.0989322776,
+      "trades_opened": 2,
+      "completed_trades": 1,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2023-12-11",
+      "net_pnl": 146.8755059241,
+      "trades_opened": 403,
+      "completed_trades": 402,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 570
+    },
+    {
+      "date": "2023-12-12",
+      "net_pnl": 0.4241293604,
+      "trades_opened": 4,
+      "completed_trades": 3,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 8
+    },
+    {
+      "date": "2023-12-13",
+      "net_pnl": 0.933548496,
+      "trades_opened": 9,
+      "completed_trades": 8,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 14
+    },
+    {
+      "date": "2023-12-14",
+      "net_pnl": 81.4067350057,
+      "trades_opened": 295,
+      "completed_trades": 294,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 414
+    },
+    {
+      "date": "2023-12-15",
+      "net_pnl": 1.8989886692,
+      "trades_opened": 10,
+      "completed_trades": 9,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 12
+    },
+    {
+      "date": "2023-12-16",
+      "net_pnl": 0.5536010592,
+      "trades_opened": 3,
+      "completed_trades": 2,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 8
+    },
+    {
+      "date": "2023-12-17",
+      "net_pnl": 0.2398203553,
+      "trades_opened": 11,
+      "completed_trades": 10,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 16
+    },
+    {
+      "date": "2023-12-18",
+      "net_pnl": 0.2839311707,
+      "trades_opened": 7,
+      "completed_trades": 6,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 13
+    },
+    {
+      "date": "2023-12-19",
+      "net_pnl": 0.1631150632,
+      "trades_opened": 6,
+      "completed_trades": 5,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 9
+    },
+    {
+      "date": "2023-12-20",
+      "net_pnl": 1.4027753012,
+      "trades_opened": 8,
+      "completed_trades": 7,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 10
+    },
+    {
+      "date": "2023-12-21",
+      "net_pnl": 0.1684566215,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 1
+    },
+    {
+      "date": "2023-12-22",
+      "net_pnl": 0.1201370892,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 1
+    },
+    {
+      "date": "2023-12-23",
+      "net_pnl": 0.0395289577,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 2
+    },
+    {
+      "date": "2023-12-24",
+      "net_pnl": 12.2940468462,
+      "trades_opened": 106,
+      "completed_trades": 105,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 158
+    },
+    {
+      "date": "2023-12-25",
+      "net_pnl": -0.1054527915,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2023-12-26",
+      "net_pnl": 12.2763324021,
+      "trades_opened": 77,
+      "completed_trades": 76,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 104
+    },
+    {
+      "date": "2023-12-27",
+      "net_pnl": 0.337013955,
+      "trades_opened": 2,
+      "completed_trades": 1,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2023-12-28",
+      "net_pnl": 0.2331069073,
+      "trades_opened": 2,
+      "completed_trades": 1,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2023-12-29",
+      "net_pnl": 2.8777561355,
+      "trades_opened": 30,
+      "completed_trades": 29,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 39
+    },
+    {
+      "date": "2023-12-30",
+      "net_pnl": 0.1363235356,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 2
+    },
+    {
+      "date": "2023-12-31",
+      "net_pnl": 0.1999670983,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2024-01-01",
+      "net_pnl": -0.070096359,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2024-01-02",
+      "net_pnl": 0.7655321088,
+      "trades_opened": 2,
+      "completed_trades": 1,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2024-01-03",
+      "net_pnl": 150.6311790007,
+      "trades_opened": 575,
+      "completed_trades": 574,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 780
+    },
+    {
+      "date": "2024-01-04",
+      "net_pnl": 12.9279030446,
+      "trades_opened": 39,
+      "completed_trades": 38,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 54
+    },
+    {
+      "date": "2024-01-05",
+      "net_pnl": 106.6094837834,
+      "trades_opened": 358,
+      "completed_trades": 357,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 493
+    },
+    {
+      "date": "2024-01-06",
+      "net_pnl": 0.4547228944,
+      "trades_opened": 8,
+      "completed_trades": 7,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 13
+    },
+    {
+      "date": "2024-01-07",
+      "net_pnl": -0.5627752607,
+      "trades_opened": 28,
+      "completed_trades": 27,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 41
+    },
+    {
+      "date": "2024-01-08",
+      "net_pnl": 11.4334300845,
+      "trades_opened": 80,
+      "completed_trades": 79,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 125
+    },
+    {
+      "date": "2024-01-09",
+      "net_pnl": 219.7216933892,
+      "trades_opened": 788,
+      "completed_trades": 787,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 1136
+    },
+    {
+      "date": "2024-01-10",
+      "net_pnl": 169.5641549926,
+      "trades_opened": 816,
+      "completed_trades": 815,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 1191
+    },
+    {
+      "date": "2024-01-11",
+      "net_pnl": 14.7668196738,
+      "trades_opened": 98,
+      "completed_trades": 97,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 158
+    },
+    {
+      "date": "2024-01-12",
+      "net_pnl": 18.1095723432,
+      "trades_opened": 246,
+      "completed_trades": 245,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 354
+    },
+    {
+      "date": "2024-01-13",
+      "net_pnl": 0.5140298574,
+      "trades_opened": 11,
+      "completed_trades": 10,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 15
+    },
+    {
+      "date": "2024-01-14",
+      "net_pnl": 3.2906446197,
+      "trades_opened": 53,
+      "completed_trades": 52,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 77
+    },
+    {
+      "date": "2024-01-15",
+      "net_pnl": 1.4197038217,
+      "trades_opened": 29,
+      "completed_trades": 28,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 43
+    },
+    {
+      "date": "2024-01-16",
+      "net_pnl": 0.1289531593,
+      "trades_opened": 14,
+      "completed_trades": 13,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 25
+    },
+    {
+      "date": "2024-01-17",
+      "net_pnl": 0.5284015452,
+      "trades_opened": 15,
+      "completed_trades": 14,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 29
+    },
+    {
+      "date": "2024-01-18",
+      "net_pnl": 0.2260243275,
+      "trades_opened": 79,
+      "completed_trades": 78,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 118
+    },
+    {
+      "date": "2024-01-19",
+      "net_pnl": 1.0513537952,
+      "trades_opened": 13,
+      "completed_trades": 12,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 14
+    },
+    {
+      "date": "2024-01-20",
+      "net_pnl": 0.182699298,
+      "trades_opened": 5,
+      "completed_trades": 4,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 6
+    },
+    {
+      "date": "2024-01-21",
+      "net_pnl": 0.0557992372,
+      "trades_opened": 2,
+      "completed_trades": 1,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 5
+    },
+    {
+      "date": "2024-01-22",
+      "net_pnl": 5.301270561,
+      "trades_opened": 136,
+      "completed_trades": 135,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 208
+    },
+    {
+      "date": "2024-01-23",
+      "net_pnl": -0.143566569,
+      "trades_opened": 10,
+      "completed_trades": 9,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 15
+    },
+    {
+      "date": "2024-01-24",
+      "net_pnl": 0.0530892511,
+      "trades_opened": 10,
+      "completed_trades": 9,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 22
+    },
+    {
+      "date": "2024-01-25",
+      "net_pnl": -0.5574383023,
+      "trades_opened": 10,
+      "completed_trades": 9,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 23
+    },
+    {
+      "date": "2024-01-26",
+      "net_pnl": -2.9450859863,
+      "trades_opened": 75,
+      "completed_trades": 75,
+      "marked_end_positions": 0,
+      "paired_partial_fills": 95
+    },
+    {
+      "date": "2024-01-27",
+      "net_pnl": -0.3312570505,
+      "trades_opened": 7,
+      "completed_trades": 7,
+      "marked_end_positions": 0,
+      "paired_partial_fills": 15
+    },
+    {
+      "date": "2024-01-28",
+      "net_pnl": -0.2872722751,
+      "trades_opened": 29,
+      "completed_trades": 28,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 43
+    },
+    {
+      "date": "2024-01-29",
+      "net_pnl": -1.5930548341,
+      "trades_opened": 33,
+      "completed_trades": 32,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 50
+    },
+    {
+      "date": "2024-01-30",
+      "net_pnl": -0.979106083,
+      "trades_opened": 41,
+      "completed_trades": 41,
+      "marked_end_positions": 0,
+      "paired_partial_fills": 52
+    },
+    {
+      "date": "2024-01-31",
+      "net_pnl": -2.3886668909,
+      "trades_opened": 46,
+      "completed_trades": 45,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 80
+    },
+    {
+      "date": "2024-02-01",
+      "net_pnl": -0.987947073,
+      "trades_opened": 36,
+      "completed_trades": 35,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 62
+    },
+    {
+      "date": "2024-02-02",
+      "net_pnl": -1.0557618789,
+      "trades_opened": 28,
+      "completed_trades": 27,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 49
+    },
+    {
+      "date": "2024-02-03",
+      "net_pnl": -0.2008899995,
+      "trades_opened": 9,
+      "completed_trades": 9,
+      "marked_end_positions": 0,
+      "paired_partial_fills": 12
+    },
+    {
+      "date": "2024-02-04",
+      "net_pnl": 0.3073280253,
+      "trades_opened": 27,
+      "completed_trades": 27,
+      "marked_end_positions": 0,
+      "paired_partial_fills": 46
+    },
+    {
+      "date": "2024-02-05",
+      "net_pnl": -1.2905246759,
+      "trades_opened": 22,
+      "completed_trades": 21,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 33
+    },
+    {
+      "date": "2024-02-06",
+      "net_pnl": -0.1734653589,
+      "trades_opened": 10,
+      "completed_trades": 10,
+      "marked_end_positions": 0,
+      "paired_partial_fills": 14
+    },
+    {
+      "date": "2024-02-07",
+      "net_pnl": -0.6808492088,
+      "trades_opened": 17,
+      "completed_trades": 16,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 22
+    },
+    {
+      "date": "2024-02-08",
+      "net_pnl": -1.0874522025,
+      "trades_opened": 37,
+      "completed_trades": 37,
+      "marked_end_positions": 0,
+      "paired_partial_fills": 58
+    },
+    {
+      "date": "2024-02-09",
+      "net_pnl": 0.2628217457,
+      "trades_opened": 130,
+      "completed_trades": 129,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 181
+    },
+    {
+      "date": "2024-02-10",
+      "net_pnl": -0.1300874551,
+      "trades_opened": 17,
+      "completed_trades": 16,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 25
+    },
+    {
+      "date": "2024-02-11",
+      "net_pnl": -0.9623577567,
+      "trades_opened": 9,
+      "completed_trades": 8,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 10
+    },
+    {
+      "date": "2024-02-12",
+      "net_pnl": 0.8227206152,
+      "trades_opened": 13,
+      "completed_trades": 12,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 21
+    },
+    {
+      "date": "2024-02-13",
+      "net_pnl": 1.8607451975,
+      "trades_opened": 29,
+      "completed_trades": 28,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 45
+    },
+    {
+      "date": "2024-02-14",
+      "net_pnl": 0.2142096324,
+      "trades_opened": 5,
+      "completed_trades": 4,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 9
+    },
+    {
+      "date": "2024-02-15",
+      "net_pnl": 1.0413269777,
+      "trades_opened": 11,
+      "completed_trades": 10,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 16
+    },
+    {
+      "date": "2024-02-16",
+      "net_pnl": -0.1124635629,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 1
+    },
+    {
+      "date": "2024-02-17",
+      "net_pnl": 0.3337345602,
+      "trades_opened": 5,
+      "completed_trades": 4,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 10
+    },
+    {
+      "date": "2024-02-18",
+      "net_pnl": -0.0005407089,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2024-02-19",
+      "net_pnl": -0.0001077832,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 1
+    },
+    {
+      "date": "2024-02-20",
+      "net_pnl": 2.3891079049,
+      "trades_opened": 6,
+      "completed_trades": 5,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 9
+    },
+    {
+      "date": "2024-02-21",
+      "net_pnl": 1.901458145,
+      "trades_opened": 7,
+      "completed_trades": 6,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 9
+    },
+    {
+      "date": "2024-02-22",
+      "net_pnl": 2.7768961515,
+      "trades_opened": 15,
+      "completed_trades": 14,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 22
+    },
+    {
+      "date": "2024-02-23",
+      "net_pnl": 0.3792138127,
+      "trades_opened": 2,
+      "completed_trades": 1,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 2
+    },
+    {
+      "date": "2024-02-24",
+      "net_pnl": -0.0502164205,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 1
+    },
+    {
+      "date": "2024-02-25",
+      "net_pnl": -0.035541269,
+      "trades_opened": 1,
+      "completed_trades": 0,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 2
+    },
+    {
+      "date": "2024-02-26",
+      "net_pnl": 0.5009456292,
+      "trades_opened": 2,
+      "completed_trades": 1,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 3
+    },
+    {
+      "date": "2024-02-27",
+      "net_pnl": 1.0392282672,
+      "trades_opened": 2,
+      "completed_trades": 1,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 5
+    },
+    {
+      "date": "2024-02-28",
+      "net_pnl": 47.9685249486,
+      "trades_opened": 41,
+      "completed_trades": 40,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 64
+    },
+    {
+      "date": "2024-02-29",
+      "net_pnl": 1.4342890738,
+      "trades_opened": 4,
+      "completed_trades": 3,
+      "marked_end_positions": 1,
+      "paired_partial_fills": 5
+    }
+  ],
+  "top_five_trade_activity": {
+    "definition": "One trade is one flat-to-flat position ID, partial fills grouped; trades opened includes any position marked open at day-end.",
+    "top_five": [
+      {
+        "date": "2024-01-09",
+        "net_pnl": 219.7216933892,
+        "trades_opened": 788,
+        "completed_trades": 787,
+        "marked_end_positions": 1,
+        "paired_partial_fills": 1136
+      },
+      {
+        "date": "2024-01-10",
+        "net_pnl": 169.5641549926,
+        "trades_opened": 816,
+        "completed_trades": 815,
+        "marked_end_positions": 1,
+        "paired_partial_fills": 1191
+      },
+      {
+        "date": "2024-01-03",
+        "net_pnl": 150.6311790007,
+        "trades_opened": 575,
+        "completed_trades": 574,
+        "marked_end_positions": 1,
+        "paired_partial_fills": 780
+      },
+      {
+        "date": "2023-12-11",
+        "net_pnl": 146.8755059241,
+        "trades_opened": 403,
+        "completed_trades": 402,
+        "marked_end_positions": 1,
+        "paired_partial_fills": 570
+      },
+      {
+        "date": "2024-01-05",
+        "net_pnl": 106.6094837834,
+        "trades_opened": 358,
+        "completed_trades": 357,
+        "marked_end_positions": 1,
+        "paired_partial_fills": 493
+      }
+    ],
+    "top_five_total_trades": 2940,
+    "top_five_mean_trades": 588.0,
+    "other_days": 86,
+    "other_days_total_trades": 2301,
+    "other_days_mean_trades": 26.75581395348837,
+    "other_days_mean_completed_trades": 25.848837209302324,
+    "all_days_total_trades": 5241,
+    "all_days_mean_trades": 57.59340659340659
+  }
+}

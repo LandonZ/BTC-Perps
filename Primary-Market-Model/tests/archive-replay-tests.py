@@ -13,6 +13,8 @@ from pathlib import Path
 MODEL=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(MODEL/'tools'))
 from download_binance_maker import prepare, event, COLUMNS
+from sweep_entry_deviation import deviation_grid, small_events
+from sweep_entry_deviation_days import select_days
 
 START=1701388800000
 DAY=86400000
@@ -23,6 +25,65 @@ def write_csv(path, data):
 
 
 class ArchiveReplayTests(unittest.TestCase):
+    def test_multi_day_selection_is_distinct_and_reproducible(self):
+        days=[f'2024-01-{i:02d}' for i in range(1,32)]
+        selected=select_days(days,314,5)
+        self.assertEqual(selected,select_days(list(reversed(days)),314,5))
+        self.assertEqual(len(set(selected)),5)
+        self.assertTrue(set(selected).issubset(days))
+        with self.assertRaises(ValueError):select_days(days,314,32)
+
+    def test_sort_selected_days_excludes_intervening_days(self):
+        with tempfile.TemporaryDirectory(prefix='archive-selected-days-') as temporary:
+            root=Path(temporary)
+            times=[START+3*DAY,START+2*DAY+5,START+DAY,START+5,START+2*DAY+5,START]
+            data=[[i,100+i,.01,0,0,t,'true'] for i,t in enumerate(times)]
+            write_csv(root/'raw.csv',data)
+            with (root/'raw.csv').open('rb') as source,(root/'days.bin').open('wb') as output:
+                subprocess.run([str(MODEL/'build/archive-sort'),'T',str(root/'runs'),str(root),
+                                '2',str(START),str(START+3*DAY),f'{START},{START+2*DAY}'],
+                               stdin=source,stdout=output,stderr=subprocess.PIPE,check=True)
+            actual=list(struct.iter_unpack('=qddQ',(root/'days.bin').read_bytes()[16:]))
+            expected=sorted((t,float(100+i),.01,i) for i,t in enumerate(times)
+                            if t//DAY in (START//DAY,START//DAY+2))
+            self.assertEqual(actual,expected)
+
+    def test_sweep_grid_and_day_funding_premium_boundaries(self):
+        self.assertEqual(deviation_grid('1','5','.25'),[1+i/4 for i in range(17)])
+        for settings in [('1','5','0'),('1','5','.3'),('nan','5','.25')]:
+            with self.assertRaises(ValueError):deviation_grid(*settings)
+        with tempfile.TemporaryDirectory(prefix='sweep-small-test-') as temporary:
+            root=Path(temporary)
+            inputs={'mark':[[t,100] for t in [START-DAY,START,START+DAY]],
+                    'funding':[[t,8,.0001] for t in [START-DAY,START,START+DAY]],
+                    'premium':[[t,0,0,0,.001,0,t+59999] for t in [START-120000,START-60000,START,START+DAY-60000]]}
+            manifest={'sources':{}}
+            for name,data in inputs.items():
+                path=root/(name+'.zip')
+                with zipfile.ZipFile(path,'w') as archive:
+                    import io
+                    buffer=io.StringIO();csv.writer(buffer).writerows(data)
+                    archive.writestr(name+'.csv',buffer.getvalue())
+                manifest['sources'][name]={'path':str(path)}
+            actual=small_events(manifest,START,START+DAY)
+            self.assertEqual([int(r[0]) for r in actual if r[1]=='F'],[START])
+            self.assertEqual([int(r[0]) for r in actual if r[1]=='P'],[START,START+60000])
+            self.assertEqual([int(r[0]) for r in actual if r[1]=='R'],[START-8*3600000])
+
+    def test_sort_day_filter_preserves_stable_order_and_excludes_end(self):
+        with tempfile.TemporaryDirectory(prefix='archive-day-test-') as temporary:
+            root=Path(temporary)
+            times=[START+DAY,START+5,START-1,START,START+5,START+DAY-1]
+            data=[[i,100+i,.01,0,0,t,'true'] for i,t in enumerate(times)]
+            write_csv(root/'raw.csv',data)
+            with (root/'raw.csv').open('rb') as source,(root/'day.bin').open('wb') as output:
+                subprocess.run([str(MODEL/'build/archive-sort'),'T',str(root/'runs'),str(root),
+                                '2',str(START),str(START+DAY)],stdin=source,stdout=output,
+                               stderr=subprocess.PIPE,check=True)
+            records=list(struct.iter_unpack('=qddQ',(root/'day.bin').read_bytes()[16:]))
+            expected=sorted((t,float(100+i),.01,i) for i,t in enumerate(times) if START<=t<START+DAY)
+            self.assertEqual(records,expected)
+
     def test_matches_csv_engine_with_disorder_ties_funding_and_carried_inventory(self):
         with tempfile.TemporaryDirectory(prefix='archive-replay-test-') as temporary:
             root=Path(temporary)
@@ -116,6 +177,41 @@ class ArchiveReplayTests(unittest.TestCase):
             self.assertEqual(limited,json.loads((root/'limited-reference/summary.json').read_text()))
             self.assertTrue(limited['single_basis_position'])
             self.assertLessEqual(limited['max_open_gross_perp_btc'],.01+1e-9)
+            opposite_settings=[*limited_settings,'--exit-on-opposite-signal','1']
+            subprocess.run([str(MODEL/'build/basis-maker'),'--events',str(root/'events.csv'),
+                            '--premium-events',str(root/'premium.csv'),*opposite_settings,
+                            '--output',str(root/'opposite-reference')],check=True,capture_output=True)
+            subprocess.run([str(MODEL/'build/archive-replay'),str(root/'sources.tsv'),str(root/'small.csv'),
+                            str(root/'opposite-streaming'),*opposite_settings],check=True,capture_output=True)
+            opposite=json.loads((root/'opposite-streaming/summary.json').read_text())
+            self.assertEqual(opposite,json.loads((root/'opposite-reference/summary.json').read_text()))
+            self.assertTrue(opposite['exit_on_opposite_signal'])
+            self.assertGreater(opposite['opposite_signal_exit_pairs'],0)
+            self.assertLessEqual(opposite['max_open_gross_perp_btc'],.01+1e-9)
+            for terminal_close in (0,1):
+                batched=root/f'daily-batch-{terminal_close}'
+                reset_settings=[*opposite_settings,'--daily-reset','1','--close-at-day-end',str(terminal_close)]
+                subprocess.run([str(MODEL/'build/archive-replay'),str(root/'sources.tsv'),str(root/'small.csv'),
+                                str(batched),*reset_settings],check=True,capture_output=True)
+                manifest=json.loads((batched/'daily-trials.json').read_text())
+                self.assertEqual(len(manifest['dates']),3)
+                for day_index,day in enumerate(manifest['dates']):
+                    first=START+day_index*DAY
+                    with (root/'one-day.tsv').open('w') as handle:
+                        for kind,name in [('Q','book'),('T','trades'),('S','spot_trades')]:
+                            handle.write(f'{kind} {first} {first+DAY} {root/(name+".bin")} BINARY\n')
+                    independent=root/f'fresh-{terminal_close}-{day}'
+                    subprocess.run([str(MODEL/'build/archive-replay'),str(root/'one-day.tsv'),str(root/'small.csv'),
+                                    str(independent),*reset_settings],check=True,capture_output=True)
+                    actual=json.loads((batched/'days'/day/'summary.json').read_text())
+                    fresh=json.loads((independent/'days'/day/'summary.json').read_text())
+                    self.assertEqual(actual,fresh,'Batch replay must match a fresh process for every day')
+                    with (batched/'days'/day/'equity.csv').open() as handle:marks=list(csv.DictReader(handle))
+                    self.assertTrue(all(first<=int(point['time_ms'])<first+DAY for point in marks))
+                    if terminal_close:
+                        self.assertEqual(actual['open_gross_perp_btc'],0)
+                        self.assertEqual(actual['daily_trial_exit_pairs']+actual['funding_exit_pairs']+
+                                         actual['opposite_signal_exit_pairs'],actual['closed_pairs'])
 
     def test_multi_pass_sort_preserves_timestamp_ties_and_every_record(self):
         with tempfile.TemporaryDirectory(prefix='archive-sort-test-') as temporary:

@@ -1,0 +1,20 @@
+{
+  "side_attribution_marks": 131519,
+  "max_side_attribution_errors": {
+    "unrealized_pnl": 1.000000082740371e-10,
+    "realized_price_pnl": 6.999698598519899e-10,
+    "funding_pnl": 0,
+    "fees": 2.000888343900442e-10,
+    "net_pnl": 6.00152816332411e-10,
+    "open_btc": 0
+  },
+  "trial_count": 91,
+  "every_trial_starts_and_ends_flat": true,
+  "terminal_exit_costs_included": true,
+  "funding_settlements": 273,
+  "gross_funding_paid_usdt": 0,
+  "gross_funding_received_usdt": 12.3940876132,
+  "max_position_units": 1.0,
+  "max_payment_error_usdt": 8.870187917509043e-11,
+  "sum_of_daily_pnl_verified": true
+}

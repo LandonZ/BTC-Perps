@@ -6,6 +6,9 @@
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include <limits>
+#include <set>
+#include <sstream>
 #include <thread>
 #include <cerrno>
 #include <fcntl.h>
@@ -56,8 +59,22 @@ void merge(const std::vector<std::string>& paths,std::ostream& output) {
 int main(int argc,char** argv) {
     int slot=-1;
     try {
-        if ((argc!=4 && argc!=5) || std::string(argv[1]).size()!=1) throw std::runtime_error("Usage: archive-sort KIND RUN_DIRECTORY SLOT_DIRECTORY [CHUNK_ROWS]");
-        const std::size_t chunk_rows=argc==5?std::stoull(argv[4]):4000000;
+        if ((argc!=4 && argc!=5 && argc!=7 && argc!=8) || std::string(argv[1]).size()!=1) throw std::runtime_error("Usage: archive-sort KIND RUN_DIRECTORY SLOT_DIRECTORY [CHUNK_ROWS [START_MS END_MS [UTC_DAY_STARTS_MS]]]");
+        const std::size_t chunk_rows=argc>=5?std::stoull(argv[4]):4000000;
+        const auto start=argc>=7?std::stoll(argv[5]):std::numeric_limits<long long>::min();
+        const auto end=argc>=7?std::stoll(argv[6]):std::numeric_limits<long long>::max();
+        if(end<=start)throw std::runtime_error("Archive sort end must follow start");
+        std::set<long long> days;
+        if(argc==8) {
+            std::istringstream input(argv[7]);std::string value;
+            while(std::getline(input,value,',')) {
+                std::size_t parsed=0;const auto day=std::stoll(value,&parsed);
+                if(parsed!=value.size() || day%86400000 || day<start || day>=end)
+                    throw std::runtime_error("Invalid selected UTC day");
+                days.insert(day);
+            }
+            if(days.empty())throw std::runtime_error("Selected UTC days must not be empty");
+        }
         if(!chunk_rows)throw std::runtime_error("Archive sort chunk size must be positive");
         const char kind=argv[1][0];
         if (kind!='Q' && kind!='S' && kind!='T') throw std::runtime_error("Invalid archive kind");
@@ -92,6 +109,8 @@ int main(int argc,char** argv) {
         };
         while(std::getline(input,line)) {
             Record row;if(!parser.parse(line,row))continue;
+            if(row.time<start || row.time>=end)continue;
+            if(!days.empty() && !days.count(row.time/86400000*86400000))continue;
             if(!buffer.empty() && btc::archive::before(row,buffer.back()))ordered=false;
             buffer.push_back(row);++count;
             if(buffer.size()==chunk_rows)flush();
