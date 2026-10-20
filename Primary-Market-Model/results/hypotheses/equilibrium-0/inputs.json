@@ -1,0 +1,195 @@
+{
+  "months": [
+    "2023-12",
+    "2024-01",
+    "2024-02"
+  ],
+  "start_ms": 1701388800000,
+  "end_ms": 1709251200000,
+  "hypothesis": {
+    "equilibrium_bps": 0.0,
+    "entry_offset_bps": 1.5
+  },
+  "engine_sha256": "b824d0794ca75cea472d6f078c9fe37c8725470c19e7b6490c0de9ad4a9cdd94",
+  "archive_sort_sha256": "a79e6f353eeab3fb8e6bae44220433276e9c9f9c9bb973f0c3337b772072a0ec",
+  "sorting": "Exact stable external sort; all source rows retained",
+  "sources": [
+    {
+      "symbol": "BTCUSDT",
+      "month": "2023-12",
+      "start_ms": 1701388800000,
+      "end_ms": 1704067200000,
+      "sources": {
+        "spot_trades": {
+          "url": "https://data.binance.vision/data/spot/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/spot_trades/BTCUSDT-aggTrades-2023-12.zip",
+          "sha256": "a5a890bdf2cc349435f61bb134c7726fef1dd9d88bea7356716d5975f2ee5ce7",
+          "bytes": 483390162
+        },
+        "mark": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/mark/BTCUSDT-1m-2023-12.zip",
+          "sha256": "6c5f2473e4cbb328b7ec271c075c2203ae9b3eb23b53a2cf36325bcb2d0e3741",
+          "bytes": 1057725
+        },
+        "funding": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/funding/BTCUSDT-fundingRate-2023-12.zip",
+          "sha256": "8f02fdd2a2da261bbf13ab301c74bdb57fae005f19d5088e9ece5f8824c1a2a7",
+          "bytes": 810
+        },
+        "trades": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/trades/BTCUSDT-aggTrades-2023-12.zip",
+          "sha256": "f56d85c15dc93b658f808c56688658d9f9aabe9797823b973830b3696642d03f",
+          "bytes": 431442108
+        },
+        "premium": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/premium/BTCUSDT-1m-2023-12.zip",
+          "sha256": "d246dba0425eb7c601366adda6539f9427f47b3744f0efb87ce2d59c27f7eb2b",
+          "bytes": 877059
+        },
+        "book": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/bookTicker/BTCUSDT/BTCUSDT-bookTicker-2023-12.zip",
+          "path": "data/binance/maker/2023-12/archives/book/BTCUSDT-bookTicker-2023-12.zip",
+          "sha256": "f6b0a74101fdfd30c2ee0cd364470428e355d0eabc0621182c1a686da14a6c33",
+          "bytes": 5297950404
+        }
+      },
+      "status": "checksum_verified",
+      "usage": "Monthly source ZIPs for continuous archive replay or reference CSV conversion. Spot trades remain a midpoint proxy.",
+      "coverage_checks": {
+        "mark_minutes": 44640,
+        "funding_settlements": 93,
+        "premium_minutes": 44640,
+        "tick_coverage": "Every UTC day present; sorted source counts and maximum gaps checked in build/current/coverage.csv",
+        "source_rows": {
+          "Q": 478791247,
+          "S": 35370512,
+          "T": 32959424
+        },
+        "max_quote_gap_ms": 469904
+      },
+      "downloaded_bytes": 6214718268
+    },
+    {
+      "symbol": "BTCUSDT",
+      "month": "2024-01",
+      "start_ms": 1704067200000,
+      "end_ms": 1706745600000,
+      "sources": {
+        "trades": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/trades/BTCUSDT-aggTrades-2024-01.zip",
+          "sha256": "d752f50932091dd209803187ca2354a9eadbfe8e4b9c481c3581a1bbb1bd8282",
+          "bytes": 522743749
+        },
+        "mark": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/mark/BTCUSDT-1m-2024-01.zip",
+          "sha256": "1607b1522928d2a698592019fef7c3fcc9bee2cd01674c72a27e7fc028fd66ca",
+          "bytes": 1153812
+        },
+        "funding": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/funding/BTCUSDT-fundingRate-2024-01.zip",
+          "sha256": "3e0d30870672aa8f0f937881056e3cfd55913ae5c780cd50b33f2763aa0ba58e",
+          "bytes": 696
+        },
+        "premium": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/premium/BTCUSDT-1m-2024-01.zip",
+          "sha256": "e799edfbb6c25ef363613e9f70555c75514fbc01c90afc9546dc17419d9eba9a",
+          "bytes": 880055
+        },
+        "spot_trades": {
+          "url": "https://data.binance.vision/data/spot/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/spot_trades/BTCUSDT-aggTrades-2024-01.zip",
+          "sha256": "6713db84b8836aec43bb52471735b2e057ed2cd8b571d7bdc81672826d8c8a19",
+          "bytes": 566954365
+        },
+        "book": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/bookTicker/BTCUSDT/BTCUSDT-bookTicker-2024-01.zip",
+          "path": "data/binance/maker/2024-01/archives/book/BTCUSDT-bookTicker-2024-01.zip",
+          "sha256": "05ab114597172885508f8ab78ecd9999d95a99803993549ba46eaeefd0587b95",
+          "bytes": 6952660870
+        }
+      },
+      "status": "checksum_verified",
+      "usage": "Monthly source ZIPs for continuous archive replay or reference CSV conversion. Spot trades remain a midpoint proxy.",
+      "coverage_checks": {
+        "mark_minutes": 44640,
+        "funding_settlements": 93,
+        "premium_minutes": 44640,
+        "tick_coverage": "Every UTC day present; sorted source counts and maximum gaps checked in build/current/coverage.csv",
+        "source_rows": {
+          "Q": 725011366,
+          "S": 41962464,
+          "T": 40294620
+        },
+        "max_quote_gap_ms": 826416
+      },
+      "downloaded_bytes": 8044393547
+    },
+    {
+      "symbol": "BTCUSDT",
+      "month": "2024-02",
+      "start_ms": 1706745600000,
+      "end_ms": 1709251200000,
+      "sources": {
+        "mark": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/mark/BTCUSDT-1m-2024-02.zip",
+          "sha256": "2e6f24f3bc92a7d241d5dbcfc79c54a0aa24b26ad12b4988f61a8c8d93e867fc",
+          "bytes": 990137
+        },
+        "trades": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/trades/BTCUSDT-aggTrades-2024-02.zip",
+          "sha256": "3c2426d3f2435ace18b0e9b3acf45144b1710dad08cb184487539d5d829ccef3",
+          "bytes": 472350747
+        },
+        "spot_trades": {
+          "url": "https://data.binance.vision/data/spot/monthly/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/spot_trades/BTCUSDT-aggTrades-2024-02.zip",
+          "sha256": "5134af82d946b46c2be160f71d94e3ef5b0f4e8565b4211869169092ea7e5ca5",
+          "bytes": 504930291
+        },
+        "funding": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/funding/BTCUSDT-fundingRate-2024-02.zip",
+          "sha256": "daf1e4901e3d6436d82ad60f90d007eb5300be8047cfef121007203a7212cde6",
+          "bytes": 776
+        },
+        "premium": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/premium/BTCUSDT-1m-2024-02.zip",
+          "sha256": "4d1cc8c4ea65ecbdb806b06eaade4ba76a2b551338d2110e39ecdbea3805d1ea",
+          "bytes": 817138
+        },
+        "book": {
+          "url": "https://data.binance.vision/data/futures/um/monthly/bookTicker/BTCUSDT/BTCUSDT-bookTicker-2024-02.zip",
+          "path": "data/binance/maker/2024-02/archives/book/BTCUSDT-bookTicker-2024-02.zip",
+          "sha256": "2aea15b4f9b9f9731bad294327e4e7e43b2a43bc9a2d2c6b04d0826e2bb7b397",
+          "bytes": 8270743447
+        }
+      },
+      "status": "checksum_verified",
+      "usage": "Monthly source ZIPs for continuous archive replay or reference CSV conversion. Spot trades remain a midpoint proxy.",
+      "coverage_checks": {
+        "mark_minutes": 41760,
+        "funding_settlements": 87,
+        "premium_minutes": 41760,
+        "tick_coverage": "Every UTC day present; sorted source counts and maximum gaps checked in build/current/coverage.csv",
+        "source_rows": {
+          "Q": 942461817,
+          "S": 37492760,
+          "T": 36317913
+        },
+        "max_quote_gap_ms": 2587922
+      },
+      "downloaded_bytes": 9249832536
+    }
+  ]
+}

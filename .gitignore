@@ -7,8 +7,3 @@ __pycache__/
 
 # Local builds; retain only the latest self-contained report
 Primary-Market-Model/build/
-Primary-Market-Model/results/*
-!Primary-Market-Model/results/result.html
-!Primary-Market-Model/results/result.png
-!Primary-Market-Model/results/trials.json
-!Primary-Market-Model/results/trials.png

@@ -1,0 +1,14 @@
+{
+  "description": "Preserved -5 bp target, -6.5/-3.5 bp entries, any-payer funding exits",
+  "sha256": {
+    "summary.json": "1226c32ad9b417eb8e036c1009a1d3b7968f0308dc838a1cf37208ed8f756db7",
+    "coverage.csv": "aa26bb55b7399fe15d16c58bb7c1be541dfdb18f85041c0e3fc1af647635033e",
+    "inputs.json": "a441211cf006698814918b0df4d2023c3a016eb1d2bd766ebbc17e14b2c3b5de",
+    "validation.json": "386f473a0af1ac2ad3210b0b8fdf6123543e946888eaf877be0aa05f94df9356",
+    "equity.csv": "c4caaea36c7817615483d4577695ceba1cf0a82d2fa23fbff5a8ffd2c001cc25",
+    "result.png": "30924bde63afef83f136ddb9dd4329645fd868b920aaaa6ccdb7cd2f0150dd2f",
+    "result.html": "5f695538b6106edcb000e36d80c8463688fa86189c6e547d16cbd4a91bb71e3d",
+    "trials.png": "563443f17dd609e88564ecd6fbc7bc924b424d8671d746d70458c3f93602269d",
+    "trials.json": "648670fcba61e99bf358a1dac264189c9fe3f28164cd33270e06021bcc7b5074"
+  }
+}

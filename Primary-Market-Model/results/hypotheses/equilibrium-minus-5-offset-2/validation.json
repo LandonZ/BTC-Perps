@@ -1,0 +1,16 @@
+{
+  "funding_settlements": 273,
+  "max_payment_error_usdt": 7.916241884231567e-09,
+  "gross_funding_paid_usdt": 0,
+  "gross_funding_received_usdt": 81449722.18882878,
+  "paying_side_settlements": [],
+  "side_attribution_marks": 131609,
+  "max_side_attribution_errors": {
+    "unrealized_pnl": 1.600012183189392e-06,
+    "realized_price_pnl": 1.1827614798676223e-07,
+    "funding_pnl": 4.470348358154297e-08,
+    "fees": 5.093170329928398e-09,
+    "net_pnl": 1.5497207641601562e-06,
+    "open_btc": 9.022187441587448e-10
+  }
+}

@@ -1,0 +1,1615 @@
+{
+  "continuous_inventory": true,
+  "trial_definition": "UTC daily changes in total marked equity from one continuous run; inventory carries across days and months",
+  "hypothesis": "H0: mean daily marked equity change <= 0; H1: mean > 0",
+  "interpretation": "Hypothesis tested on previously inspected history; dependent daily USD PnL, not fixed-capital returns or proof of live profitability",
+  "sample_note": "Hypothesis tested on previously inspected history. Carried inventory makes daily PnL dependent; tests are in-sample diagnostics.",
+  "limitations": [
+    "Queue, impact, depth, borrowing costs, margin and liquidation omitted; unlimited inventory.",
+    "Spot last-trade midpoint proxy and assumed 1 bp full spread; zero latency.",
+    "Funding exits use causal premium-minute CLOSE proxies.",
+    "HAC and block bootstrap address some serial dependence but not structural change or fill-model error.",
+    "Quote gaps reach 43.1 minutes; stale books pause entries, while held positions remain marked at last observed prices."
+  ],
+  "statistics": {
+    "n": 91,
+    "total": 54978732.80538141,
+    "mean": 604161.8989602353,
+    "median": 437579.45949015766,
+    "std": 838536.5181328442,
+    "positive": 85,
+    "minimum": -592281.089596536,
+    "maximum": 5980567.639373727,
+    "lag1_correlation": 0.5156834198938847,
+    "t_test": {
+      "statistic": 6.873090282388479,
+      "df": 90,
+      "p_one_sided": 3.980719656260743e-10,
+      "standard_error": 87902.51169962545,
+      "ci95_two_sided": [
+        429528.2169026743,
+        778795.5810177963
+      ]
+    },
+    "hac": {
+      "3": {
+        "effective_lags": 3,
+        "standard_error": 127924.18770217293,
+        "statistic": 4.7228120796578095,
+        "p_one_sided": 1.1630288109844247e-06,
+        "ci95_asymptotic": [
+          353435.0983124346,
+          854888.699608036
+        ]
+      },
+      "7": {
+        "effective_lags": 7,
+        "standard_error": 149951.1794679696,
+        "statistic": 4.029057331218175,
+        "p_one_sided": 2.800048052579822e-05,
+        "ci95_asymptotic": [
+          310262.9877637128,
+          898060.8101567577
+        ]
+      }
+    },
+    "block_bootstrap": {
+      "3": {
+        "samples": 20000,
+        "seed": 20261021,
+        "p_one_sided_centered": 4.999750012499375e-05,
+        "ci95_basic": [
+          356113.62913989834,
+          794772.9063869985
+        ]
+      },
+      "7": {
+        "samples": 20000,
+        "seed": 20261025,
+        "p_one_sided_centered": 9.99950002499875e-05,
+        "ci95_basic": [
+          319264.13829542685,
+          828409.8828583164
+        ]
+      }
+    }
+  },
+  "price_only_statistics": {
+    "n": 91,
+    "total": -2592709.088844627,
+    "mean": -28491.308668622278,
+    "median": -157.39894443429966,
+    "std": 348957.00042857986,
+    "positive": 45,
+    "minimum": -1165952.125285686,
+    "maximum": 1089323.8194360363,
+    "lag1_correlation": -0.2504922899121001,
+    "t_test": {
+      "statistic": -0.7788631895989686,
+      "df": 90,
+      "p_one_sided": 0.780948300617988,
+      "standard_error": 36580.63322172442,
+      "ci95_two_sided": [
+        -101165.12137304465,
+        44182.504035800084
+      ]
+    },
+    "hac": {
+      "3": {
+        "effective_lags": 3,
+        "standard_error": 31191.484237231783,
+        "statistic": -0.9134322833734717,
+        "p_one_sided": 0.8194923834786554,
+        "ci95_asymptotic": [
+          -89625.49439794537,
+          32642.877060700815
+        ]
+      },
+      "7": {
+        "effective_lags": 7,
+        "standard_error": 31013.006312164274,
+        "statistic": -0.9186890294297941,
+        "p_one_sided": 0.8208708751827047,
+        "ci95_asymptotic": [
+          -89275.68409277762,
+          32293.066755533062
+        ]
+      }
+    },
+    "block_bootstrap": {
+      "3": {
+        "samples": 20000,
+        "seed": 20261021,
+        "p_one_sided_centered": 0.8266586670666467,
+        "ci95_basic": [
+          -86525.48633941603,
+          33832.588821239784
+        ]
+      },
+      "7": {
+        "samples": 20000,
+        "seed": 20261025,
+        "p_one_sided_centered": 0.8285585720713964,
+        "ci95_basic": [
+          -82582.98892881838,
+          34194.919225942605
+        ]
+      }
+    }
+  },
+  "trials": [
+    {
+      "date": "2023-12-01",
+      "summary": {
+        "net_pnl": -9290.8292209715,
+        "price_pnl": -4240.1550766723,
+        "fees": 5187.8088887671,
+        "funding_pnl": 137.1347444679,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-02",
+      "summary": {
+        "net_pnl": 257.8151749254994,
+        "price_pnl": 3203.3283768929005,
+        "fees": 3360.7273213272,
+        "funding_pnl": 415.21411935980007,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-03",
+      "summary": {
+        "net_pnl": 1163.6111245506008,
+        "price_pnl": 3137.0670110871997,
+        "fees": 3339.6872688883996,
+        "funding_pnl": 1366.2313823517998,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-04",
+      "summary": {
+        "net_pnl": 27742.648089755497,
+        "price_pnl": 20882.126099513902,
+        "fees": 3172.5140934698993,
+        "funding_pnl": 10033.0360837116,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-05",
+      "summary": {
+        "net_pnl": 17146.5301768382,
+        "price_pnl": -2252.966622948701,
+        "fees": 2340.5176919037003,
+        "funding_pnl": 21740.014491690505,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-06",
+      "summary": {
+        "net_pnl": 27858.633842369898,
+        "price_pnl": -8870.1133911311,
+        "fees": 2636.3204881517995,
+        "funding_pnl": 39365.06772165289,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-07",
+      "summary": {
+        "net_pnl": 6292.766167281101,
+        "price_pnl": -44986.21191358571,
+        "fees": 2530.6862741616023,
+        "funding_pnl": 53809.664355028406,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-08",
+      "summary": {
+        "net_pnl": 34110.4982030565,
+        "price_pnl": -86208.2441502809,
+        "fees": 2216.687571572198,
+        "funding_pnl": 122535.4299249096,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-09",
+      "summary": {
+        "net_pnl": 273030.29825796187,
+        "price_pnl": 113266.8844605684,
+        "fees": 1590.3325045815,
+        "funding_pnl": 161353.7463019749,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-10",
+      "summary": {
+        "net_pnl": 199768.81030571717,
+        "price_pnl": 5219.1656500697,
+        "fees": 1291.7871979285992,
+        "funding_pnl": 195841.4318535761,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-11",
+      "summary": {
+        "net_pnl": 136849.56013750704,
+        "price_pnl": 28024.9421400428,
+        "fees": 3192.7493320061003,
+        "funding_pnl": 112017.36732947035,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-12",
+      "summary": {
+        "net_pnl": 66754.41619223577,
+        "price_pnl": -42140.4227995277,
+        "fees": 2403.8680214437045,
+        "funding_pnl": 111298.70701320714,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-13",
+      "summary": {
+        "net_pnl": 321462.2111426109,
+        "price_pnl": 178779.4512189031,
+        "fees": 2458.069719514897,
+        "funding_pnl": 145140.82964322274,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-14",
+      "summary": {
+        "net_pnl": 95643.86495528393,
+        "price_pnl": -44977.811698079095,
+        "fees": 1474.3741135036034,
+        "funding_pnl": 142096.05076686665,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-15",
+      "summary": {
+        "net_pnl": -62806.87638565083,
+        "price_pnl": -211784.3703631163,
+        "fees": 1888.9152541566,
+        "funding_pnl": 150866.409231622,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-16",
+      "summary": {
+        "net_pnl": 392439.2491440468,
+        "price_pnl": 233688.66608655447,
+        "fees": 1157.4676846891962,
+        "funding_pnl": 159908.05074218148,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-17",
+      "summary": {
+        "net_pnl": 2067.035979094915,
+        "price_pnl": -162433.845908761,
+        "fees": 1589.397057456299,
+        "funding_pnl": 166090.27894531214,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-18",
+      "summary": {
+        "net_pnl": 342971.7766887981,
+        "price_pnl": 118279.7603843212,
+        "fees": 2357.0557024793015,
+        "funding_pnl": 227049.0720069562,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-19",
+      "summary": {
+        "net_pnl": 71140.3051622808,
+        "price_pnl": -121444.159866333,
+        "fees": 2128.7075368041988,
+        "funding_pnl": 194713.17256541806,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-20",
+      "summary": {
+        "net_pnl": 17248.834782102378,
+        "price_pnl": -292695.3057820797,
+        "fees": 2462.247120346503,
+        "funding_pnl": 312406.3876845285,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-21",
+      "summary": {
+        "net_pnl": 735699.8712098198,
+        "price_pnl": 92329.85561037072,
+        "fees": 1960.8183377922978,
+        "funding_pnl": 645330.8339372417,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-22",
+      "summary": {
+        "net_pnl": 699047.4510127949,
+        "price_pnl": 78202.64776349059,
+        "fees": 1792.3590220202968,
+        "funding_pnl": 622637.1622713245,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-23",
+      "summary": {
+        "net_pnl": 474857.6715938193,
+        "price_pnl": 133788.0450003148,
+        "fees": 970.9903889180059,
+        "funding_pnl": 342040.6169824223,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-24",
+      "summary": {
+        "net_pnl": 552314.1919528632,
+        "price_pnl": 126101.7529269456,
+        "fees": 1361.7136628386943,
+        "funding_pnl": 427574.1526887561,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-25",
+      "summary": {
+        "net_pnl": 128345.1211765632,
+        "price_pnl": -375951.09517598146,
+        "fees": 1444.8493989269045,
+        "funding_pnl": 505741.06575147156,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-26",
+      "summary": {
+        "net_pnl": 986560.5217420664,
+        "price_pnl": 128534.02187263969,
+        "fees": 2011.585723311,
+        "funding_pnl": 860038.0855927384,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-27",
+      "summary": {
+        "net_pnl": 1007740.4040864771,
+        "price_pnl": 107952.6563159227,
+        "fees": 1777.607351782397,
+        "funding_pnl": 901565.3551223362,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-28",
+      "summary": {
+        "net_pnl": 726243.281180921,
+        "price_pnl": -249296.80109107494,
+        "fees": 1810.9773879261993,
+        "funding_pnl": 977351.0596599225,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-29",
+      "summary": {
+        "net_pnl": 1693956.4167290572,
+        "price_pnl": 194204.28267467022,
+        "fees": 2071.7057487300044,
+        "funding_pnl": 1501823.8398031173,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-30",
+      "summary": {
+        "net_pnl": 1026591.2907983698,
+        "price_pnl": -138168.07789564133,
+        "fees": 1258.1038661013008,
+        "funding_pnl": 1166017.4725601114,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2023-12-31",
+      "summary": {
+        "net_pnl": 1098731.1952052154,
+        "price_pnl": 90558.92529320711,
+        "fees": 1216.5869644854902,
+        "funding_pnl": 1009388.8568764944,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-01",
+      "summary": {
+        "net_pnl": 537784.6251102854,
+        "price_pnl": -518493.88887035847,
+        "fees": 1445.4657943907077,
+        "funding_pnl": 1057723.979775034,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-02",
+      "summary": {
+        "net_pnl": 2305170.0574071854,
+        "price_pnl": 481758.998916626,
+        "fees": 3172.432765889098,
+        "funding_pnl": 1826583.4912564494,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-03",
+      "summary": {
+        "net_pnl": 1387357.1177870352,
+        "price_pnl": 798683.2824912071,
+        "fees": 2702.977019084108,
+        "funding_pnl": 591376.8123149127,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-04",
+      "summary": {
+        "net_pnl": 701725.7637638915,
+        "price_pnl": 332737.3989429474,
+        "fees": 1221.6058438373875,
+        "funding_pnl": 370209.9706647806,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-05",
+      "summary": {
+        "net_pnl": 164355.1522790827,
+        "price_pnl": -212111.48742198944,
+        "fees": 2360.9290599661035,
+        "funding_pnl": 378827.56876103766,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-06",
+      "summary": {
+        "net_pnl": 722470.4459288716,
+        "price_pnl": 343214.84651207924,
+        "fees": 734.2721167968994,
+        "funding_pnl": 379989.87153358944,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-07",
+      "summary": {
+        "net_pnl": 390107.9044951387,
+        "price_pnl": 11826.589298963547,
+        "fees": 2936.6780712289037,
+        "funding_pnl": 381217.9932674039,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-08",
+      "summary": {
+        "net_pnl": -592281.089596536,
+        "price_pnl": -972415.6464502811,
+        "fees": 3741.8503289780056,
+        "funding_pnl": 383876.4071827233,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-09",
+      "summary": {
+        "net_pnl": 949150.8167774975,
+        "price_pnl": 534670.5073857307,
+        "fees": 1943.6684124051972,
+        "funding_pnl": 416423.9778041709,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-10",
+      "summary": {
+        "net_pnl": 264748.0951561779,
+        "price_pnl": -149238.58205199242,
+        "fees": 2932.215749217299,
+        "funding_pnl": 416918.89295738935,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-11",
+      "summary": {
+        "net_pnl": 777635.6469023973,
+        "price_pnl": 341030.6648962498,
+        "fees": 2735.7221131077968,
+        "funding_pnl": 439340.7041192539,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-12",
+      "summary": {
+        "net_pnl": 219961.82693307102,
+        "price_pnl": -221095.33718895912,
+        "fees": 3219.0291703104012,
+        "funding_pnl": 444276.1932923421,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-13",
+      "summary": {
+        "net_pnl": 701325.9356791601,
+        "price_pnl": 265820.0237131119,
+        "fees": 1013.6116461872007,
+        "funding_pnl": 436519.52361223474,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-14",
+      "summary": {
+        "net_pnl": 299514.2944066487,
+        "price_pnl": -139534.80204582214,
+        "fees": 694.329810670999,
+        "funding_pnl": 439743.4262631424,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-15",
+      "summary": {
+        "net_pnl": 391153.8555187695,
+        "price_pnl": -45165.266292095184,
+        "fees": 688.4042036767933,
+        "funding_pnl": 437007.52601454034,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-16",
+      "summary": {
+        "net_pnl": 754631.7401755974,
+        "price_pnl": 309305.42954206467,
+        "fees": 777.5904566763056,
+        "funding_pnl": 446103.90109020844,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-17",
+      "summary": {
+        "net_pnl": 23205.972268473357,
+        "price_pnl": -422794.55464959145,
+        "fees": 437.5660194975062,
+        "funding_pnl": 446438.0929375626,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-18",
+      "summary": {
+        "net_pnl": 854159.7343834303,
+        "price_pnl": 407301.732016325,
+        "fees": 1110.1411364980013,
+        "funding_pnl": 447968.1435036026,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-19",
+      "summary": {
+        "net_pnl": 172036.62960627303,
+        "price_pnl": -259909.58437514305,
+        "fees": 1405.351859103088,
+        "funding_pnl": 433351.56584051996,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-20",
+      "summary": {
+        "net_pnl": 700486.5355810374,
+        "price_pnl": 258828.348392725,
+        "fees": 176.01016678850283,
+        "funding_pnl": 441834.19735510275,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-21",
+      "summary": {
+        "net_pnl": 307150.7650230713,
+        "price_pnl": -134991.4051811695,
+        "fees": 264.50783966590825,
+        "funding_pnl": 442406.67804390565,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-22",
+      "summary": {
+        "net_pnl": 458591.17192564905,
+        "price_pnl": 23748.814019680023,
+        "fees": 1924.3609795146913,
+        "funding_pnl": 436766.7188854851,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-23",
+      "summary": {
+        "net_pnl": 656804.1322153062,
+        "price_pnl": 237728.45061731339,
+        "fees": 1118.1677549023007,
+        "funding_pnl": 420193.8493528925,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-24",
+      "summary": {
+        "net_pnl": 369226.56927350536,
+        "price_pnl": -53195.54431986809,
+        "fees": 3234.7091884655965,
+        "funding_pnl": 425656.8227818422,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-25",
+      "summary": {
+        "net_pnl": 478072.3870614283,
+        "price_pnl": 55098.36689352989,
+        "fees": 3002.9417337712075,
+        "funding_pnl": 425976.96190166846,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-26",
+      "summary": {
+        "net_pnl": 751135.9887857027,
+        "price_pnl": 327059.88443756104,
+        "fees": 6606.683908838895,
+        "funding_pnl": 430682.7882569805,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-27",
+      "summary": {
+        "net_pnl": 445723.8203429617,
+        "price_pnl": 44214.64577412605,
+        "fees": 2771.8970054199017,
+        "funding_pnl": 404281.0715742558,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-28",
+      "summary": {
+        "net_pnl": 58714.240360517055,
+        "price_pnl": -307348.69974160194,
+        "fees": 4467.0860692521965,
+        "funding_pnl": 370530.02617137134,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-29",
+      "summary": {
+        "net_pnl": 613946.9609274529,
+        "price_pnl": 182364.63524222374,
+        "fees": 5392.021164662001,
+        "funding_pnl": 436974.34684988856,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-30",
+      "summary": {
+        "net_pnl": 643318.7624438629,
+        "price_pnl": 269837.8184156418,
+        "fees": 5543.435351929496,
+        "funding_pnl": 379024.37938015163,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-01-31",
+      "summary": {
+        "net_pnl": 208115.13436770812,
+        "price_pnl": -125007.4920334816,
+        "fees": 6421.527304467221,
+        "funding_pnl": 339544.1537056565,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-01",
+      "summary": {
+        "net_pnl": 122168.3650261797,
+        "price_pnl": -324023.46798467636,
+        "fees": 5586.185892561276,
+        "funding_pnl": 451778.0189034194,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-02",
+      "summary": {
+        "net_pnl": 721565.2769601978,
+        "price_pnl": 266751.83482837677,
+        "fees": 4553.915599032101,
+        "funding_pnl": 459367.3577308506,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-03",
+      "summary": {
+        "net_pnl": 401331.7327878475,
+        "price_pnl": 25647.639161109924,
+        "fees": 2258.6291706810007,
+        "funding_pnl": 377942.7227974199,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-04",
+      "summary": {
+        "net_pnl": 187504.79775140062,
+        "price_pnl": -223254.9079310894,
+        "fees": 2954.447889780713,
+        "funding_pnl": 413714.1535722725,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-05",
+      "summary": {
+        "net_pnl": 559588.8601016998,
+        "price_pnl": 109647.22180342674,
+        "fees": 5440.4526452914,
+        "funding_pnl": 455382.09094356373,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-06",
+      "summary": {
+        "net_pnl": 543933.5305143148,
+        "price_pnl": 140905.5811882019,
+        "fees": 4394.868213932699,
+        "funding_pnl": 407422.8175400458,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-07",
+      "summary": {
+        "net_pnl": 437579.45949015766,
+        "price_pnl": 118758.85440087318,
+        "fees": 5119.091659664991,
+        "funding_pnl": 323939.6967489496,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-08",
+      "summary": {
+        "net_pnl": 153053.44485602528,
+        "price_pnl": -142277.97216677666,
+        "fees": 7137.872317711095,
+        "funding_pnl": 302469.28934051096,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-09",
+      "summary": {
+        "net_pnl": 257090.26682930812,
+        "price_pnl": -111497.29803705215,
+        "fees": 10438.932731198001,
+        "funding_pnl": 379026.4975975603,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-10",
+      "summary": {
+        "net_pnl": 526856.3859350719,
+        "price_pnl": 61128.766495227814,
+        "fees": 4592.066135759611,
+        "funding_pnl": 470319.6855756007,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-11",
+      "summary": {
+        "net_pnl": -268620.5248117149,
+        "price_pnl": -777602.5544052124,
+        "fees": 3007.4937445028045,
+        "funding_pnl": 511989.5233380012,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-12",
+      "summary": {
+        "net_pnl": -299005.9980191849,
+        "price_pnl": -818407.2793719769,
+        "fees": 2339.4839869663992,
+        "funding_pnl": 521740.76533975825,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-13",
+      "summary": {
+        "net_pnl": 1634964.500530444,
+        "price_pnl": 1092005.7074286938,
+        "fees": 2681.887992657488,
+        "funding_pnl": 545640.681094408,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-14",
+      "summary": {
+        "net_pnl": -550513.8878462166,
+        "price_pnl": -1162905.987575531,
+        "fees": 3046.137710155017,
+        "funding_pnl": 615438.2374394722,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-15",
+      "summary": {
+        "net_pnl": 983084.6341100112,
+        "price_pnl": 379203.8910918236,
+        "fees": 3469.291440603585,
+        "funding_pnl": 607350.03445879,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-16",
+      "summary": {
+        "net_pnl": 383273.8337803818,
+        "price_pnl": -240109.4305696488,
+        "fees": 2359.699657879217,
+        "funding_pnl": 625742.9640079066,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-17",
+      "summary": {
+        "net_pnl": 255656.874383457,
+        "price_pnl": -506480.19881367683,
+        "fees": 2120.091850716679,
+        "funding_pnl": 764257.1650478542,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-18",
+      "summary": {
+        "net_pnl": 1013378.6984340474,
+        "price_pnl": -59753.746591091156,
+        "fees": 1729.6315630523022,
+        "funding_pnl": 1074862.076588191,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-19",
+      "summary": {
+        "net_pnl": 1200438.4669088349,
+        "price_pnl": -41387.01330423355,
+        "fees": 2072.0899994318024,
+        "funding_pnl": 1243897.5702124983,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-20",
+      "summary": {
+        "net_pnl": 951346.7452054024,
+        "price_pnl": 15112.32615327835,
+        "fees": 3303.37801471859,
+        "funding_pnl": 939537.797066845,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-21",
+      "summary": {
+        "net_pnl": 1162978.0600497648,
+        "price_pnl": 443895.5415315628,
+        "fees": 2730.6109158540203,
+        "funding_pnl": 721813.1294340566,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-22",
+      "summary": {
+        "net_pnl": 849151.992044881,
+        "price_pnl": -2275.8113837242126,
+        "fees": 2216.5832623424067,
+        "funding_pnl": 853644.3866909444,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-23",
+      "summary": {
+        "net_pnl": 820910.0088256821,
+        "price_pnl": 38259.47073125839,
+        "fees": 1988.6573292079847,
+        "funding_pnl": 784639.1954236329,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-24",
+      "summary": {
+        "net_pnl": 424445.13712877035,
+        "price_pnl": -296784.98751211155,
+        "fees": 1150.8349312411156,
+        "funding_pnl": 722380.9595721215,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-25",
+      "summary": {
+        "net_pnl": 916776.6020028144,
+        "price_pnl": -104224.97911357885,
+        "fees": 1239.40686706829,
+        "funding_pnl": 1022240.9879834652,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-26",
+      "summary": {
+        "net_pnl": 1951539.1815835983,
+        "price_pnl": 57267.342603206635,
+        "fees": 3437.3366472197813,
+        "funding_pnl": 1897709.1756276116,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-27",
+      "summary": {
+        "net_pnl": 3534863.0958835855,
+        "price_pnl": -47083.85810995102,
+        "fees": 4702.254398517514,
+        "funding_pnl": 3586649.208392054,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-28",
+      "summary": {
+        "net_pnl": 2315386.0556625053,
+        "price_pnl": -874963.3206400871,
+        "fees": 8016.9454462045105,
+        "funding_pnl": 3198366.321748793,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    },
+    {
+      "date": "2024-02-29",
+      "summary": {
+        "net_pnl": 5980567.639373727,
+        "price_pnl": -890259.3978977203,
+        "fees": 5890.512134445802,
+        "funding_pnl": 6876717.549405895,
+        "perp_maker_bps": 0.0,
+        "perp_taker_bps": 0.5,
+        "spot_taker_bps": 0.5,
+        "equilibrium_bps": 0.0,
+        "entry_bid_basis_bps": -1.5,
+        "entry_ask_basis_bps": 1.5,
+        "funding_exit_flat_region_exempt": false
+      }
+    }
+  ],
+  "data_quality": {
+    "max_quote_gap_ms": 2587922,
+    "quote_gap_days": [
+      {
+        "date": "2023-12-07",
+        "max_gap_ms": 469904
+      },
+      {
+        "date": "2024-01-03",
+        "max_gap_ms": 826416
+      },
+      {
+        "date": "2024-02-28",
+        "max_gap_ms": 2587922
+      }
+    ]
+  }
+}

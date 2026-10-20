@@ -1,0 +1,48 @@
+{
+  "baseline": "/Users/allen/src/BTC-Perps/Primary-Market-Model/results/hypotheses/equilibrium-minus-5",
+  "experiment": "/Users/allen/src/BTC-Perps/Primary-Market-Model/results/hypotheses/equilibrium-0",
+  "start_ms": 1701388800000,
+  "end_ms": 1709251200000,
+  "same_data_and_execution_rules": true,
+  "interpretation": "Exploratory comparison on previously inspected history; changing inventory sizes mean dollar PnLs are not equal-capital returns",
+  "hypotheses": [
+    {
+      "target_bps": -5.0,
+      "entry_bid_basis_bps": -6.5,
+      "entry_ask_basis_bps": -3.5,
+      "price_pnl_after_fees": -4573129.292209617,
+      "funding_pnl": 83698980.62561204,
+      "net_pnl": 79125851.33340243,
+      "fees": 190203.589182845,
+      "funding_paid_usdt": 0,
+      "entries": 15092093,
+      "peak_open_btc_per_leg": 82499.3469932377,
+      "final_open_btc_per_leg": 82499.3269932377,
+      "long_price_pnl": 14427.6528514606,
+      "short_price_pnl": -4587556.945060884
+    },
+    {
+      "target_bps": 0.0,
+      "entry_bid_basis_bps": -1.5,
+      "entry_ask_basis_bps": 1.5,
+      "price_pnl_after_fees": -2592709.0888446267,
+      "funding_pnl": 57571441.89422604,
+      "net_pnl": 54978732.80538141,
+      "fees": 252633.1988895829,
+      "funding_paid_usdt": 0,
+      "entries": 13607934,
+      "peak_open_btc_per_leg": 55532.6599981351,
+      "final_open_btc_per_leg": 55532.6299981351,
+      "long_price_pnl": -172436.1994661865,
+      "short_price_pnl": -2420272.8893771633
+    }
+  ],
+  "experiment_minus_baseline": {
+    "price_pnl_after_fees": 1980420.2033649902,
+    "funding_pnl": -26127538.731386,
+    "net_pnl": -24147118.528021015,
+    "fees": 62429.609706737916,
+    "entries": -1484159,
+    "peak_open_btc_per_leg": -26966.686995102602
+  }
+}

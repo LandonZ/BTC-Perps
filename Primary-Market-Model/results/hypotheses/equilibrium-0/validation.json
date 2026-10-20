@@ -1,0 +1,26 @@
+{
+  "funding_settlements": 273,
+  "max_payment_error_usdt": 3.958120942115784e-09,
+  "gross_funding_paid_usdt": 0,
+  "gross_funding_received_usdt": 57571441.89422607,
+  "paying_side_settlements": [],
+  "side_attribution_marks": 131609,
+  "max_side_attribution_errors": {
+    "unrealized_pnl": 4.363013431429863e-06,
+    "realized_price_pnl": 1.7515703802928329e-06,
+    "funding_pnl": 2.9802322387695312e-08,
+    "fees": 9.089999366551638e-07,
+    "net_pnl": 3.38628888130188e-06,
+    "open_btc": 3.100285539403558e-08
+  },
+  "source_events": 2370793436,
+  "daily_equity_days": 91,
+  "fee_reconciliation": true,
+  "zero_btc_delta": true,
+  "baseline_snapshot_hashes_unchanged": true,
+  "original_baseline_files_unchanged": true,
+  "hypothesis": {
+    "equilibrium_bps": 0,
+    "entry_offset_bps": 1.5
+  }
+}

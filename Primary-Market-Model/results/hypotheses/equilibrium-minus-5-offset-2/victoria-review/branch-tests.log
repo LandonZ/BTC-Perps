@@ -1,0 +1,32 @@
+mkdir -p build
+clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic backtester/events.cpp backtester/basis-maker.cpp tests/basis-maker-tests.cpp -o build/basis-maker-tests
+clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic model/bip-funding.cpp tests/bip-funding-tests.cpp -o build/bip-funding-tests
+clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic backtester/events.cpp backtester/basis-maker.cpp backtester/basis-maker-cli.cpp -o build/basis-maker
+clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic backtester/events.cpp backtester/basis-maker.cpp backtester/archive-replay.cpp -o build/archive-replay
+clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic backtester/archive-sort.cpp -o build/archive-sort
+./build/basis-maker-tests
+PASS: -5 bps equilibrium, inclusive -6.5/-3.5 bps entry boundaries, band cancellations, equal-BTC spot hedges,
+concurrent pairs, two-sided convergence exits, all four fees, optional recycled cap, legacy no-exit replay,
+zero funding, pre-funding cancellations, partial fills, proxy/real spot spreads and per-direction price/funding attribution;
+funding exit minimum, maximum hold, end-of-data exit and EMA fair basis.
+./build/bip-funding-tests
+PASS: BIP mark fallbacks, 3m/20-sample premium, 0.75 smoothing, contract
+payments, live estimator hours, closed-market and partial-hour handling.
+python3 tests/binance-data-tests.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.008s
+
+OK
+python3 tests/archive-replay-tests.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.266s
+
+OK
+python3 tests/coinbase-events-tests.py
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.008s
+
+OK

@@ -1,0 +1,29 @@
+{
+  "funding_settlements": 273,
+  "max_payment_error_usdt": 5.587935447692871e-09,
+  "gross_funding_paid_usdt": 0,
+  "gross_funding_received_usdt": 83698980.62561189,
+  "paying_side_settlements": [],
+  "side_attribution_marks": 131609,
+  "max_side_attribution_errors": {
+    "unrealized_pnl": 1.3485550880432129e-06,
+    "realized_price_pnl": 3.398345143068582e-07,
+    "funding_pnl": 1.4901161193847656e-07,
+    "fees": 5.209585651755333e-09,
+    "net_pnl": 1.3709068298339844e-06,
+    "open_btc": 9.022187441587448e-10
+  },
+  "entry_rule_unchanged": true,
+  "entry_fill_count_unchanged": true,
+  "short_side_unchanged": true,
+  "source_events": 2370793436,
+  "daily_equity_days": 91,
+  "zero_btc_delta": true,
+  "fee_reconciliation": true,
+  "comparison": {
+    "previous_net_pnl": 79103934.25700441,
+    "net_pnl_change": 21917.076398015022,
+    "previous_long_funding_pnl": -20939.2705563741,
+    "current_long_funding_pnl": 0.0
+  }
+}
