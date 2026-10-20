@@ -5,16 +5,20 @@ For each venue, day and entry offset (fair basis +/- offset) this runs
 build/basis-maker with Shreev's rules: rest a perp quote when the basis is far from
 fair value, hedge each fill with an equal-BTC spot taker order, close the pair when
 the basis returns to fair value, and close anything left at the end of the day.
+Each run is done twice, with two ways of closing:
+  * market exit: cross the spread on both legs as soon as the basis is back at fair
+  * resting exit: rest a perp order at the fair-value price; when someone trades
+    with it, buy/sell the spot leg back at the market
 
 Assumptions agreed with Shreev:
-  * fees per fill: perp maker 0.5 bp, perp taker 2 bp, spot taker 2 bp, so one
-    round trip (1 maker + 3 taker fills) costs 6.5 bp
+  * fees per fill: perp maker 0.5 bp, perp taker 2 bp, spot taker 2 bp, so a round
+    trip costs 6.5 bp with a market exit and 5 bp with a resting exit
   * zero latency: reversion around fair value plays out over hours, so acting now
     or a moment later makes no difference. --latencies 0,50,250 reprices the hedge
     and exit legs later as a sensitivity check.
 
 Each day is replayed separately (flat start, flat end) and results are pooled per
-venue and offset. The fee sweep restates net bps for other total cycle fees; fees
+venue, exit and offset. The fee sweep restates net bps for other total cycle fees; fees
 do not change any decision in the engine, so this equals rerunning it. Basis
 markouts (how far the basis moves back toward fair value after a deviation) are
 measured on a 1-second grid within each day and pooled.
@@ -63,7 +67,13 @@ VENUES = {
         "args": ["--equilibrium-bps", "-5", "--participation", "0.1", "--fill-at-touch", "1"],
     },
 }
-COMMON = ["--exit-on-equilibrium", "1", "--close-at-end", "1", "--order-btc", "0.01",
+# Two ways to close a pair when the basis returns to fair value:
+#   taker: cross the spread on both legs at once (perp taker + spot taker)
+#   maker: rest a perp order at the fair-value price; when it fills, buy/sell spot back (perp maker + spot taker)
+EXITS = {"taker": ["--exit-on-equilibrium", "1"], "maker": ["--maker-exit", "1", "--exit-on-equilibrium", "0"]}
+EXIT_NAMES = {"taker": "market exit", "maker": "resting exit"}
+HEADLINE_EXIT = "maker"
+COMMON = ["--close-at-end", "1", "--order-btc", "0.01",
           "--max-gross-perp-btc", "0.1", "--details", "1"]
 
 # Reference palette (dataviz skill): surface, ink and the categorical slots in fixed order.
@@ -95,10 +105,16 @@ def binance_days(days):
     return out
 
 
-def run_engine(venue, spec, offset, fees, out):
+def cycle_fee(fees, exit_mode):
+    """Total fees for one round trip: perp maker entry + spot hedge, then the exit's two fills."""
+    perp_exit = fees[0] if exit_mode == "maker" else fees[1]
+    return fees[0] + fees[2] + perp_exit + fees[2]
+
+
+def run_engine(venue, spec, offset, exit_mode, fees, out):
     cmd = [str(MODEL / "build/basis-maker"), "--events", str(spec["events"]), "--output", str(out),
            "--entry-offset-bps", str(offset), "--perp-maker-bps", str(fees[0]), "--perp-taker-bps", str(fees[1]),
-           "--spot-taker-bps", str(fees[2]), *COMMON, *VENUES[venue]["args"]]
+           "--spot-taker-bps", str(fees[2]), *COMMON, *EXITS[exit_mode], *VENUES[venue]["args"]]
     if "premium" in spec:
         cmd += ["--premium-events", str(spec["premium"])]
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
@@ -134,6 +150,7 @@ def latency_change_usd(pairs, book, latency):
     long_ = d > 0
     entry_spot = price_at(book["spot"], pairs.time_ms.to_numpy() + latency, long_)     # long perp sells spot at the bid
     exit_perp = price_at(book["perp"], pairs.exit_time_ms.to_numpy() + latency, long_)  # and exits the perp at the bid
+    exit_perp = np.where(pairs.exit_reason == "MAKER_EXIT", pairs.exit_perp_price, exit_perp)  # resting orders keep their price
     exit_spot = price_at(book["spot"], pairs.exit_time_ms.to_numpy() + latency, ~long_)  # and buys spot back at the ask
     return (d * pairs.perp_btc * ((entry_spot - pairs.spot_price) + (exit_perp - pairs.exit_perp_price)
                                   - (exit_spot - pairs.exit_spot_price))).to_numpy()
@@ -173,12 +190,14 @@ def markout_sums(venue, basis):
 
 def sweep(venue_days, fees, latencies, work, jobs):
     """Run every venue/day/offset; returns (pair-level frame, per-day basis stats, markouts, Coinbase grid)."""
-    tasks = [(venue, spec, offset) for venue, specs in venue_days.items() for spec in specs for offset in OFFSETS]
+    tasks = [(venue, exit_mode, spec, offset) for venue, specs in venue_days.items() for exit_mode in EXITS
+             for spec in specs for offset in OFFSETS]
 
     def run(task):
-        venue, spec, offset = task
-        pairs, summary = run_engine(venue, spec, offset, fees, work / f"{venue}-{spec['day']}-offset-{offset}")
-        pairs["venue"], pairs["day"], pairs["entry_offset_bps"] = venue, spec["day"], offset
+        venue, exit_mode, spec, offset = task
+        out = work / f"{venue}-{exit_mode}-{spec['day']}-offset-{offset}"
+        pairs, summary = run_engine(venue, spec, offset, exit_mode, fees, out)
+        pairs["venue"], pairs["exit"], pairs["day"], pairs["entry_offset_bps"] = venue, exit_mode, spec["day"], offset
         pairs["funding_usd_day"] = summary["funding_pnl"]
         return pairs
 
@@ -216,22 +235,22 @@ def sweep(venue_days, fees, latencies, work, jobs):
 
 
 def tables(pairs, day_stats, fees, latencies):
-    """Pooled results per venue/offset (with fee and latency variants) and per day."""
-    cycle = fees[0] + fees[1] + 2 * fees[2]
+    """Pooled results per venue/exit/offset (with fee and latency variants) and per day."""
     rows = []
-    for (venue, offset), g in pairs.groupby(["venue", "entry_offset_bps"], sort=False):
+    for (venue, exit_mode, offset), g in pairs.groupby(["venue", "exit", "entry_offset_bps"], sort=False):
         notional = g.notional.sum()
         hours = day_stats[day_stats.venue == venue].hours.sum()
         net = g.realized_pnl.sum()
         gross = net + g.fees_usd.sum()
-        base = {"venue": venue, "entry_offset_bps": offset, "days": g.day.nunique(), "hours": round(hours, 2),
+        base = {"venue": venue, "exit": exit_mode, "entry_offset_bps": offset, "days": g.day.nunique(),
+                "hours": round(hours, 2),
                 "round_trips": len(g), "btc_traded": round(g.perp_btc.sum(), 4),
                 "median_hold_s": round(float((g.exit_time_ms - g.time_ms).median() / 1000), 2) if len(g) else 0,
                 "max_hold_s": round(float((g.exit_time_ms - g.time_ms).max() / 1000), 1) if len(g) else 0,
                 "funding_usd": round(float(g.funding_pnl.sum()), 4),
                 "gross_bps": round(gross / notional * 1e4, 3) if notional else np.nan,
                 "net_bps": round(net / notional * 1e4, 3) if notional else np.nan,
-                "net_usd": round(net, 2), "cycle_fee_bps": cycle}
+                "net_usd": round(net, 2), "cycle_fee_bps": cycle_fee(fees, exit_mode)}
         for fee in CYCLE_FEES:
             base[f"net_bps_at_{fee:g}_fee"] = round((gross / notional * 1e4) - fee, 3) if notional else np.nan
         for latency in latencies:
@@ -239,13 +258,13 @@ def tables(pairs, day_stats, fees, latencies):
                 change = g[f"latency_{latency}_usd"].sum()
                 base[f"net_bps_{latency}ms"] = round((net + change) / notional * 1e4, 3) if notional else np.nan
         rows.append(base)
-    days = (pairs.groupby(["venue", "day", "entry_offset_bps"])
+    days = (pairs.groupby(["venue", "exit", "day", "entry_offset_bps"])
             .agg(round_trips=("realized_pnl", "size"), net_usd=("realized_pnl", "sum"), fees_usd=("fees_usd", "sum"),
                  notional=("notional", "sum"))
             .reset_index())
     days["gross_bps"] = ((days.net_usd + days.fees_usd) / days.notional * 1e4).round(3)
     days["net_bps"] = (days.net_usd / days.notional * 1e4).round(3)
-    days = days.merge(day_stats, on=["venue", "day"], how="right").sort_values(["venue", "day", "entry_offset_bps"])
+    days = days.merge(day_stats, on=["venue", "day"], how="right").sort_values(["venue", "exit", "day", "entry_offset_bps"])
     return pd.DataFrame(rows), days
 
 
@@ -273,9 +292,12 @@ def charts(results, days, markouts, coinbase_grid, fees, latencies, out):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     plt.rcParams.update({"figure.facecolor": SURFACE, "font.size": 10, "lines.linewidth": 2})
-    cycle = fees[0] + fees[1] + 2 * fees[2]
+    cycle = cycle_fee(fees, HEADLINE_EXIT)
+    head = EXIT_NAMES[HEADLINE_EXIT]
     venues = list(results.venue.unique())
     stats = days.drop_duplicates(["venue", "day"])
+    all_results, results = results, results[results.exit == HEADLINE_EXIT]
+    days = days[days.exit == HEADLINE_EXIT]
 
     # 1. Binance: where the basis sat on each recorded day, against the -5 bp equilibrium.
     b = stats[stats.venue == "binance"]
@@ -334,22 +356,27 @@ def charts(results, days, markouts, coinbase_grid, fees, latencies, out):
         ax.axvline(cycle, color=INK2, linewidth=1, linestyle="--")
         ax.annotate(f"our fees: {cycle:g} bp", (cycle, 1), xycoords=("data", "axes fraction"), xytext=(4, -12),
                     textcoords="offset points", color=INK2, fontsize=9)
-        style(ax, f"{venue.capitalize()}: net per round trip", "total fees per round trip (bp)", "net bp per round trip")
+        style(ax, f"{venue.capitalize()}: net per round trip ({head})", "total fees per round trip (bp)",
+              "net bp per round trip")
     bottom_legend(fig, axes[0][0], "enter when the basis is this far from fair value")
     fig.savefig(out / "fees.png", dpi=160)
     plt.close(fig)
 
-    # 5. Trade-off at our fees: wider entries earn more per trip but trade less.
-    fig, axes = plt.subplots(1, 2, figsize=(10, 3.8), squeeze=False)
+    # 5. Trade-off at our fees: wider entries earn more per trip but trade less; resting vs market exits.
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.2), squeeze=False)
     for color, venue in zip(SERIES, venues):
-        r = results[results.venue == venue]
-        axes[0][0].plot(r.entry_offset_bps, r.net_bps, color=color, marker="o", markersize=5, label=venue.capitalize())
-        axes[0][1].plot(r.entry_offset_bps, r.round_trips / r.hours * 24, color=color, marker="o", markersize=5)
+        for exit_mode, style_ in (("maker", "-"), ("taker", "--")):
+            r = all_results[(all_results.venue == venue) & (all_results.exit == exit_mode)]
+            label = f"{venue.capitalize()}, {EXIT_NAMES[exit_mode]} ({cycle_fee(fees, exit_mode):g} bp)"
+            axes[0][0].plot(r.entry_offset_bps, r.net_bps, color=color, linestyle=style_, marker="o", markersize=5,
+                            label=label)
+            axes[0][1].plot(r.entry_offset_bps, r.round_trips / r.hours * 24, color=color, linestyle=style_,
+                            marker="o", markersize=5)
     axes[0][0].axhline(0, color=INK2, linewidth=1)
-    style(axes[0][0], f"Net per round trip at {cycle:g} bp fees", "entry offset from fair (bp)", "net bp per round trip")
+    style(axes[0][0], "Net per round trip after fees", "entry offset from fair (bp)", "net bp per round trip")
     style(axes[0][1], "Round trips per 24 h", "entry offset from fair (bp)", "round trips (log scale)")
     axes[0][1].set_yscale("log")
-    bottom_legend(fig, axes[0][0], "")
+    bottom_legend(fig, axes[0][0], "", ncol=2)
     fig.savefig(out / "offsets.png", dpi=160)
     plt.close(fig)
 
@@ -367,7 +394,7 @@ def charts(results, days, markouts, coinbase_grid, fees, latencies, out):
                    label=f"±{offset:g} bp")
         ax.axhline(0, color=INK2, linewidth=1)
         ax.set_xticks(x, [day[:7] for day in day_list], rotation=45)
-        style(ax, f"Binance net USD per day at {cycle:g} bp fees (0.01 BTC lots, ≤0.1 BTC open)", "", "net USD")
+        style(ax, f"Binance net USD per day, {head} ({cycle:g} bp fees, 0.01 BTC lots, ≤0.1 BTC open)", "", "net USD")
         bottom_legend(fig, ax, "entry offset")
         fig.savefig(out / "binance-days.png", dpi=160)
         plt.close(fig)
@@ -381,19 +408,20 @@ def charts(results, days, markouts, coinbase_grid, fees, latencies, out):
                 col = "net_bps" if latency == 0 else f"net_bps_{latency}ms"
                 ax.plot(r.entry_offset_bps, r[col], color=color, marker="o", markersize=4, label=f"{latency} ms")
             ax.axhline(0, color=INK2, linewidth=1)
-            style(ax, f"{venue.capitalize()}: net vs hedge delay", "entry offset from fair (bp)", "net bp per round trip")
+            style(ax, f"{venue.capitalize()}: net vs hedge delay ({head})", "entry offset from fair (bp)",
+                  "net bp per round trip")
         bottom_legend(fig, axes[0][0], "hedge and exit delay")
         fig.savefig(out / "latency.png", dpi=160)
         plt.close(fig)
 
 
 def summary_md(results, days, fees, latencies):
-    cycle = fees[0] + fees[1] + 2 * fees[2]
     stats = days.drop_duplicates(["venue", "day"])
     lines = ["# Basis strategy on recorded data", "",
-             f"Fees per fill: perp maker {fees[0]:g} bp, perp taker {fees[1]:g} bp, spot taker {fees[2]:g} bp "
-             f"({cycle:g} bp per round trip). Zero latency. 0.01 BTC lots, at most 0.1 BTC open. "
-             "Each day starts and ends flat.", ""]
+             f"Fees per fill: perp maker {fees[0]:g} bp, perp taker {fees[1]:g} bp, spot taker {fees[2]:g} bp. "
+             f"A round trip costs {cycle_fee(fees, 'taker'):g} bp with a market exit (both legs cross) and "
+             f"{cycle_fee(fees, 'maker'):g} bp with a resting exit (perp maker order at fair value, spot crosses). "
+             "Zero latency. 0.01 BTC lots, at most 0.1 BTC open. Each day starts and ends flat.", ""]
     for venue in results.venue.unique():
         s = stats[stats.venue == venue]
         lines.append(f"- **{VENUES[venue]['name']}**: {len(s)} days, {s.hours.sum():.1f} h. Daily mean basis "
@@ -401,16 +429,17 @@ def summary_md(results, days, fees, latencies):
                      f"typical within-day std {s.basis_std.median():.2f} bp.")
     extra = [f"{lat} ms" for lat in latencies if lat]
     lines += ["", "Pooled over all days (gross = before fees):", "",
-              "| venue | offset | trips | trips/24h | BTC | median hold s | gross bp | net bp | net USD | "
+              "| venue | exit | offset | trips | trips/24h | BTC | median hold s | gross bp | net bp | net USD | "
               + " | ".join(["net bp @2 fee", "net bp @3.5 fee"] + [f"net bp +{e}" for e in extra]) + " |",
-              "|" + "---|" * (11 + len(extra))]
+              "|" + "---|" * (12 + len(extra))]
     for _, r in results.iterrows():
-        cells = [r.venue, f"±{r.entry_offset_bps:g}", f"{r.round_trips:,}", f"{r.round_trips / r.hours * 24:,.0f}",
+        cells = [r.venue, EXIT_NAMES[r.exit], f"±{r.entry_offset_bps:g}", f"{r.round_trips:,}", f"{r.round_trips / r.hours * 24:,.0f}",
                  f"{r.btc_traded:g}", f"{r.median_hold_s:g}", f"{r.gross_bps:+.2f}", f"{r.net_bps:+.2f}",
                  f"{r.net_usd:+,.2f}", f"{r['net_bps_at_2_fee']:+.2f}", f"{r['net_bps_at_3.5_fee']:+.2f}"]
         cells += [f"{r[f'net_bps_{lat}ms']:+.2f}" for lat in latencies if lat]
         lines.append("| " + " | ".join(cells) + " |")
-    lines += ["", "Per day (net USD at our fees):", "",
+    days = days[days.exit == HEADLINE_EXIT]
+    lines += ["", f"Per day, {EXIT_NAMES[HEADLINE_EXIT]} (net USD at our fees; days.csv has both exits):", "",
               "| venue | day | hours | mean basis | " + " | ".join(f"±{o:g}" for o in OFFSETS) + " |",
               "|" + "---|" * (4 + len(OFFSETS))]
     for (venue, day), g in days.groupby(["venue", "day"], sort=False):

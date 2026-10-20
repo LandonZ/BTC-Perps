@@ -272,6 +272,10 @@ engine options this needs (all off by default, so the runs above are unchanged):
 - `--close-at-end 1`: close what is left at the last book so all PnL is realized.
 - `--max-hold-seconds N` and `--funding-exit-min-bps X` (exit a payer only when the
   estimated rate is at least X; the exit costs two taker fills).
+- `--maker-exit 1`: instead of crossing the spread, rest a perp order at the
+  fair-value price; when a trade fills it (same rule as entries), buy or sell the
+  spot leg back at the market. Partial fills close the oldest pairs first.
+  Opposite-direction entries wait while pairs are open.
 - `--events` also reads `.gz` files directly.
 
 `tools/coinbase_basis_events.py` turns a Coinbase recording into the same event
@@ -285,9 +289,11 @@ make -C Primary-Market-Model sweep
 ```
 
 Assumptions agreed with Shreev: fees per fill are **perp maker 0.5 bp, perp taker
-2 bp, spot taker 2 bp (6.5 bp per round trip)**, and **zero latency**, since
-reversion toward fair value plays out over hours. 0.01 BTC lots, at most 0.1 BTC
-open, each day replayed from flat to flat.
+2 bp, spot taker 2 bp**, and **zero latency**, since reversion toward fair value
+plays out over hours. 0.01 BTC lots, at most 0.1 BTC open, each day replayed from
+flat to flat. Every run is done with two exits: a **market exit** (both legs cross,
+6.5 bp per round trip) and a **resting exit** (perp limit order at fair value, then
+spot crosses, 5 bp per round trip).
 
 What 13 Binance days (first of each month, 2025-10 to 2026-10) and 18.7 hours of
 Coinbase (2026-10-15 to 10-20) show:
@@ -297,18 +303,23 @@ Coinbase (2026-10-15 to 10-20) show:
   Coinbase BIP traded **+1.7 to +3.3 bp rich** and drifted, so its fair value is a
   10-minute EMA (`basis-coinbase.png`).
 - **The basis mean-reverts, and wider gaps revert more.** Gross profit per round
-  trip rises from about +1 bp at a ±0.5 bp entry to +6.4 bp (Binance) at ±4 bp.
-  Median holds are seconds, and almost no funding was paid.
-- **At 6.5 bp fees nothing pays.** Every entry offset loses on both venues. The
-  closest is Binance at ±4 bp: -0.13 bp per round trip (-$22 over 13 days), and
-  only 2 of the 13 days were positive (`fees.png`, `binance-days.png`). Wider
-  entries earn more per trip but trade far less: about 425 round trips a day at
-  ±4 bp against 55,000 at ±0.5 bp (`offsets.png`).
-- **Where it would pay** (`fees.png`): at 3.5 bp per round trip Binance ±3 bp and
-  ±4 bp net +0.9 and +2.9 bp; at about 2 bp (the Virtu-scale cost Shreev quoted)
-  every offset from ±2 bp up is positive. Fees, not the signal, decide the trade.
-- **Coinbase is too thin to judge.** Only 13 round trips at ±3 bp and 3 at ±4 bp in
-  18.7 hours.
+  trip rises from about +1 bp at a ±0.5 bp entry to +6.4 bp (market exit) or
+  +7.5 bp (resting exit) on Binance at ±4 bp. Median holds are seconds, and almost
+  no funding was paid.
+- **With market exits nothing pays.** Every offset loses on both venues; the
+  closest is Binance ±4 bp at -0.13 bp per round trip.
+- **Resting exits make the widest entries pay on Binance** (`offsets.png`): ±4 bp
+  nets **+2.5 bp per round trip (+$409 over 13 days)** and ±3 bp breaks even
+  (+0.1 bp, +$45). They save 1.5 bp of fees and also exit at a better price,
+  because the order waits at fair value instead of crossing. Almost every pair
+  closed through the resting order; at ±4 bp none fell back to a market close.
+- **Day by day** (`binance-days.png`): resting-exit ±4 bp made money on 10 of 13
+  days, but 2026-03-01 alone is 57% of the total. ±3 bp is positive only because of
+  that day.
+- **Everything tighter than ±3 bp loses**, and **Coinbase loses on every setting**
+  (only 13 round trips at ±3 bp and 3 at ±4 bp in 18.7 hours).
+- `fees.png` shows the break-even fee for each offset: at about 2 bp per round trip
+  (Virtu-scale) every offset from ±1.5 bp up is positive.
 
 Limits: 13 single days and under a day of Coinbase are illustrations, not
 significance tests. The wide-entry profits come from brief dislocations that close
