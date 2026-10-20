@@ -103,6 +103,31 @@ Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_
 Add `--funding-curve` to the saved-result command to redraw the standard
 eight-hour funding illustration alongside the report.
 
+## Hypothesis comparison
+
+The **−5 bp target** remains the default and its completed run is preserved under
+`results/hypotheses/equilibrium-minus-5/`. That folder includes the original
+graphs, equity, summary, validation, input provenance and daily statistics;
+`preservation.json` records their SHA-256 hashes. The original root reports and
+`build/current/` also continue to show that baseline.
+
+The **0 bp target** is a separate experiment with entries at **−1.5 / +1.5 bps**.
+It uses the same December–February source data, execution assumptions, fees,
+unlimited inventory and any-payer pre-funding exits. Run it without replacing
+the baseline:
+
+```bash
+Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/run_archive_backtest.py --equilibrium-bps 0 --entry-offset-bps 1.5 --output Primary-Market-Model/results/hypotheses/equilibrium-0 --report-dir Primary-Market-Model/results/hypotheses/equilibrium-0
+Primary-Market-Model/build/trial-venv/bin/python Primary-Market-Model/tools/compare_hypotheses.py Primary-Market-Model/results/hypotheses/equilibrium-minus-5 Primary-Market-Model/results/hypotheses/equilibrium-0 --output Primary-Market-Model/results/hypotheses/comparison.png
+```
+
+Each experiment retains its own data and graphs. The comparison validates the
+date window, source hashes, observation clock and execution settings, then
+separates price PnL after fees from funding. Different inventory paths mean the
+dollar PnLs are not returns on equal capital. This is an exploratory comparison
+on previously inspected history, not proof that either target is the market's
+equilibrium.
+
 ## Archive inputs
 
 Each month has six checksum-verified Binance source ZIPs: perp best-bid/ask

@@ -341,6 +341,22 @@ int main() {
         buffered.on_event(premium(due-60000,.0007));
         check(buffered.pairs()[0].closed && !buffered.pairs()[1].closed && !buffered.pairs()[2].closed,
               "Funding closes only buffered long payers while retaining short receivers, even inside the entry band");
+        Config zero_target; zero_target.equilibrium_bps=0;
+        Engine zero(zero_target); seed(zero);
+        zero.on_event(book(start+1,99980,99990));
+        check(zero.decisions().back().side==1,"Zero target bids at exactly -1.5 bps");
+        zero.on_event(trade(start+2,99980,true));
+        zero.on_event(book(start+3,99980.01,99990.01));
+        check(zero.decisions().back().side==0,"Zero target cancels the bid just inside -1.5 bps");
+        zero.on_event(book(start+4,100009.99,100019.99));
+        check(zero.decisions().back().side==0,"Zero target does not offer just inside +1.5 bps");
+        zero.on_event(book(start+5,100010,100020));
+        check(zero.decisions().back().side==-1,"Zero target offers at exactly +1.5 bps");
+        zero.on_event(trade(start+6,100020,false));
+        check(zero.pairs().size()==2 && zero.pairs()[0].direction==1 && zero.pairs()[1].direction==-1,
+              "Zero-target experiment trades both hedged directions at the requested boundaries");
+        close(zero.totals().perp_btc+zero.totals().spot_btc,0,"Zero-target experiment preserves the BTC hedge");
+        verify_side_attribution(zero);
         for (double offset : {-1.0,10000.0}) {
             Config invalid; invalid.entry_offset_bps=offset;
             bool rejected=false;

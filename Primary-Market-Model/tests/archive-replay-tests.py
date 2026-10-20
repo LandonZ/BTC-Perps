@@ -80,6 +80,18 @@ class ArchiveReplayTests(unittest.TestCase):
             self.assertEqual(int(daily[START//DAY]['time_ms']),START+DAY-900)
             self.assertGreater(actual['paired_partial_fills'],0)
             self.assertGreater(actual['funding_exit_pairs'],0)
+            subprocess.run([str(MODEL/'build/basis-maker'),'--events',str(root/'events.csv'),
+                            '--premium-events',str(root/'premium.csv'),'--equilibrium-bps','0',
+                            '--entry-offset-bps','1.5','--output',str(root/'zero-reference')],
+                           check=True,capture_output=True)
+            subprocess.run([str(MODEL/'build/archive-replay'),str(root/'sources.tsv'),str(root/'small.csv'),
+                            str(root/'zero-streaming'),'--equilibrium-bps','0','--entry-offset-bps','1.5'],
+                           check=True,capture_output=True)
+            zero=json.loads((root/'zero-streaming/summary.json').read_text())
+            self.assertEqual(zero,json.loads((root/'zero-reference/summary.json').read_text()))
+            self.assertEqual((zero['equilibrium_bps'],zero['entry_bid_basis_bps'],zero['entry_ask_basis_bps']),(0,-1.5,1.5))
+            self.assertEqual(zero['entry_band_violations'],0)
+            self.assertFalse(zero['funding_exit_flat_region_exempt'])
 
     def test_multi_pass_sort_preserves_timestamp_ties_and_every_record(self):
         with tempfile.TemporaryDirectory(prefix='archive-sort-test-') as temporary:

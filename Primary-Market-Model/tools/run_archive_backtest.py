@@ -52,8 +52,8 @@ def continuous_statistics(directory, summary):
     return dict(continuous_inventory=True,
         trial_definition='UTC daily changes in total marked equity from one continuous run; inventory carries across days and months',
         hypothesis='H0: mean daily marked equity change <= 0; H1: mean > 0',
-        interpretation='Revised funding-exit rule on previously inspected history; dependent daily USD PnL, not fixed-capital returns or proof of live profitability',
-        sample_note='Revised exit rule on previously inspected history. Carried inventory makes daily PnL dependent; tests are in-sample diagnostics.',
+        interpretation='Hypothesis tested on previously inspected history; dependent daily USD PnL, not fixed-capital returns or proof of live profitability',
+        sample_note='Hypothesis tested on previously inspected history. Carried inventory makes daily PnL dependent; tests are in-sample diagnostics.',
         limitations=['Queue, impact, depth, borrowing costs, margin and liquidation omitted; unlimited inventory.',
                      'Spot last-trade midpoint proxy and assumed 1 bp full spread; zero latency.',
                      'Funding exits use causal premium-minute CLOSE proxies.',
@@ -126,9 +126,15 @@ def main():
     parser.add_argument('--start-month', default='2023-12')
     parser.add_argument('--end-month', default='2024-02')
     parser.add_argument('--output', type=Path, default=MODEL/'build/current')
+    parser.add_argument('--report-dir',type=Path,default=MODEL/'results',help='Keep experiment plots and statistics separate from the baseline')
+    parser.add_argument('--equilibrium-bps',type=float,default=-5,help='Configured midpoint-basis target; defaults to the original -5 bp hypothesis')
+    parser.add_argument('--entry-offset-bps',type=float,default=1.5)
     parser.add_argument('--wait-for-inputs', action='store_true',help='Allow verified monthly downloads to finish while earlier months replay')
     parser.add_argument('--stream-source', nargs=3,help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if (not math.isfinite(args.equilibrium_bps) or not math.isfinite(args.entry_offset_bps)
+            or args.entry_offset_bps<0 or args.equilibrium_bps-args.entry_offset_bps<=-10000):
+        parser.error('Invalid basis target or entry offset')
     if args.stream_source:
         month,key,work=args.stream_source
         deadline=time.monotonic()+7200
@@ -192,7 +198,8 @@ def main():
                         streams.append(process)
                         handle.write(f'{kind} {m["start_ms"]} {m["end_ms"]} /dev/fd/{process.stdout.fileno()} BINARY\n')
             subprocess.run([str(MODEL/'build/archive-replay'),str(folder/'sources.tsv'),str(folder/'small.csv'),
-                            str(args.output)],check=True,
+                            str(args.output),'--equilibrium-bps',str(args.equilibrium_bps),
+                            '--entry-offset-bps',str(args.entry_offset_bps)],check=True,
                            pass_fds=tuple(p.stdout.fileno() for p in streams))
             for process in streams:
                 process.stdout.close()
@@ -205,6 +212,8 @@ def main():
     manifests=[json.loads((ROOT/'data/binance/maker'/month/'month-inputs.manifest.json').read_text()) for month in months]
     if any(m['status']!='checksum_verified' for m in manifests):raise ValueError('Monthly download did not complete validation')
     summary=json.loads((args.output/'summary.json').read_text())
+    if summary['equilibrium_bps']!=args.equilibrium_bps or summary['entry_offset_bps']!=args.entry_offset_bps:
+        raise ValueError('Replay used different hypothesis parameters than requested')
     with (args.output/'coverage.csv').open() as handle:
         quote_coverage=[row for row in csv.DictReader(handle) if row['kind']=='Q']
     summary['max_quote_gap_ms']=max(int(row['max_gap_ms']) for row in quote_coverage)
@@ -223,6 +232,7 @@ def main():
     (args.output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     (args.output/'validation.json').write_text(json.dumps(validation,indent=2)+'\n')
     provenance=dict(months=months,start_ms=manifests[0]['start_ms'],end_ms=manifests[-1]['end_ms'],
+                    hypothesis=dict(equilibrium_bps=args.equilibrium_bps,entry_offset_bps=args.entry_offset_bps),
                     engine_sha256=hashlib.sha256((MODEL/'build/archive-replay').read_bytes()).hexdigest(),
                     archive_sort_sha256=hashlib.sha256((MODEL/'build/archive-sort').read_bytes()).hexdigest(),
                     sorting='Exact stable external sort; all source rows retained',sources=manifests)
@@ -230,10 +240,11 @@ def main():
     statistics=continuous_statistics(args.output,summary)
     statistics['data_quality']=dict(max_quote_gap_ms=summary['max_quote_gap_ms'],quote_gap_days=summary['quote_gap_days'])
     statistics['limitations'].append(f'Quote gaps reach {summary["max_quote_gap_ms"]/60000:.1f} minutes; stale books pause entries, while held positions remain marked at last observed prices.')
-    render_report(args.output,MODEL/'results/result.html')
-    render_png(args.output,MODEL/'results/result.png')
-    (MODEL/'results/trials.json').write_text(json.dumps(statistics,indent=2)+'\n')
-    render_trials(statistics,MODEL/'results/trials.png')
+    args.report_dir.mkdir(parents=True,exist_ok=True)
+    render_report(args.output,args.report_dir/'result.html')
+    render_png(args.output,args.report_dir/'result.png')
+    (args.report_dir/'trials.json').write_text(json.dumps(statistics,indent=2)+'\n')
+    render_trials(statistics,args.report_dir/'trials.png')
     print(f'Continuous profit: {summary["net_pnl"]:+,.2f} USDT over {len(statistics["trials"])} days',flush=True)
 
 

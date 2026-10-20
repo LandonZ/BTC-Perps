@@ -66,8 +66,8 @@ def render_direction_png(summary, rows, output):
                          'axes.spines.left':False,'axes.spines.bottom':False})
     fig,axes=plt.subplots(2,1,figsize=(12,11.5),dpi=170,facecolor='#fafbfc')
     fig.subplots_adjust(left=.115,right=.96,top=.735,bottom=.255,hspace=.46)
-    fig.text(.075,.954,'BTC basis: price PnL by direction',fontsize=24,fontweight='bold')
-    fig.text(.075,.921,f'Binance BTCUSDT | {times[0]:%Y-%m-%d} to {times[-1]:%Y-%m-%d} UTC | Zero latency',color='#52656e')
+    fig.text(.075,.954,f'BTC basis: {summary["equilibrium_bps"]:g} bp target',fontsize=24,fontweight='bold')
+    fig.text(.075,.921,f'Binance BTCUSDT | {times[0]:%Y-%m-%d} to {times[-1]:%Y-%m-%d} UTC | Entry band {summary["entry_bid_basis_bps"]:g} / {summary["entry_ask_basis_bps"]:g} bps | Zero latency',fontsize=9.5,color='#52656e')
     fig.text(.075,.898,f'Maker {summary["perp_maker_bps"]:g} / perp taker {summary["perp_taker_bps"]:g} / spot taker {summary["spot_taker_bps"]:g} bps per fill. Each direction includes its equal-BTC spot hedge.',fontsize=9,color='#52656e')
     if 'funding_paid_usdt' in summary:
         fig.text(.075,.877,f'Funding cash audit: paid {summary["funding_paid_usdt"]:,.2f} USDT; received {summary["funding_received_usdt"]:,.2f} USDT. Exit signals use a causal estimate.',fontsize=8.5,color='#52656e')

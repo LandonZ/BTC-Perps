@@ -142,8 +142,23 @@ int priority(char kind) {
 }
 int main(int argc,char** argv) {
     try {
-        if (argc < 4 || argc > 5) throw std::runtime_error("Usage: archive-replay SOURCES_TSV FUNDING_AND_PREMIUM_CSV OUTPUT_DIR [REORDER_MS]");
-        const Millis window = argc == 5 ? std::stoll(argv[4]) : 1000;
+        if (argc < 4) throw std::runtime_error("Usage: archive-replay SOURCES_TSV FUNDING_AND_PREMIUM_CSV OUTPUT_DIR [REORDER_MS] [--equilibrium-bps VALUE] [--entry-offset-bps VALUE]");
+        Millis window = 1000;
+        btc::basis_maker::Config config; config.retain_decisions = false; config.retain_fills = false;
+        for (int i=4;i<argc;++i) {
+            const std::string key = argv[i];
+            if (i==4 && key.rfind("--",0)!=0) {
+                std::size_t used=0; window=std::stoll(key,&used);
+                if (used!=key.size()) throw std::runtime_error("Invalid reorder window");
+                continue;
+            }
+            if (key!="--equilibrium-bps" && key!="--entry-offset-bps") throw std::runtime_error("Unknown option: "+key);
+            if (++i>=argc) throw std::runtime_error("Missing value for "+key);
+            const std::string value=argv[i]; std::size_t used=0; const double number=std::stod(value,&used);
+            if (used!=value.size() || !std::isfinite(number)) throw std::runtime_error("Invalid value for "+key);
+            if (key=="--equilibrium-bps") config.equilibrium_bps=number;
+            else config.entry_offset_bps=number;
+        }
         if (window < 0) throw std::runtime_error("Negative reorder window");
         std::ifstream manifest(argv[1]);
         std::vector<std::unique_ptr<Source>> sources;
@@ -168,7 +183,6 @@ int main(int argc,char** argv) {
         std::stable_sort(small.begin(),small.end(),[](const Event& a,const Event& b) {
             return a.time != b.time ? a.time < b.time : priority(a.kind) < priority(b.kind);
         });
-        btc::basis_maker::Config config; config.retain_decisions = false; config.retain_fills = false;
         btc::basis_maker::Engine engine(config);
         std::size_t index = 0;
         Millis previous_time = -1,progress = -1;
